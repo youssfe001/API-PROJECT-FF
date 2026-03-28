@@ -892,7 +892,6 @@
     if (action === 'cs')       return renderCsStats(data);
     if (action === 'search')   return renderSearch(data);
     if (action === 'wishlist') return renderWishlist(data);
-    if (action === 'leaderboard') return renderLeaderboard(data);
     if (action === 'health')   return renderHealth(data);
     return `<pre style="color:var(--text-primary);white-space:pre-wrap">${esc(JSON.stringify(data,null,2))}</pre>`;
   }
