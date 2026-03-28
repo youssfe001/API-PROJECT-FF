@@ -1,4 +1,5 @@
 const express = require("express");
+const path = require("path");
 const { errorHandler } = require("./lib/validate");
 
 const app = express();
@@ -8,6 +9,12 @@ app.use(express.urlencoded({ extended: true }));
 app.use((req, res, next) => {
   console.log(`[${new Date().toISOString()}] ${req.method} ${req.path}`);
   next();
+});
+
+app.use(express.static(path.join(__dirname, "public")));
+
+app.get("/api/demo", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "demo.html"));
 });
 
 app.use("/api", require("./routes/health"));
@@ -27,6 +34,7 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Free Fire API running on port ${PORT}`);
   console.log(`http://localhost:${PORT}/api/health`);
+  console.log(`http://localhost:${PORT}/api/demo`);
 });
 
 module.exports = app;
