@@ -1,8 +1,9 @@
 const express = require("express");
 const router = express.Router();
 
-const { ffRequestEncrypted } = require("../lib/request");
-const { requireRegion, requireParam } = require("../lib/validate");
+const { ffRequest, ffRequestEncrypted } = require("../lib/request");
+const { encodeProto } = require("../lib/proto");
+const { requireRegion, requireParam, requireUid } = require("../lib/validate");
 const { decodeVarint } = require("../lib/protobuf/varint");
 
 function normalizeHex(value, name = "bodyHex") {
@@ -62,6 +63,36 @@ function parseWishList(buffer) {
 
   return { items };
 }
+
+router.get("/v1/wishlist", async (req, res, next) => {
+  try {
+    const region = requireRegion(req.query.region);
+    const uid    = requireUid(req.query.uid);
+
+    const reqBuf = encodeProto(
+      { accountId: BigInt(uid) },
+      "WishList.request"
+    );
+
+    const responseBuffer = await ffRequest({
+      region,
+      endpoint: "/GetWishListItems",
+      hexBody: reqBuf.toString("hex"),
+    });
+
+    const parsed = parseWishList(responseBuffer);
+
+    res.json({
+      endpoint: "/GetWishListItems",
+      region,
+      uid,
+      response: parsed,
+      rawResponseHex: responseBuffer.toString("hex"),
+    });
+  } catch (err) {
+    next(err);
+  }
+});
 
 router.post("/wishlist", async (req, res, next) => {
   try {
