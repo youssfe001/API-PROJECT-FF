@@ -1278,6 +1278,107 @@ select option { background: #1a0800; color: var(--text-primary); }
   color: rgba(34,197,94,0.7);
 }
 
+/* ── LEADERBOARD ─────────────────────────────────────── */
+.lb-wrap { display: flex; flex-direction: column; gap: 12px; }
+
+.lb-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.lb-region-tag {
+  font-family: var(--font-hd);
+  font-size: 11px;
+  letter-spacing: 2px;
+  color: var(--fire-orange);
+  text-transform: uppercase;
+}
+.lb-total {
+  font-family: var(--font-hd);
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  color: var(--text-muted);
+}
+
+.lb-list { display: flex; flex-direction: column; gap: 6px; }
+
+.lb-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  background: rgba(255,107,0,0.03);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  transition: border-color 0.15s, background 0.15s;
+}
+.lb-row:hover {
+  border-color: var(--border-bright);
+  background: var(--bg-hover);
+}
+.lb-row.lb-top {
+  background: rgba(255,107,0,0.06);
+  border-color: rgba(255,107,0,0.25);
+}
+
+.lb-pos {
+  font-family: var(--font-hd);
+  font-size: 16px;
+  width: 36px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.lb-avatar {
+  width: 38px; height: 38px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(255,107,0,0.25), rgba(122,16,0,0.5));
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-hd);
+  font-size: 13px;
+  color: var(--fire-gold);
+  border: 1.5px solid rgba(255,107,0,0.35);
+  flex-shrink: 0;
+}
+
+.lb-info { flex: 1; min-width: 0; }
+.lb-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-primary);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.lb-uid {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.lb-rank-block { text-align: right; flex-shrink: 0; }
+.lb-rank-name {
+  font-family: var(--font-hd);
+  font-size: 13px;
+  font-weight: 700;
+}
+.lb-pts {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.lb-decode-warn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 30px;
+  color: var(--warn);
+  text-align: center;
+  font-size: 13px;
+}
+
 /* ── FOOTER ─────────────────────────────────────────── */
 .site-footer {
   text-align: center;
