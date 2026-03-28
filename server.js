@@ -21,6 +21,7 @@ app.use("/api", require("./routes/health"));
 app.use("/api", require("./routes/account"));
 app.use("/api", require("./routes/playerstats"));
 app.use("/api", require("./routes/playertcstats"));
+app.use("/api", require("./routes/search"));
 app.use("/api", require("./routes/galleryshow"));
 app.use("/api", require("./routes/wishlist"));
 app.use("/api", require("./routes/uidgenerator"));

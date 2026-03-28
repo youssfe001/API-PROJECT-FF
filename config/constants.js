@@ -1,7 +1,7 @@
 const USER_AGENT      = "Dalvik/2.1.0 (Linux; U; Android 13; A063 Build/TKQ1.221220.001)";
 const X_UNITY_VERSION = "2018.4.11f1";
 const X_GA            = "v1 1";
-const RELEASE_VERSION = "OB47";
+const RELEASE_VERSION = "OB52";
 
 const SUPPORTED_REGIONS = [
   "ME","IND","BR","SG","RU","ID","TW","US","VN","TH","PK","CIS","BD"
