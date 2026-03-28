@@ -1,12 +1,8 @@
-[  
-  {    
-    "name": "John Doe",    
-    "email": "john.doe@example.com",    
-    "username": "johndoe"  
-  },  
-  {    
-    "name": "Jane Smith",    
-    "email": "jane.smith@example.com",    
-    "username": "janesmith"  
-  }  
-]
+{
+  "IND": [
+    { "uid": "YOUR_GUEST_UID_1", "password": "YOUR_GUEST_PASSWORD_1" }
+  ],
+  "BR": [
+    { "uid": "YOUR_GUEST_UID_1", "password": "YOUR_GUEST_PASSWORD_1" }
+  ]
+}

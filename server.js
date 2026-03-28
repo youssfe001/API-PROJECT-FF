@@ -27,6 +27,8 @@ app.use("/api", require("./routes/galleryshow"));
 app.use("/api", require("./routes/wishlist"));
 
 app.use("/api", require("./routes/uidgenerator"));
+app.use("/api", require("./routes/guestgenerator"));
+app.use("/api", require("./routes/likespam"));
 
 app.use((req, res) => {
   res.status(404).json({ error: "endpoint_not_found", path: req.path });

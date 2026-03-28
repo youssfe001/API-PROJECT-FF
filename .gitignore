@@ -1,3 +1,5 @@
 node_modules/
 .env
 .vercel
+config/accounts.json
+config/guests.json
