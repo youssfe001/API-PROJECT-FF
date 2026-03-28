@@ -28,7 +28,7 @@ const FF_ENDPOINTS = {
   GET_PLAYER_STATS:         "/GetPlayerStats",
   GET_PLAYER_TC_STATS:      "/GetPlayerTCStats",
   FUZZY_SEARCH_ACCOUNT:     "/FuzzySearchAccountByName",
-  GET_RANKING_LIST:         "/GetBRRankingInfo",
+  GET_RANKING_LIST:         "/Leaderboard",
 };
 
 const MATCH_MODES = {
