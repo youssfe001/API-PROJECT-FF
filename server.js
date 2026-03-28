@@ -24,6 +24,7 @@ app.use("/api", require("./routes/playertcstats"));
 app.use("/api", require("./routes/search"));
 app.use("/api", require("./routes/galleryshow"));
 app.use("/api", require("./routes/wishlist"));
+app.use("/api", require("./routes/leaderboard"));
 app.use("/api", require("./routes/uidgenerator"));
 
 app.use((req, res) => {
