@@ -1,5 +1,5 @@
-const USER_AGENT      = "Dalvik/2.1.0 (Linux; U; Android 13; A063 Build/TKQ1.221220.001)";
-const X_UNITY_VERSION = "2018.4.11f1";
+const USER_AGENT      = "UnityPlayer/2022.3.47f1 (UnityWebRequest/1.0, libcurl/8.5.0-DEV)";
+const X_UNITY_VERSION = "2022.3.47f1";
 const X_GA            = "v1 1";
 const RELEASE_VERSION = "OB52";
 
