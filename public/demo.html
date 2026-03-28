@@ -10,8 +10,30 @@
 </head>
 <body>
 
+  <!-- ── BACKGROUND ALBUM SLIDESHOW ──────────────────── -->
+  <div id="bg-slideshow" class="bg-slideshow"></div>
+
   <canvas id="fire-canvas"></canvas>
   <div class="vignette"></div>
+
+  <!-- ── NOW PLAYING BADGE ───────────────────────────── -->
+  <div id="now-playing">
+    <div class="np-art">
+      <img id="np-img" src="" alt="" style="display:none" />
+    </div>
+    <div class="np-info">
+      <div class="np-label">
+        <svg width="8" height="8" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/></svg>
+        NOW PLAYING
+      </div>
+      <div class="np-track" id="np-track">—</div>
+      <div class="np-album" id="np-album">—</div>
+    </div>
+    <div class="np-bars"><span></span><span></span><span></span></div>
+  </div>
+
+  <!-- ── BACKGROUND THEME BADGE ──────────────────────── -->
+  <div class="bg-theme-badge" id="bg-theme-badge"></div>
 
   <div class="page-wrap">
 
@@ -50,14 +72,8 @@
             </span>
           </button>
           <div class="spotify-player" id="spotify-player">
-            <iframe
-              id="spotify-iframe"
-              src="https://open.spotify.com/embed/track/2fFr6V8XnUyjcA7s4tQ5rF?utm_source=generator&theme=0"
-              width="100%" height="80"
-              frameborder="0"
-              allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-              loading="lazy">
-            </iframe>
+            <!-- Spotify IFrame API injects the embed here -->
+            <div id="spotify-embed"></div>
           </div>
         </div>
         <span class="pulse-dot"></span>
@@ -241,6 +257,244 @@
 
   <script>
   /* ═══════════════════════════════════════════════════
+     ① BACKGROUND ALBUM SLIDESHOW
+     — Each theme = image + color palette + ember hue
+     — Rotates every 25 s; Spotify album art overrides
+  ═══════════════════════════════════════════════════ */
+
+  /*
+   * colorTheme → matches [data-theme="…"] in styles.css
+   * emberHue   → {base, range} hue for fire canvas particles
+   * fallback   → gradient shown when image file missing
+   */
+  const BG_THEMES = [
+    {
+      bg:         "url('/assets/ff-squad-gold.jpg')",
+      fallback:   'linear-gradient(160deg,#0d0a00 0%,#332800 50%,#886600 85%,#ddac00 100%)',
+      label:      'Golden Squad',
+      colorTheme: 'gold',
+      emberHue:   { base: 38, range: 28 },
+    },
+    {
+      bg:         "url('/assets/ff-halloween.jpg')",
+      fallback:   'linear-gradient(160deg,#070010 0%,#1a0040 50%,#5500bb 85%,#8800ff 100%)',
+      label:      'Halloween',
+      colorTheme: 'halloween',
+      emberHue:   { base: 270, range: 45 },
+    },
+    {
+      bg:         "url('/assets/ff-winter.jpg')",
+      fallback:   'linear-gradient(160deg,#000713 0%,#001840 50%,#0040a0 85%,#00b4d8 100%)',
+      label:      'Winter',
+      colorTheme: 'winter',
+      emberHue:   { base: 190, range: 35 },
+    },
+    {
+      bg:         "url('/assets/free-fire-season-1-vxesowl5h3j4oc1r.jpg')",
+      fallback:   'linear-gradient(160deg,#0d0200 0%,#3d0a00 45%,#c42000 85%,#ff4400 100%)',
+      label:      'Season 1',
+      colorTheme: 'fire',
+      emberHue:   { base: 20, range: 30 },
+    },
+    {
+      bg:         'linear-gradient(160deg,#000d07 0%,#002810 50%,#007730 85%,#00cc55 100%)',
+      label:      'Jungle',
+      colorTheme: 'jungle',
+      emberHue:   { base: 110, range: 40 },
+    },
+    {
+      bg:         'linear-gradient(160deg,#0d0008 0%,#36001a 50%,#990040 85%,#ff0066 100%)',
+      label:      'Crimson',
+      colorTheme: 'crimson',
+      emberHue:   { base: 330, range: 40 },
+    },
+  ];
+
+  // Active ember hue — read by the fire canvas particle system
+  let EMBER_HUE = { base: 38, range: 28 };
+
+  const bgSlideshow  = document.getElementById('bg-slideshow');
+  const bgThemeBadge = document.getElementById('bg-theme-badge');
+  let   bgSlides     = [];
+  let   activeSlot   = 0;
+  let   activeBgIdx  = 0;
+  let   lastBgValue  = '';
+  let   autoTimer    = null;
+  let   badgeTimer   = null;
+  const ROTATE_MS    = 25000;
+
+  // ── Create A/B crossfade slides ──
+  function initSlideshow() {
+    for (let i = 0; i < 2; i++) {
+      const s = document.createElement('div');
+      s.className = 'bg-slide';
+      bgSlideshow.appendChild(s);
+      bgSlides.push(s);
+    }
+    loadAndApplyTheme(BG_THEMES[0], true);
+    startAutoRotate();
+  }
+
+  // ── Low-level: set a background CSS value with crossfade ──
+  function applyBgDirect(cssValue) {
+    if (cssValue === lastBgValue) return;
+    lastBgValue = cssValue;
+    const next  = (activeSlot + 1) % 2;
+    const isUrl = cssValue.startsWith('url(');
+    bgSlides[next].style.cssText =
+      `background-image:${isUrl ? cssValue : 'none'};` +
+      `background:${isUrl ? '' : cssValue};` +
+      'background-size:cover;background-position:center;';
+    void bgSlides[next].offsetWidth;          // force reflow → enables CSS transition
+    bgSlides[next].classList.add('active');
+    bgSlides[activeSlot].classList.remove('active');
+    activeSlot = next;
+  }
+
+  // ── High-level: load theme image (fallback to gradient) + change UI colors ──
+  function loadAndApplyTheme(themeObj, skipBadge) {
+    if (!themeObj) return;
+    applyColorTheme(themeObj.colorTheme, themeObj.emberHue);   // colors first (instant)
+
+    if (themeObj.bg.startsWith('url(')) {
+      const url = (themeObj.bg.match(/url\(['"]?([^'")\s]+)['"]?\)/) || [])[1];
+      if (!url) { applyBgDirect(themeObj.fallback || themeObj.bg); _badge(themeObj, skipBadge); return; }
+      const img = new Image();
+      img.onload  = () => { applyBgDirect(themeObj.bg);                         _badge(themeObj, skipBadge); };
+      img.onerror = () => { applyBgDirect(themeObj.fallback || themeObj.bg);    _badge(themeObj, skipBadge); };
+      img.src = url;
+    } else {
+      applyBgDirect(themeObj.bg);
+      _badge(themeObj, skipBadge);
+    }
+  }
+
+  function _badge(t, skip) { if (!skip) flashBadge(t.label); }
+
+  // ── Apply CSS color theme + ember hue ──
+  function applyColorTheme(themeName, emberHue) {
+    document.documentElement.setAttribute('data-theme', themeName || 'fire');
+    if (emberHue) EMBER_HUE = emberHue;
+  }
+
+  function flashBadge(label) {
+    bgThemeBadge.textContent = label;
+    bgThemeBadge.classList.add('flash');
+    clearTimeout(badgeTimer);
+    badgeTimer = setTimeout(() => bgThemeBadge.classList.remove('flash'), 2800);
+  }
+
+  function nextTheme() {
+    activeBgIdx = (activeBgIdx + 1) % BG_THEMES.length;
+    loadAndApplyTheme(BG_THEMES[activeBgIdx]);
+  }
+
+  function startAutoRotate() {
+    stopAutoRotate();
+    autoTimer = setInterval(nextTheme, ROTATE_MS);
+  }
+
+  function stopAutoRotate() {
+    if (autoTimer) { clearInterval(autoTimer); autoTimer = null; }
+  }
+
+  // Called when Spotify gives us album art
+  function setBgFromAlbumArt(url, albumName) {
+    applyBgDirect(`url('${url}')`);
+    flashBadge(albumName || 'Album Art');
+    stopAutoRotate();
+    setTimeout(startAutoRotate, 180000);
+  }
+
+  initSlideshow();
+
+
+  /* ═══════════════════════════════════════════════════
+     ② NOW PLAYING BADGE
+  ═══════════════════════════════════════════════════ */
+
+  let npHideTimer = null;
+
+  function showNowPlaying(trackName, albumName, artUrl) {
+    document.getElementById('np-track').textContent = trackName || '—';
+    document.getElementById('np-album').textContent = albumName || '—';
+    const img = document.getElementById('np-img');
+    if (artUrl) { img.src = artUrl; img.style.display = 'block'; }
+    else          { img.style.display = 'none'; }
+    const el = document.getElementById('now-playing');
+    el.classList.add('visible');
+    clearTimeout(npHideTimer);
+    npHideTimer = setTimeout(() => el.classList.remove('visible'), 6500);
+  }
+
+
+  /* ═══════════════════════════════════════════════════
+     ③ SPOTIFY IFRAME API
+     Detects track changes → syncs album art to background
+     Config: change SPOTIFY_URI to any track / album / playlist
+  ═══════════════════════════════════════════════════ */
+
+  // ▶ Free Fire Album — auto-advances through all tracks
+  const SPOTIFY_URI = 'spotify:album:2F2ZjH7HJQns03217zo2xi';
+
+  let spotifyController = null;
+  let lastTrackUri      = null;
+
+  // Load the Spotify Embed IFrame API
+  ;(function () {
+    const s = document.createElement('script');
+    s.src   = 'https://open.spotify.com/embed-podcast/iframe-api/v1';
+    s.async = true;
+    document.head.appendChild(s);
+  })();
+
+  // Fallback: if Spotify API fails to load within 5 s, inject a plain iframe
+  const spotifyFallbackTimer = setTimeout(() => {
+    if (!spotifyController) {
+      const c = document.getElementById('spotify-embed');
+      if (c && !c.querySelector('iframe')) {
+        c.innerHTML =
+          `<iframe src="https://open.spotify.com/embed/album/2F2ZjH7HJQns03217zo2xi` +
+          `?utm_source=generator&theme=0" width="100%" height="152" frameborder="0" ` +
+          `allow="autoplay;clipboard-write;encrypted-media;fullscreen;picture-in-picture" loading="lazy"></iframe>`;
+      }
+    }
+  }, 5000);
+
+  // IFrame API callback (fires when the script loads)
+  window.onSpotifyIframeApiReady = function (IFrameAPI) {
+    clearTimeout(spotifyFallbackTimer);
+    const container = document.getElementById('spotify-embed');
+    if (!container) return;
+
+    IFrameAPI.createController(container, { uri: SPOTIFY_URI, width: '100%', height: 152 },
+      function (ctrl) {
+        spotifyController = ctrl;
+
+        ctrl.addListener('playback_update', function (evt) {
+          const d = evt && evt.data;
+          if (!d || !d.track) return;
+          if (d.track.uri === lastTrackUri) return;   // same track, skip
+          lastTrackUri = d.track.uri;
+
+          const images    = d.track.album && d.track.album.images;
+          const artUrl    = images && images.length ? images[0].url : null;
+          const trackName = d.track.name     || '—';
+          const albumName = d.track.album && d.track.album.name ? d.track.album.name : '—';
+
+          showNowPlaying(trackName, albumName, artUrl);
+          if (artUrl) setBgFromAlbumArt(artUrl, albumName);
+
+          // Animate spotify bars in header
+          document.getElementById('spotify-bars').classList.remove('paused');
+          document.getElementById('spotify-label').textContent = 'Playing';
+        });
+      }
+    );
+  };
+
+
+  /* ═══════════════════════════════════════════════════
      Spotify Toggle
   ═══════════════════════════════════════════════════ */
   let spotifyOpen = false;
@@ -280,7 +534,7 @@
         this.vx = (Math.random() - 0.5) * 0.8;
         this.vy = -(0.6 + Math.random() * 1.4);
         this.life = 0; this.maxL = 180 + Math.random() * 160;
-        this.hue = 20 + Math.random() * 30;
+        this.hue = EMBER_HUE.base + Math.random() * EMBER_HUE.range;
       };
       this.reset(); this.life = Math.random() * this.maxL;
     }

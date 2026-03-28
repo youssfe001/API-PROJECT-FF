@@ -37,6 +37,108 @@
   --font-mono: 'JetBrains Mono', 'Consolas', monospace;
 }
 
+/* ── @property — enables smooth color transitions ──── */
+@property --fire-gold    { syntax: '<color>'; inherits: true; initial-value: #FFB800; }
+@property --fire-orange  { syntax: '<color>'; inherits: true; initial-value: #FF6B00; }
+@property --fire-red     { syntax: '<color>'; inherits: true; initial-value: #CC2200; }
+@property --ember        { syntax: '<color>'; inherits: true; initial-value: #FF9500; }
+@property --border       { syntax: '<color>'; inherits: true; initial-value: rgba(255,107,0,0.15); }
+@property --border-bright{ syntax: '<color>'; inherits: true; initial-value: rgba(255,107,0,0.45); }
+@property --bg-card      { syntax: '<color>'; inherits: true; initial-value: rgba(18,8,2,0.82); }
+
+/* Transition all registered vars together */
+html {
+  transition:
+    --fire-gold     1.3s ease,
+    --fire-orange   1.3s ease,
+    --fire-red      1.3s ease,
+    --ember         1.3s ease,
+    --border        1.3s ease,
+    --border-bright 1.3s ease,
+    --bg-card       1.3s ease;
+}
+
+/* ══════════════════════════════════════════════════════
+   COLOR THEMES  (data-theme attribute on <html>)
+   ══════════════════════════════════════════════════════ */
+
+/* ── 🔥 Fire / Season 1 (default) — no overrides needed */
+
+/* ── 🏆 Golden Squad ── */
+[data-theme="gold"] {
+  --fire-gold:     #FFD700;
+  --fire-orange:   #FFA040;
+  --fire-red:      #CC8800;
+  --fire-deep:     #6B5000;
+  --ember:         #FFB800;
+  --bg-card:       rgba(22,16,4,0.83);
+  --bg-input:      rgba(255,180,0,0.06);
+  --bg-hover:      rgba(255,180,0,0.11);
+  --border:        rgba(255,180,0,0.18);
+  --border-bright: rgba(255,215,0,0.50);
+  --text-muted:    #8B7040;
+}
+
+/* ── 🎃 Halloween ── */
+[data-theme="halloween"] {
+  --fire-gold:     #FF7700;
+  --fire-orange:   #CC3300;
+  --fire-red:      #991100;
+  --fire-deep:     #4B0082;
+  --ember:         #FF5500;
+  --bg-card:       rgba(8,4,18,0.87);
+  --bg-input:      rgba(180,50,0,0.07);
+  --bg-hover:      rgba(180,50,0,0.13);
+  --border:        rgba(140,40,200,0.20);
+  --border-bright: rgba(180,60,255,0.46);
+  --text-muted:    #7040A0;
+}
+
+/* ── ❄️ Winter ── */
+[data-theme="winter"] {
+  --fire-gold:     #48CAE4;
+  --fire-orange:   #00B4D8;
+  --fire-red:      #0077B6;
+  --fire-deep:     #03045E;
+  --ember:         #90E0EF;
+  --bg-card:       rgba(3,8,24,0.87);
+  --bg-input:      rgba(0,180,216,0.06);
+  --bg-hover:      rgba(0,180,216,0.11);
+  --border:        rgba(0,180,216,0.18);
+  --border-bright: rgba(72,202,228,0.52);
+  --text-muted:    #3A7A8A;
+}
+
+/* ── 🌿 Jungle ── */
+[data-theme="jungle"] {
+  --fire-gold:     #00DD66;
+  --fire-orange:   #00AA44;
+  --fire-red:      #007730;
+  --fire-deep:     #003315;
+  --ember:         #55EE99;
+  --bg-card:       rgba(3,14,8,0.87);
+  --bg-input:      rgba(0,170,60,0.06);
+  --bg-hover:      rgba(0,170,60,0.11);
+  --border:        rgba(0,170,60,0.18);
+  --border-bright: rgba(0,220,80,0.48);
+  --text-muted:    #307A50;
+}
+
+/* ── 💜 Crimson ── */
+[data-theme="crimson"] {
+  --fire-gold:     #FF2277;
+  --fire-orange:   #CC0055;
+  --fire-red:      #990033;
+  --fire-deep:     #4D001A;
+  --ember:         #FF77BB;
+  --bg-card:       rgba(14,2,8,0.87);
+  --bg-input:      rgba(200,0,60,0.06);
+  --bg-hover:      rgba(200,0,60,0.11);
+  --border:        rgba(200,0,80,0.18);
+  --border-bright: rgba(255,0,100,0.48);
+  --text-muted:    #8A2040;
+}
+
 /* ── Reset ─────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -47,16 +149,40 @@ html, body {
   font-family: var(--font-ui);
   font-size: 14px;
   background-color: var(--bg-void);
-  background-image:
-    linear-gradient(to bottom,
-      rgba(7,4,1,0.55) 0%,
-      rgba(15,5,0,0.75) 50%,
-      rgba(7,4,1,0.92) 100%),
-    url('/assets/free-fire-season-1-vxesowl5h3j4oc1r.jpg');
-  background-size: cover;
-  background-position: center 20%;
-  background-attachment: fixed;
   overflow-x: hidden;
+}
+
+/* ── Background Album Slideshow ────────────────────── */
+.bg-slideshow {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.bg-slide {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  opacity: 0;
+  transition: opacity 2.8s ease-in-out;
+  will-change: opacity;
+}
+
+.bg-slide.active { opacity: 1; }
+
+/* Dark cinematic overlay so UI text stays readable */
+.bg-slide::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(to bottom,
+      rgba(5,2,0,0.62) 0%,
+      rgba(8,3,0,0.70) 40%,
+      rgba(4,1,0,0.88) 100%);
 }
 
 /* ── Fire Canvas ───────────────────────────────────── */
@@ -64,7 +190,7 @@ html, body {
   position: fixed;
   inset: 0;
   pointer-events: none;
-  z-index: 0;
+  z-index: 1;
 }
 
 /* ── Vignette ──────────────────────────────────────── */
@@ -72,16 +198,132 @@ html, body {
   position: fixed;
   inset: 0;
   pointer-events: none;
-  z-index: 1;
+  z-index: 2;
   background: radial-gradient(ellipse at center,
     transparent 40%,
     rgba(4,1,0,0.7) 100%);
 }
 
+/* ── Now Playing Badge ─────────────────────────────── */
+#now-playing {
+  position: fixed;
+  bottom: 22px;
+  left: 22px;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 14px 7px 7px;
+  background: rgba(8,3,0,0.80);
+  border: 1px solid rgba(30,215,96,0.22);
+  border-radius: 40px;
+  backdrop-filter: blur(14px);
+  box-shadow: 0 4px 24px rgba(0,0,0,0.6), 0 0 16px rgba(30,215,96,0.08);
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 0.45s ease, transform 0.45s ease;
+  pointer-events: none;
+  max-width: 290px;
+}
+
+#now-playing.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.np-art {
+  width: 38px; height: 38px;
+  border-radius: 8px;
+  background: rgba(255,107,0,0.15);
+  flex-shrink: 0;
+  overflow: hidden;
+  border: 1px solid rgba(255,107,0,0.2);
+}
+
+.np-art img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.np-info { flex: 1; min-width: 0; }
+
+.np-label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 1.6px;
+  text-transform: uppercase;
+  color: #1ED760;
+  margin-bottom: 3px;
+}
+
+.np-track {
+  font-family: var(--font-ui);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.np-album {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Now-playing animated bars */
+.np-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 14px;
+  flex-shrink: 0;
+}
+
+.np-bars span {
+  display: block;
+  width: 3px;
+  background: #1ED760;
+  border-radius: 2px;
+  transform-origin: bottom;
+}
+.np-bars span:nth-child(1) { animation: npbar1 0.9s ease-in-out infinite; }
+.np-bars span:nth-child(2) { animation: npbar2 0.7s ease-in-out infinite; }
+.np-bars span:nth-child(3) { animation: npbar3 1.1s ease-in-out infinite; }
+
+@keyframes npbar1 { 0%,100%{height:6px}  50%{height:13px} }
+@keyframes npbar2 { 0%,100%{height:11px} 50%{height:4px}  }
+@keyframes npbar3 { 0%,100%{height:4px}  50%{height:10px} }
+
+/* Theme badge (bottom-right corner) */
+.bg-theme-badge {
+  position: fixed;
+  bottom: 22px;
+  right: 22px;
+  z-index: 20;
+  font-family: var(--font-hd);
+  font-size: 9px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: rgba(255,184,0,0.5);
+  opacity: 0;
+  transition: opacity 0.5s;
+  pointer-events: none;
+}
+.bg-theme-badge.flash { opacity: 1; }
+
 /* ── Page wrap ─────────────────────────────────────── */
 .page-wrap {
   position: relative;
-  z-index: 2;
+  z-index: 3;
   max-width: var(--panel-w);
   margin: 0 auto;
   padding: 24px 20px 44px;
@@ -216,7 +458,7 @@ html, body {
   position: absolute;
   top: calc(100% + 10px);
   right: 0;
-  width: 320px;
+  width: 340px;
   border-radius: 12px;
   overflow: hidden;
   border: 1px solid rgba(30,215,96,0.25);
