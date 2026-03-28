@@ -72,9 +72,12 @@ router.get("/v1/leaderboard", async (req, res, next) => {
       "GetRankingList.request"
     );
 
+    // NOTE: /Leaderboard (new endpoint) requires a non-emulator JWT (is_emulator=false).
+    // Guest accounts flagged as emulator will get HTTP 500 from /Leaderboard.
+    // /GetBRRankingInfo is the older endpoint that works with any authenticated account.
     const responseBuffer = await ffRequest({
       region,
-      endpoint: "/Leaderboard",
+      endpoint: "/GetBRRankingInfo",
       hexBody:  reqBuf.toString("hex"),
     });
 
