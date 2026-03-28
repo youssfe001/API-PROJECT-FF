@@ -1,0 +1,9 @@
+{
+  "IND": [
+    { "uid": "YOUR_GUEST_UID_1", "password": "YOUR_GUEST_PASSWORD_1" },
+    { "uid": "YOUR_GUEST_UID_2", "password": "YOUR_GUEST_PASSWORD_2" }
+  ],
+  "BR": [
+    { "uid": "YOUR_GUEST_UID", "password": "YOUR_GUEST_PASSWORD" }
+  ]
+}
