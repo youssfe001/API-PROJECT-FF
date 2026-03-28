@@ -17,6 +17,10 @@ app.get("/api/demo", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "demo.html"));
 });
 
+app.get("/leaderboard", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "leaderboard.html"));
+});
+
 app.use("/api", require("./routes/health"));
 app.use("/api", require("./routes/account"));
 app.use("/api", require("./routes/playerstats"));
