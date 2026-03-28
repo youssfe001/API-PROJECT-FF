@@ -28,9 +28,6 @@ const FF_ENDPOINTS = {
   GET_PLAYER_STATS:         "/GetPlayerStats",
   GET_PLAYER_TC_STATS:      "/GetPlayerTCStats",
   FUZZY_SEARCH_ACCOUNT:     "/FuzzySearchAccountByName",
-  // /Leaderboard is the modern endpoint but requires is_emulator=false in JWT.
-  // /GetBRRankingInfo works with any authenticated account (incl. guest/emulator).
-  GET_RANKING_LIST:         "/GetBRRankingInfo",
 };
 
 const MATCH_MODES = {
