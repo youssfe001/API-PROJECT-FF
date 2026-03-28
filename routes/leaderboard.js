@@ -6,21 +6,39 @@ const { encodeProto, decodeProto } = require("../lib/proto");
 const { requireRegion, ApiError }  = require("../lib/validate");
 
 const RANK_TYPES = { BR: 1, CS: 2 };
-const BR_RANKS   = ["", "Bronze", "Silver", "Gold", "Platinum", "Diamond", "Heroic", "Grandmaster"];
 
-function rankName(n) { return BR_RANKS[n] || (n ? `Rank ${n}` : "—"); }
+// Derive a rough rank tier from ranking points (approximate thresholds)
+const TIER_THRESHOLDS = [
+  { min: 5000, name: "Grandmaster", id: 7 },
+  { min: 3000, name: "Heroic",      id: 6 },
+  { min: 2000, name: "Diamond",     id: 5 },
+  { min: 1200, name: "Platinum",    id: 4 },
+  { min:  600, name: "Gold",        id: 3 },
+  { min:  200, name: "Silver",      id: 2 },
+  { min:    1, name: "Bronze",      id: 1 },
+];
+
+function tierFromPoints(pts) {
+  if (!pts) return { name: "—", id: 0 };
+  for (const t of TIER_THRESHOLDS) {
+    if (pts >= t.min) return { name: t.name, id: t.id };
+  }
+  return { name: "Bronze", id: 1 };
+}
 
 function formatEntry(e, pos) {
   if (!e) return null;
+  const pts  = e.rankingpoints || 0;
+  const tier = tierFromPoints(pts);
   return {
-    position:      e.rankpos  || pos + 1,
-    accountId:     e.accountid ? String(e.accountid) : "—",
-    nickname:      e.nickname  || "—",
-    rank:          rankName(e.rank),
-    rankId:        e.rank      || 0,
-    rankingPoints: e.rankingpoints || 0,
-    level:         e.level     || 0,
-    region:        e.region    || "",
+    position:      e.rankpos      || pos + 1,
+    accountId:     e.accountid    ? String(e.accountid) : "—",
+    nickname:      e.nickname     || "",          // may be empty; UI shows "Unknown"
+    headpic:       e.headpic      || 0,
+    rankingPoints: pts,
+    tier:          tier.name,
+    tierId:        tier.id,
+    level:         e.level        || 0,
   };
 }
 
