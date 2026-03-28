@@ -965,6 +965,7 @@
   function runCs()       { call(`/api/v1/playertcstats?region=${enc(region())}&uid=${enc(uid())}&matchmode=${matchmode()}`, 'cs'); }
   function runSearch()   { call(`/api/v1/search?region=${enc(region())}&keyword=${enc(uid())}`, 'search'); }
   function runWishlist() { call(`/api/v1/wishlist?region=${enc(region())}&uid=${enc(uid())}`, 'wishlist'); }
+  function runLeaderboard() { call(`/api/v1/leaderboard?region=${enc(region())}&type=BR&page=0`, 'leaderboard'); }
   function runHealth()   { call('/api/health', 'health'); }
   </script>
 </body>
