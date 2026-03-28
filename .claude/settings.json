@@ -1,0 +1,17 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "file=$(jq -r '.tool_input.file_path // .tool_response.filePath // empty'); if [ -z \"$file\" ]; then exit 0; fi; cd /workspace/project && git add \"$file\" && git diff --cached --quiet && exit 0; git commit -m \"chore: auto-save $(basename $file)\" && git push origin omnara/chivalry-laborious 2>/dev/null || true",
+            "statusMessage": "Pushing to GitHub...",
+            "timeout": 30
+          }
+        ]
+      }
+    ]
+  }
+}
