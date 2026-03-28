@@ -74,7 +74,7 @@ router.get("/v1/leaderboard", async (req, res, next) => {
 
     const responseBuffer = await ffRequest({
       region,
-      endpoint: "/GetBRRankingInfo",
+      endpoint: "/Leaderboard",
       hexBody:  reqBuf.toString("hex"),
     });
 
