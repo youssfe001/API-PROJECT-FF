@@ -1,0 +1,14 @@
+{
+  "ME": {
+    "uid": "YOUR_UID",
+    "password": "YOUR_PASSWORD_OR_HASH"
+  },
+  "IND": {
+    "uid": "YOUR_UID",
+    "password": "YOUR_PASSWORD_OR_HASH"
+  },
+  "BR": {
+    "uid": "YOUR_UID",
+    "password": "YOUR_PASSWORD_OR_HASH"
+  }
+}
