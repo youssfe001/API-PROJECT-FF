@@ -795,10 +795,15 @@
       </div>`;
     }
     if (!entries.length) {
-      return `<div class="rich-empty"><span class="rich-empty-label">No leaderboard data returned</span></div>`;
+      return `<div class="rich-empty">
+        <span class="rich-empty-label">No leaderboard data returned</span><br>
+        <a href="/leaderboard" style="color:var(--fire-gold);font-size:12px;text-decoration:none">
+          Open Full Leaderboard Page →
+        </a>
+      </div>`;
     }
     const MEDALS = ['🥇','🥈','🥉'];
-    const RANK_COLORS = {
+    const TIER_COLORS = {
       Grandmaster:'#FF00AA', Heroic:'#FF6B00', Diamond:'#B0E0E6',
       Platinum:'#00BFFF', Gold:'#FFD700', Silver:'#C0C0C0', Bronze:'#CD7F32',
     };
@@ -806,22 +811,32 @@
     <div class="lb-wrap">
       <div class="lb-header">
         <span class="lb-region-tag">${esc(data.region)} · ${esc(data.type)} LEADERBOARD</span>
-        <span class="lb-total">${entries.length} PLAYERS</span>
+        <span class="lb-total">${entries.length} ENTR${entries.length===1?'Y':'IES'}</span>
       </div>
       <div class="lb-list">
-        ${entries.map((e, i) => `
-        <div class="lb-row ${i < 3 ? 'lb-top' : ''}">
-          <div class="lb-pos">${MEDALS[i] || `#${e.position}`}</div>
-          <div class="lb-avatar">${esc((e.nickname||'?').slice(0,2).toUpperCase())}</div>
-          <div class="lb-info">
-            <div class="lb-name">${esc(e.nickname)}</div>
-            <div class="lb-uid">UID: ${esc(e.accountId)} ${e.level ? `· Lv ${e.level}` : ''}</div>
-          </div>
-          <div class="lb-rank-block">
-            <div class="lb-rank-name" style="color:${RANK_COLORS[e.rank]||'var(--text-muted)'}">${esc(e.rank)}</div>
-            <div class="lb-pts">${fmtNum(e.rankingPoints)} pts</div>
-          </div>
-        </div>`).join('')}
+        ${entries.map((e, i) => {
+          const displayName = e.nickname || '';
+          const initials2   = displayName ? displayName.slice(0,2).toUpperCase() : '??';
+          const tierColor   = TIER_COLORS[e.tier] || 'var(--text-muted)';
+          return `
+          <div class="lb-row ${i < 3 ? 'lb-top' : ''}">
+            <div class="lb-pos">${MEDALS[i] || `#${e.position}`}</div>
+            <div class="lb-avatar">${esc(initials2)}</div>
+            <div class="lb-info">
+              <div class="lb-name">${displayName ? esc(displayName) : '<span style="opacity:.45;font-style:italic">Unknown</span>'}</div>
+              <div class="lb-uid">UID: ${esc(e.accountId)} ${e.level ? `· Lv ${e.level}` : ''}</div>
+            </div>
+            <div class="lb-rank-block">
+              <div class="lb-rank-name" style="color:${tierColor}">${esc(e.tier || '—')}</div>
+              <div class="lb-pts">${fmtNum(e.rankingPoints)} pts</div>
+            </div>
+          </div>`;
+        }).join('')}
+      </div>
+      <div style="text-align:center;padding:10px 0 4px">
+        <a href="/leaderboard" style="color:var(--fire-gold);font-size:12px;text-decoration:none;opacity:.7">
+          Open Full Leaderboard Page →
+        </a>
       </div>
     </div>`;
   }
