@@ -37,6 +37,108 @@
   --font-mono: 'JetBrains Mono', 'Consolas', monospace;
 }
 
+/* ── @property — enables smooth color transitions ──── */
+@property --fire-gold    { syntax: '<color>'; inherits: true; initial-value: #FFB800; }
+@property --fire-orange  { syntax: '<color>'; inherits: true; initial-value: #FF6B00; }
+@property --fire-red     { syntax: '<color>'; inherits: true; initial-value: #CC2200; }
+@property --ember        { syntax: '<color>'; inherits: true; initial-value: #FF9500; }
+@property --border       { syntax: '<color>'; inherits: true; initial-value: rgba(255,107,0,0.15); }
+@property --border-bright{ syntax: '<color>'; inherits: true; initial-value: rgba(255,107,0,0.45); }
+@property --bg-card      { syntax: '<color>'; inherits: true; initial-value: rgba(18,8,2,0.82); }
+
+/* Transition all registered vars together */
+html {
+  transition:
+    --fire-gold     1.3s ease,
+    --fire-orange   1.3s ease,
+    --fire-red      1.3s ease,
+    --ember         1.3s ease,
+    --border        1.3s ease,
+    --border-bright 1.3s ease,
+    --bg-card       1.3s ease;
+}
+
+/* ══════════════════════════════════════════════════════
+   COLOR THEMES  (data-theme attribute on <html>)
+   ══════════════════════════════════════════════════════ */
+
+/* ── 🔥 Fire / Season 1 (default) — no overrides needed */
+
+/* ── 🏆 Golden Squad ── */
+[data-theme="gold"] {
+  --fire-gold:     #FFD700;
+  --fire-orange:   #FFA040;
+  --fire-red:      #CC8800;
+  --fire-deep:     #6B5000;
+  --ember:         #FFB800;
+  --bg-card:       rgba(22,16,4,0.83);
+  --bg-input:      rgba(255,180,0,0.06);
+  --bg-hover:      rgba(255,180,0,0.11);
+  --border:        rgba(255,180,0,0.18);
+  --border-bright: rgba(255,215,0,0.50);
+  --text-muted:    #8B7040;
+}
+
+/* ── 🎃 Halloween ── */
+[data-theme="halloween"] {
+  --fire-gold:     #FF7700;
+  --fire-orange:   #CC3300;
+  --fire-red:      #991100;
+  --fire-deep:     #4B0082;
+  --ember:         #FF5500;
+  --bg-card:       rgba(8,4,18,0.87);
+  --bg-input:      rgba(180,50,0,0.07);
+  --bg-hover:      rgba(180,50,0,0.13);
+  --border:        rgba(140,40,200,0.20);
+  --border-bright: rgba(180,60,255,0.46);
+  --text-muted:    #7040A0;
+}
+
+/* ── ❄️ Winter ── */
+[data-theme="winter"] {
+  --fire-gold:     #48CAE4;
+  --fire-orange:   #00B4D8;
+  --fire-red:      #0077B6;
+  --fire-deep:     #03045E;
+  --ember:         #90E0EF;
+  --bg-card:       rgba(3,8,24,0.87);
+  --bg-input:      rgba(0,180,216,0.06);
+  --bg-hover:      rgba(0,180,216,0.11);
+  --border:        rgba(0,180,216,0.18);
+  --border-bright: rgba(72,202,228,0.52);
+  --text-muted:    #3A7A8A;
+}
+
+/* ── 🌿 Jungle ── */
+[data-theme="jungle"] {
+  --fire-gold:     #00DD66;
+  --fire-orange:   #00AA44;
+  --fire-red:      #007730;
+  --fire-deep:     #003315;
+  --ember:         #55EE99;
+  --bg-card:       rgba(3,14,8,0.87);
+  --bg-input:      rgba(0,170,60,0.06);
+  --bg-hover:      rgba(0,170,60,0.11);
+  --border:        rgba(0,170,60,0.18);
+  --border-bright: rgba(0,220,80,0.48);
+  --text-muted:    #307A50;
+}
+
+/* ── 💜 Crimson ── */
+[data-theme="crimson"] {
+  --fire-gold:     #FF2277;
+  --fire-orange:   #CC0055;
+  --fire-red:      #990033;
+  --fire-deep:     #4D001A;
+  --ember:         #FF77BB;
+  --bg-card:       rgba(14,2,8,0.87);
+  --bg-input:      rgba(200,0,60,0.06);
+  --bg-hover:      rgba(200,0,60,0.11);
+  --border:        rgba(200,0,80,0.18);
+  --border-bright: rgba(255,0,100,0.48);
+  --text-muted:    #8A2040;
+}
+
 /* ── Reset ─────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
