@@ -3,66 +3,185 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Free Fire API Demo</title>
+    <title>FF API Pro</title>
     <link rel="stylesheet" href="/styles.css" />
   </head>
   <body>
+    <!-- Animated background particles -->
+    <div class="particles" id="particles"></div>
+
     <main class="overlay">
+      <!-- Header -->
+      <header class="site-header">
+        <div class="logo">
+          <span class="logo-icon">⚡</span>
+          <span class="logo-text">FF <span class="neon">API</span> Pro</span>
+        </div>
+        <div class="header-badge">v1.0 · Live</div>
+      </header>
+
+      <!-- Main panel -->
       <section class="panel">
-        <h1>Free Fire API Demo</h1>
-        <p>Test your API quickly from one page.</p>
 
-        <div class="row">
-          <label>Region</label>
-          <input id="region" value="IND" />
+        <!-- Panel header -->
+        <div class="panel-header">
+          <h2>API Console</h2>
+          <p>Send live requests to the Free Fire game server</p>
         </div>
 
-        <div class="row">
-          <label>UID</label>
-          <input id="uid" value="1633864660" />
+        <!-- Inputs -->
+        <div class="inputs-grid">
+          <div class="field">
+            <label for="region">
+              <span class="field-icon">🌍</span> Region
+            </label>
+            <div class="input-wrap">
+              <input id="region" value="IND" placeholder="e.g. IND, BR, SG" />
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="uid">
+              <span class="field-icon">🆔</span> Player UID
+            </label>
+            <div class="input-wrap">
+              <input id="uid" value="1633864660" placeholder="Player UID" />
+            </div>
+          </div>
         </div>
 
-        <div class="buttons">
-          <button onclick="runAccount()">Account</button>
-          <button onclick="runBr()">BR Stats</button>
-          <button onclick="runCs()">CS Stats</button>
-          <button onclick="runUidGen()">UID Generator</button>
+        <!-- Endpoint buttons -->
+        <div class="endpoints">
+          <p class="endpoints-label">Select Endpoint</p>
+          <div class="buttons">
+            <button class="btn" data-action="account" onclick="runAccount()">
+              <span class="btn-icon">👤</span>
+              <span class="btn-label">Account</span>
+              <span class="btn-path">/GetPlayerPersonalShow</span>
+            </button>
+            <button class="btn" data-action="br" onclick="runBr()">
+              <span class="btn-icon">🔫</span>
+              <span class="btn-label">BR Stats</span>
+              <span class="btn-path">/GetPlayerStats</span>
+            </button>
+            <button class="btn" data-action="cs" onclick="runCs()">
+              <span class="btn-icon">🏆</span>
+              <span class="btn-label">CS Stats</span>
+              <span class="btn-path">/GetPlayerTCStats</span>
+            </button>
+            <button class="btn" data-action="uid" onclick="runUidGen()">
+              <span class="btn-icon">🎲</span>
+              <span class="btn-label">UID Generator</span>
+              <span class="btn-path">/uid-generator</span>
+            </button>
+            <button class="btn" data-action="search" onclick="runSearch()">
+              <span class="btn-icon">🔍</span>
+              <span class="btn-label">Search</span>
+              <span class="btn-path">/FuzzySearchAccountByName</span>
+            </button>
+            <button class="btn" data-action="health" onclick="runHealth()">
+              <span class="btn-icon">💚</span>
+              <span class="btn-label">Health</span>
+              <span class="btn-path">/health</span>
+            </button>
+          </div>
         </div>
 
-        <pre id="out">Ready.</pre>
+        <!-- Response area -->
+        <div class="response-box">
+          <div class="response-header">
+            <span class="response-title">Response</span>
+            <span id="status-badge" class="status-badge">—</span>
+            <button class="copy-btn" onclick="copyOutput()" title="Copy JSON">Copy</button>
+          </div>
+          <pre id="out">// Ready. Select an endpoint above to fire a request.</pre>
+        </div>
+
       </section>
+
+      <footer class="site-footer">
+        FF API Pro · Built with Node.js + Express · Proto3 Binary
+      </footer>
     </main>
 
     <script>
-      const out = document.getElementById('out');
-      const region = () => document.getElementById('region').value.trim();
-      const uid = () => document.getElementById('uid').value.trim();
+      /* ── Particles ─────────────────────────────────── */
+      (function () {
+        const wrap = document.getElementById('particles');
+        for (let i = 0; i < 28; i++) {
+          const d = document.createElement('div');
+          d.className = 'particle';
+          d.style.cssText = `
+            left:${Math.random()*100}%;
+            top:${Math.random()*100}%;
+            width:${2+Math.random()*3}px;
+            height:${2+Math.random()*3}px;
+            animation-delay:${Math.random()*8}s;
+            animation-duration:${6+Math.random()*8}s;
+          `;
+          wrap.appendChild(d);
+        }
+      })();
 
-      async function call(url, options) {
-        out.textContent = 'Loading...';
+      /* ── Helpers ───────────────────────────────────── */
+      const out    = document.getElementById('out');
+      const badge  = document.getElementById('status-badge');
+      const region = () => document.getElementById('region').value.trim().toUpperCase();
+      const uid    = () => document.getElementById('uid').value.trim();
+
+      let activeBtn = null;
+
+      async function call(url, options, action) {
+        // Mark active button
+        if (activeBtn) activeBtn.classList.remove('active');
+        activeBtn = document.querySelector(`[data-action="${action}"]`);
+        if (activeBtn) activeBtn.classList.add('active');
+
+        out.textContent = '// Loading…';
+        badge.textContent = '…';
+        badge.className = 'status-badge pending';
+
         try {
-          const res = await fetch(url, options);
+          const res  = await fetch(url, options);
           const data = await res.json();
-          out.textContent = JSON.stringify(data, null, 2);
+          out.textContent  = JSON.stringify(data, null, 2);
+          badge.textContent = res.ok ? `${res.status} OK` : `${res.status} ERR`;
+          badge.className  = `status-badge ${res.ok ? 'ok' : 'err'}`;
         } catch (e) {
-          out.textContent = String(e);
+          out.textContent  = `// Error: ${e}`;
+          badge.textContent = 'FAIL';
+          badge.className  = 'status-badge err';
         }
       }
 
+      function copyOutput() {
+        navigator.clipboard.writeText(out.textContent)
+          .then(() => {
+            const b = document.querySelector('.copy-btn');
+            b.textContent = 'Copied!';
+            setTimeout(() => (b.textContent = 'Copy'), 1500);
+          });
+      }
+
+      /* ── Endpoint Actions ──────────────────────────── */
       function runAccount() {
-        call(`/api/v1/account?region=${encodeURIComponent(region())}&uid=${encodeURIComponent(uid())}`);
+        call(`/api/v1/account?region=${encodeURIComponent(region())}&uid=${encodeURIComponent(uid())}`, {}, 'account');
       }
-
       function runBr() {
-        call(`/api/v1/playerstats?region=${encodeURIComponent(region())}&uid=${encodeURIComponent(uid())}&matchmode=CAREER`);
+        call(`/api/v1/playerstats?region=${encodeURIComponent(region())}&uid=${encodeURIComponent(uid())}&matchmode=CAREER`, {}, 'br');
       }
-
       function runCs() {
-        call(`/api/v1/playertcstats?region=${encodeURIComponent(region())}&uid=${encodeURIComponent(uid())}&matchmode=CAREER`);
+        call(`/api/v1/playertcstats?region=${encodeURIComponent(region())}&uid=${encodeURIComponent(uid())}&matchmode=CAREER`, {}, 'cs');
       }
-
       function runUidGen() {
-        call('/api/uid-generator?mode=random&count=3&length=10&teamXdarks=1');
+        call('/api/uid-generator?mode=random&count=5&length=10&teamXdarks=1', {}, 'uid');
+      }
+      function runSearch() {
+        const kw = uid(); // reuse the UID field as keyword for search
+        call(`/api/v1/search?region=${encodeURIComponent(region())}&keyword=${encodeURIComponent(kw)}`, {}, 'search');
+      }
+      function runHealth() {
+        call('/api/health', {}, 'health');
       }
     </script>
   </body>
