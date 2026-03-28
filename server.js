@@ -15,6 +15,7 @@ app.use("/api", require("./routes/account"));
 app.use("/api", require("./routes/playerstats"));
 app.use("/api", require("./routes/playertcstats"));
 app.use("/api", require("./routes/galleryshow"));
+app.use("/api", require("./routes/wishlist"));
 
 app.use((req, res) => {
   res.status(404).json({ error: "endpoint_not_found", path: req.path });
