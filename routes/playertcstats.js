@@ -37,48 +37,46 @@ function compact(obj) {
 function mapDetailed(src) {
   if (!src) return undefined;
   return compact({
-    deaths: src.deaths,
-    top10Times: src.top10times,
-    topNTimes: src.topntimes,
-    distanceTravelled: src.distancetravelled,
-    survivalTime: src.survivaltime,
-    revives: src.revives,
-    highestKills: src.highestkills,
+    mvpCount: src.mvpcount,
+    doubleKills: src.doublekills,
+    tripleKills: src.triplekills,
+    fourKills: src.fourkills,
     damage: src.damage,
-    roadKills: src.roadkills,
-    headshots: src.headshots,
     headshotKills: src.headshotkills,
-    knockdown: src.knockdown,
-    pickups: src.pickups,
+    knockdowns: src.knockdowns,
+    revivals: src.revivals,
+    assists: src.assists,
+    deaths: src.deaths,
+    streakWins: src.streakwins,
+    throwingKills: src.throwingkills,
+    oneGameMostDamage: src.onegamemostdamage,
+    oneGameMostKills: src.onegamemostkills,
+    ratingPoints: src.ratingpoints,
+    ratingEnabledGames: src.ratingenabledgames,
+    headshotCount: src.headshotcount,
+    hitCount: src.hitcount,
   });
 }
 
-function mapStatsBlock(src) {
-  if (!src) return undefined;
+function formatPlayerTcStats(raw) {
+  if (!raw || !raw.csstats) return null;
   return compact({
-    accountId: toNumberOrString(src.accountid),
-    gamesPlayed: src.gamesplayed,
-    wins: src.wins,
-    kills: src.kills,
-    detailedStats: mapDetailed(src.detailedstats),
+    csStats: compact({
+      accountId: toNumberOrString(raw.csstats.accountid),
+      gamesPlayed: raw.csstats.gamesplayed,
+      wins: raw.csstats.wins,
+      kills: raw.csstats.kills,
+      detailedStats: mapDetailed(raw.csstats.detailedstats),
+    }),
   });
 }
 
-function formatPlayerStats(raw) {
-  if (!raw) return null;
-  return compact({
-    soloStats: mapStatsBlock(raw.solostats),
-    duoStats: mapStatsBlock(raw.duostats),
-    quadStats: mapStatsBlock(raw.quadstats),
-  });
-}
-
-function decodeStats(buffer) {
+function decodeTcStats(buffer) {
   try {
-    const raw = decodeProto(buffer, "PlayerStats.response");
+    const raw = decodeProto(buffer, "PlayerCSStats.response");
     return {
       decodeError: null,
-      response: formatPlayerStats(raw),
+      response: formatPlayerTcStats(raw),
       rawDecoded: raw,
     };
   } catch (err) {
@@ -90,7 +88,7 @@ function decodeStats(buffer) {
   }
 }
 
-router.get("/v1/playerstats", async (req, res, next) => {
+router.get("/v1/playertcstats", async (req, res, next) => {
   try {
     const region = requireRegion(req.query.region);
     const uid = requireUid(req.query.uid);
@@ -101,20 +99,24 @@ router.get("/v1/playerstats", async (req, res, next) => {
     }
 
     const reqBuf = encodeProto(
-      { accountid: BigInt(uid), matchmode: MATCH_MODES.BR[matchmode] },
-      "PlayerStats.request"
+      {
+        accountid: BigInt(uid),
+        gamemode: 15,
+        matchmode: MATCH_MODES.CS[matchmode],
+      },
+      "PlayerCSStats.request"
     );
 
     const responseBuffer = await ffRequest({
       region,
-      endpoint: "/GetPlayerStats",
+      endpoint: "/GetPlayerTCStats",
       hexBody: reqBuf.toString("hex"),
     });
 
-    const decoded = decodeStats(responseBuffer);
+    const decoded = decodeTcStats(responseBuffer);
 
     res.json({
-      endpoint: "/GetPlayerStats",
+      endpoint: "/GetPlayerTCStats",
       region,
       uid,
       matchmode,
@@ -126,21 +128,21 @@ router.get("/v1/playerstats", async (req, res, next) => {
   }
 });
 
-router.post("/playerstats", async (req, res, next) => {
+router.post("/playertcstats", async (req, res, next) => {
   try {
     const region = requireRegion(req.body.region);
     const bodyHex = normalizeHex(req.body.bodyHex);
 
     const responseBuffer = await ffRequestEncrypted({
       region,
-      endpoint: "/GetPlayerStats",
+      endpoint: "/GetPlayerTCStats",
       encryptedHexBody: bodyHex,
     });
 
-    const decoded = decodeStats(responseBuffer);
+    const decoded = decodeTcStats(responseBuffer);
 
     res.json({
-      endpoint: "/GetPlayerStats",
+      endpoint: "/GetPlayerTCStats",
       region,
       request: { bodyHex },
       ...decoded,

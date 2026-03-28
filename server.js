@@ -1,4 +1,4 @@
-const express          = require("express");
+const express = require("express");
 const { errorHandler } = require("./lib/validate");
 
 const app = express();
@@ -10,12 +10,11 @@ app.use((req, res, next) => {
   next();
 });
 
-// ─── Routes ──────────────────────────────────────────────────────────────────
 app.use("/api", require("./routes/health"));
 app.use("/api", require("./routes/account"));
 app.use("/api", require("./routes/playerstats"));
-app.use("/api", require("./routes/search"));
-app.use("/api", require("./routes/gallery"));
+app.use("/api", require("./routes/playertcstats"));
+app.use("/api", require("./routes/galleryshow"));
 
 app.use((req, res) => {
   res.status(404).json({ error: "endpoint_not_found", path: req.path });
@@ -24,8 +23,8 @@ app.use(errorHandler);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`✅  Free Fire API running on port ${PORT}`);
-  console.log(`    http://localhost:${PORT}/api/health`);
+  console.log(`Free Fire API running on port ${PORT}`);
+  console.log(`http://localhost:${PORT}/api/health`);
 });
 
 module.exports = app;
