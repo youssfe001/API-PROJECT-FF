@@ -44,9 +44,13 @@ function formatEntry(e, pos) {
 
 function decodeLeaderboard(buffer) {
   try {
-    const raw = decodeProto(buffer, "GetRankingList.response");
+    const raw     = decodeProto(buffer, "GetRankingList.response");
     const entries = (raw.entries || []).map((e, i) => formatEntry(e, i));
-    return { decodeError: null, response: { entries, total: raw.total || entries.length }, rawDecoded: raw };
+    return {
+      decodeError: null,
+      response:    { entries, total: entries.length },
+      rawDecoded:  raw,
+    };
   } catch (err) {
     return { decodeError: err.message, response: null, rawDecoded: null };
   }
