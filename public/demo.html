@@ -258,32 +258,72 @@
   <script>
   /* ═══════════════════════════════════════════════════
      ① BACKGROUND ALBUM SLIDESHOW
-     — FF themed gradients rotate every 25s automatically
-     — When Spotify album art is detected → use it instead
+     — Each theme = image + color palette + ember hue
+     — Rotates every 25 s; Spotify album art overrides
   ═══════════════════════════════════════════════════ */
 
-  // ──── Free Fire themed backgrounds (fallback) ────
+  /*
+   * colorTheme → matches [data-theme="…"] in styles.css
+   * emberHue   → {base, range} hue for fire canvas particles
+   * fallback   → gradient shown when image file missing
+   */
   const BG_THEMES = [
-    { bg: "url('/assets/free-fire-season-1-vxesowl5h3j4oc1r.jpg')", label: 'Season 1' },
-    { bg: 'linear-gradient(160deg,#0d0200 0%,#3d0a00 45%,#c42000 85%,#ff4400 100%)', label: 'Inferno' },
-    { bg: 'linear-gradient(160deg,#000713 0%,#001840 50%,#0040a0 85%,#0066ff 100%)', label: 'Arctic' },
-    { bg: 'linear-gradient(160deg,#070010 0%,#1a0040 50%,#5500bb 85%,#8800ff 100%)', label: 'Void' },
-    { bg: 'linear-gradient(160deg,#000d07 0%,#002810 50%,#007730 85%,#00cc55 100%)', label: 'Jungle' },
-    { bg: 'linear-gradient(160deg,#0d0a00 0%,#332800 50%,#886600 85%,#ddac00 100%)', label: 'Legendary' },
-    { bg: 'linear-gradient(160deg,#0d0008 0%,#36001a 50%,#990040 85%,#ff0066 100%)', label: 'Crimson' },
+    {
+      bg:         "url('/assets/ff-squad-gold.jpg')",
+      fallback:   'linear-gradient(160deg,#0d0a00 0%,#332800 50%,#886600 85%,#ddac00 100%)',
+      label:      'Golden Squad',
+      colorTheme: 'gold',
+      emberHue:   { base: 38, range: 28 },
+    },
+    {
+      bg:         "url('/assets/ff-halloween.jpg')",
+      fallback:   'linear-gradient(160deg,#070010 0%,#1a0040 50%,#5500bb 85%,#8800ff 100%)',
+      label:      'Halloween',
+      colorTheme: 'halloween',
+      emberHue:   { base: 270, range: 45 },
+    },
+    {
+      bg:         "url('/assets/ff-winter.jpg')",
+      fallback:   'linear-gradient(160deg,#000713 0%,#001840 50%,#0040a0 85%,#00b4d8 100%)',
+      label:      'Winter',
+      colorTheme: 'winter',
+      emberHue:   { base: 190, range: 35 },
+    },
+    {
+      bg:         "url('/assets/free-fire-season-1-vxesowl5h3j4oc1r.jpg')",
+      fallback:   'linear-gradient(160deg,#0d0200 0%,#3d0a00 45%,#c42000 85%,#ff4400 100%)',
+      label:      'Season 1',
+      colorTheme: 'fire',
+      emberHue:   { base: 20, range: 30 },
+    },
+    {
+      bg:         'linear-gradient(160deg,#000d07 0%,#002810 50%,#007730 85%,#00cc55 100%)',
+      label:      'Jungle',
+      colorTheme: 'jungle',
+      emberHue:   { base: 110, range: 40 },
+    },
+    {
+      bg:         'linear-gradient(160deg,#0d0008 0%,#36001a 50%,#990040 85%,#ff0066 100%)',
+      label:      'Crimson',
+      colorTheme: 'crimson',
+      emberHue:   { base: 330, range: 40 },
+    },
   ];
+
+  // Active ember hue — read by the fire canvas particle system
+  let EMBER_HUE = { base: 38, range: 28 };
 
   const bgSlideshow  = document.getElementById('bg-slideshow');
   const bgThemeBadge = document.getElementById('bg-theme-badge');
-  let   bgSlides     = [];      // two slide divs (A / B crossfade)
-  let   activeSlot   = 0;       // which slot is currently visible
-  let   activeBgIdx  = 0;       // current theme index
-  let   lastBgValue  = '';      // dedup: skip if same value
+  let   bgSlides     = [];
+  let   activeSlot   = 0;
+  let   activeBgIdx  = 0;
+  let   lastBgValue  = '';
   let   autoTimer    = null;
   let   badgeTimer   = null;
-  const ROTATE_MS    = 25000;   // 25 s between theme changes
+  const ROTATE_MS    = 25000;
 
-  // Create two slides for smooth A→B crossfade
+  // ── Create A/B crossfade slides ──
   function initSlideshow() {
     for (let i = 0; i < 2; i++) {
       const s = document.createElement('div');
@@ -291,32 +331,50 @@
       bgSlideshow.appendChild(s);
       bgSlides.push(s);
     }
-    applyBg(BG_THEMES[0].bg, BG_THEMES[0].label, false);
+    loadAndApplyTheme(BG_THEMES[0], true);
     startAutoRotate();
   }
 
-  // Apply a background (CSS value or image url()) with crossfade
-  function applyBg(cssValue, themeLabel, showBadge) {
+  // ── Low-level: set a background CSS value with crossfade ──
+  function applyBgDirect(cssValue) {
     if (cssValue === lastBgValue) return;
     lastBgValue = cssValue;
-
-    const next = (activeSlot + 1) % 2;
+    const next  = (activeSlot + 1) % 2;
     const isUrl = cssValue.startsWith('url(');
-
     bgSlides[next].style.cssText =
       `background-image:${isUrl ? cssValue : 'none'};` +
       `background:${isUrl ? '' : cssValue};` +
       'background-size:cover;background-position:center;';
-
-    // Trigger reflow so transition fires correctly
-    void bgSlides[next].offsetWidth;
-
+    void bgSlides[next].offsetWidth;          // force reflow → enables CSS transition
     bgSlides[next].classList.add('active');
     bgSlides[activeSlot].classList.remove('active');
     activeSlot = next;
+  }
 
-    // Show theme badge momentarily
-    if (showBadge !== false && themeLabel) flashBadge(themeLabel);
+  // ── High-level: load theme image (fallback to gradient) + change UI colors ──
+  function loadAndApplyTheme(themeObj, skipBadge) {
+    if (!themeObj) return;
+    applyColorTheme(themeObj.colorTheme, themeObj.emberHue);   // colors first (instant)
+
+    if (themeObj.bg.startsWith('url(')) {
+      const url = (themeObj.bg.match(/url\(['"]?([^'")\s]+)['"]?\)/) || [])[1];
+      if (!url) { applyBgDirect(themeObj.fallback || themeObj.bg); _badge(themeObj, skipBadge); return; }
+      const img = new Image();
+      img.onload  = () => { applyBgDirect(themeObj.bg);                         _badge(themeObj, skipBadge); };
+      img.onerror = () => { applyBgDirect(themeObj.fallback || themeObj.bg);    _badge(themeObj, skipBadge); };
+      img.src = url;
+    } else {
+      applyBgDirect(themeObj.bg);
+      _badge(themeObj, skipBadge);
+    }
+  }
+
+  function _badge(t, skip) { if (!skip) flashBadge(t.label); }
+
+  // ── Apply CSS color theme + ember hue ──
+  function applyColorTheme(themeName, emberHue) {
+    document.documentElement.setAttribute('data-theme', themeName || 'fire');
+    if (emberHue) EMBER_HUE = emberHue;
   }
 
   function flashBadge(label) {
@@ -328,7 +386,7 @@
 
   function nextTheme() {
     activeBgIdx = (activeBgIdx + 1) % BG_THEMES.length;
-    applyBg(BG_THEMES[activeBgIdx].bg, BG_THEMES[activeBgIdx].label);
+    loadAndApplyTheme(BG_THEMES[activeBgIdx]);
   }
 
   function startAutoRotate() {
@@ -340,15 +398,14 @@
     if (autoTimer) { clearInterval(autoTimer); autoTimer = null; }
   }
 
-  // Called when we get a Spotify album art URL
+  // Called when Spotify gives us album art
   function setBgFromAlbumArt(url, albumName) {
-    applyBg(`url('${CSS.escape ? url : url}')`, albumName || 'Album Art');
+    applyBgDirect(`url('${url}')`);
+    flashBadge(albumName || 'Album Art');
     stopAutoRotate();
-    // Resume auto-rotate after 3 min if user stops playback
     setTimeout(startAutoRotate, 180000);
   }
 
-  // Boot slideshow immediately
   initSlideshow();
 
 
