@@ -1,188 +1,358 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>FF API Pro</title>
-    <link rel="stylesheet" href="/styles.css" />
-  </head>
-  <body>
-    <!-- Animated background particles -->
-    <div class="particles" id="particles"></div>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FF API Pro</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=Orbitron:wght@700;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
 
-    <main class="overlay">
-      <!-- Header -->
-      <header class="site-header">
-        <div class="logo">
-          <span class="logo-icon">⚡</span>
-          <span class="logo-text">FF <span class="neon">API</span> Pro</span>
+  <!-- Fire embers -->
+  <canvas id="fire-canvas"></canvas>
+
+  <!-- Vignette overlay -->
+  <div class="vignette"></div>
+
+  <div class="page-wrap">
+
+    <!-- ── HEADER ─────────────────────────────── -->
+    <header class="site-header">
+      <div class="logo">
+        <svg class="logo-flame" viewBox="0 0 24 32" fill="none">
+          <path d="M12 2 C12 2 20 10 20 18 C20 24 16 30 12 30 C8 30 4 24 4 18 C4 10 12 2 12 2Z" fill="url(#fg)"/>
+          <path d="M12 12 C12 12 16 16 16 20 C16 23 14 26 12 26 C10 26 8 23 8 20 C8 16 12 12 12 12Z" fill="url(#fi)"/>
+          <defs>
+            <linearGradient id="fg" x1="12" y1="2" x2="12" y2="30" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#FFD700"/>
+              <stop offset="50%" stop-color="#FF6B00"/>
+              <stop offset="100%" stop-color="#CC2200"/>
+            </linearGradient>
+            <linearGradient id="fi" x1="12" y1="12" x2="12" y2="26" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#FFF4CC"/>
+              <stop offset="100%" stop-color="#FF9500"/>
+            </linearGradient>
+          </defs>
+        </svg>
+        <div class="logo-text">
+          <span class="logo-ff">FF</span>
+          <span class="logo-api">API</span>
+          <span class="logo-pro">PRO</span>
         </div>
-        <div class="header-badge">v1.0 · Live</div>
-      </header>
+      </div>
+      <div class="header-right">
+        <span class="pulse-dot"></span>
+        <span class="live-label">LIVE</span>
+        <span class="version-tag">v1.0</span>
+      </div>
+    </header>
 
-      <!-- Main panel -->
-      <section class="panel">
-
-        <!-- Panel header -->
-        <div class="panel-header">
-          <h2>API Console</h2>
-          <p>Send live requests to the Free Fire game server</p>
+    <!-- ── INPUTS ROW ─────────────────────────── -->
+    <div class="inputs-row">
+      <div class="input-group">
+        <label class="input-label">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+          Region
+        </label>
+        <div class="select-wrap">
+          <select id="region">
+            <option value="IND">IND — India</option>
+            <option value="ME">ME — Middle East</option>
+            <option value="SG">SG — Singapore</option>
+            <option value="BR">BR — Brazil</option>
+            <option value="US">US — North America</option>
+            <option value="ID">ID — Indonesia</option>
+            <option value="TW">TW — Taiwan</option>
+            <option value="TH">TH — Thailand</option>
+            <option value="VN">VN — Vietnam</option>
+            <option value="PK">PK — Pakistan</option>
+            <option value="BD">BD — Bangladesh</option>
+            <option value="CIS">CIS — CIS</option>
+            <option value="RU">RU — Russia</option>
+          </select>
+          <svg class="select-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
         </div>
+      </div>
 
-        <!-- Inputs -->
-        <div class="inputs-grid">
-          <div class="field">
-            <label for="region">
-              <span class="field-icon">🌍</span> Region
-            </label>
-            <div class="input-wrap">
-              <input id="region" value="IND" placeholder="e.g. IND, BR, SG" />
-            </div>
-          </div>
+      <div class="input-group uid-group">
+        <label class="input-label">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          Player UID
+        </label>
+        <input id="uid" type="text" value="1633864660" placeholder="Enter player UID…" spellcheck="false" autocomplete="off" />
+      </div>
 
-          <div class="field">
-            <label for="uid">
-              <span class="field-icon">🆔</span> Player UID
-            </label>
-            <div class="input-wrap">
-              <input id="uid" value="1633864660" placeholder="Player UID" />
-            </div>
-          </div>
+      <div class="input-group">
+        <label class="input-label">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+          Match Mode
+        </label>
+        <div class="select-wrap">
+          <select id="matchmode">
+            <option value="CAREER">CAREER</option>
+            <option value="RANKED">RANKED</option>
+            <option value="NORMAL">NORMAL</option>
+          </select>
+          <svg class="select-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
         </div>
+      </div>
+    </div>
 
-        <!-- Endpoint buttons -->
-        <div class="endpoints">
-          <p class="endpoints-label">Select Endpoint</p>
-          <div class="buttons">
-            <button class="btn" data-action="account" onclick="runAccount()">
-              <span class="btn-icon">👤</span>
-              <span class="btn-label">Account</span>
-              <span class="btn-path">/GetPlayerPersonalShow</span>
-            </button>
-            <button class="btn" data-action="br" onclick="runBr()">
-              <span class="btn-icon">🔫</span>
-              <span class="btn-label">BR Stats</span>
-              <span class="btn-path">/GetPlayerStats</span>
-            </button>
-            <button class="btn" data-action="cs" onclick="runCs()">
-              <span class="btn-icon">🏆</span>
-              <span class="btn-label">CS Stats</span>
-              <span class="btn-path">/GetPlayerTCStats</span>
-            </button>
-            <button class="btn" data-action="uid" onclick="runUidGen()">
-              <span class="btn-icon">🎲</span>
-              <span class="btn-label">UID Generator</span>
-              <span class="btn-path">/uid-generator</span>
-            </button>
-            <button class="btn" data-action="search" onclick="runSearch()">
-              <span class="btn-icon">🔍</span>
-              <span class="btn-label">Search</span>
-              <span class="btn-path">/FuzzySearchAccountByName</span>
-            </button>
-            <button class="btn" data-action="health" onclick="runHealth()">
-              <span class="btn-icon">💚</span>
-              <span class="btn-label">Health</span>
-              <span class="btn-path">/health</span>
-            </button>
-          </div>
+    <!-- ── ENDPOINT CARDS ──────────────────────── -->
+    <div class="endpoints-grid">
+
+      <button class="ep-card" data-action="account" onclick="runAccount()">
+        <div class="ep-card-glow"></div>
+        <div class="ep-icon-wrap">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
         </div>
-
-        <!-- Response area -->
-        <div class="response-box">
-          <div class="response-header">
-            <span class="response-title">Response</span>
-            <span id="status-badge" class="status-badge">—</span>
-            <button class="copy-btn" onclick="copyOutput()" title="Copy JSON">Copy</button>
-          </div>
-          <pre id="out">// Ready. Select an endpoint above to fire a request.</pre>
+        <div class="ep-info">
+          <span class="ep-name">Account</span>
+          <span class="ep-path">/GetPlayerPersonalShow</span>
         </div>
+        <span class="ep-method">GET</span>
+      </button>
 
-      </section>
+      <button class="ep-card" data-action="br" onclick="runBr()">
+        <div class="ep-card-glow"></div>
+        <div class="ep-icon-wrap">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
+        </div>
+        <div class="ep-info">
+          <span class="ep-name">BR Stats</span>
+          <span class="ep-path">/GetPlayerStats</span>
+        </div>
+        <span class="ep-method">GET</span>
+      </button>
 
-      <footer class="site-footer">
-        FF API Pro · Built with Node.js + Express · Proto3 Binary
-      </footer>
-    </main>
+      <button class="ep-card" data-action="cs" onclick="runCs()">
+        <div class="ep-card-glow"></div>
+        <div class="ep-icon-wrap">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        </div>
+        <div class="ep-info">
+          <span class="ep-name">CS Stats</span>
+          <span class="ep-path">/GetPlayerTCStats</span>
+        </div>
+        <span class="ep-method">GET</span>
+      </button>
 
-    <script>
-      /* ── Particles ─────────────────────────────────── */
-      (function () {
-        const wrap = document.getElementById('particles');
-        for (let i = 0; i < 28; i++) {
-          const d = document.createElement('div');
-          d.className = 'particle';
-          d.style.cssText = `
-            left:${Math.random()*100}%;
-            top:${Math.random()*100}%;
-            width:${2+Math.random()*3}px;
-            height:${2+Math.random()*3}px;
-            animation-delay:${Math.random()*8}s;
-            animation-duration:${6+Math.random()*8}s;
-          `;
-          wrap.appendChild(d);
+      <button class="ep-card" data-action="search" onclick="runSearch()">
+        <div class="ep-card-glow"></div>
+        <div class="ep-icon-wrap">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        </div>
+        <div class="ep-info">
+          <span class="ep-name">Search</span>
+          <span class="ep-path">/FuzzySearchAccountByName</span>
+        </div>
+        <span class="ep-method">GET</span>
+      </button>
+
+      <button class="ep-card" data-action="uid" onclick="runUidGen()">
+        <div class="ep-card-glow"></div>
+        <div class="ep-icon-wrap">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        </div>
+        <div class="ep-info">
+          <span class="ep-name">UID Generator</span>
+          <span class="ep-path">/uid-generator</span>
+        </div>
+        <span class="ep-method">GEN</span>
+      </button>
+
+      <button class="ep-card" data-action="health" onclick="runHealth()">
+        <div class="ep-card-glow"></div>
+        <div class="ep-icon-wrap">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        </div>
+        <div class="ep-info">
+          <span class="ep-name">Health</span>
+          <span class="ep-path">/health</span>
+        </div>
+        <span class="ep-method health-method">OK</span>
+      </button>
+
+    </div>
+
+    <!-- ── RESPONSE PANEL ──────────────────────── -->
+    <div class="response-panel">
+      <div class="response-topbar">
+        <div class="response-topbar-left">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+          <span>Response</span>
+          <span id="active-ep" class="active-ep-name"></span>
+        </div>
+        <div class="response-topbar-right">
+          <span id="resp-time" class="resp-time"></span>
+          <span id="status-badge" class="status-badge">—</span>
+          <button class="action-btn" onclick="copyOutput()">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            <span id="copy-label">Copy</span>
+          </button>
+          <button class="action-btn" onclick="clearOutput()">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>
+            Clear
+          </button>
+        </div>
+      </div>
+      <pre id="out" class="response-body">// Ready — choose an endpoint above to fire a request</pre>
+    </div>
+
+    <footer class="site-footer">
+      FF API Pro &nbsp;·&nbsp; Node.js + Express &nbsp;·&nbsp; Proto3 Binary &nbsp;·&nbsp; AES-256-CBC
+    </footer>
+
+  </div><!-- /page-wrap -->
+
+  <script>
+  /* ── Fire Canvas ────────────────────────────── */
+  (function () {
+    const canvas = document.getElementById('fire-canvas');
+    const ctx    = canvas.getContext('2d');
+    let W, H, embers = [];
+
+    function resize() {
+      W = canvas.width  = window.innerWidth;
+      H = canvas.height = window.innerHeight;
+    }
+    resize();
+    window.addEventListener('resize', resize);
+
+    function Ember() {
+      this.reset = function () {
+        this.x    = Math.random() * W;
+        this.y    = H + 10;
+        this.r    = 1 + Math.random() * 2.5;
+        this.vx   = (Math.random() - 0.5) * 0.8;
+        this.vy   = -(0.6 + Math.random() * 1.4);
+        this.life = 0;
+        this.maxL = 180 + Math.random() * 160;
+        this.hue  = 20 + Math.random() * 30; // orange–red
+      };
+      this.reset();
+      this.life = Math.random() * this.maxL; // stagger start
+    }
+
+    for (let i = 0; i < 55; i++) embers.push(new Ember());
+
+    function tick() {
+      ctx.clearRect(0, 0, W, H);
+      embers.forEach(e => {
+        e.x    += e.vx + Math.sin(e.life * 0.05) * 0.3;
+        e.y    += e.vy;
+        e.life++;
+        if (e.life > e.maxL || e.y < -10) e.reset();
+
+        const prog  = e.life / e.maxL;
+        const alpha = prog < 0.15 ? prog / 0.15 : 1 - (prog - 0.15) / 0.85;
+        ctx.beginPath();
+        ctx.arc(e.x, e.y, e.r * (1 - prog * 0.4), 0, Math.PI * 2);
+        ctx.fillStyle = `hsla(${e.hue},100%,${55 + prog * 20}%,${alpha * 0.7})`;
+        ctx.shadowBlur = 8;
+        ctx.shadowColor = `hsl(${e.hue},100%,50%)`;
+        ctx.fill();
+      });
+      requestAnimationFrame(tick);
+    }
+    tick();
+  })();
+
+  /* ── JSON Syntax Highlight ──────────────────── */
+  function highlight(str) {
+    if (typeof str !== 'string') str = JSON.stringify(str, null, 2);
+    return str
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, m => {
+        if (/^"/.test(m)) {
+          return /:$/.test(m)
+            ? `<span class="jk">${m}</span>`
+            : `<span class="js">${m}</span>`;
         }
-      })();
+        if (/true|false/.test(m)) return `<span class="jb">${m}</span>`;
+        if (/null/.test(m))        return `<span class="jn">${m}</span>`;
+        return `<span class="jnum">${m}</span>`;
+      });
+  }
 
-      /* ── Helpers ───────────────────────────────────── */
-      const out    = document.getElementById('out');
-      const badge  = document.getElementById('status-badge');
-      const region = () => document.getElementById('region').value.trim().toUpperCase();
-      const uid    = () => document.getElementById('uid').value.trim();
+  /* ── State ──────────────────────────────────── */
+  const out       = document.getElementById('out');
+  const badge     = document.getElementById('status-badge');
+  const activeEp  = document.getElementById('active-ep');
+  const respTime  = document.getElementById('resp-time');
+  let activeBtn   = null;
 
-      let activeBtn = null;
+  const region    = () => document.getElementById('region').value;
+  const uid       = () => document.getElementById('uid').value.trim();
+  const matchmode = () => document.getElementById('matchmode').value;
 
-      async function call(url, options, action) {
-        // Mark active button
-        if (activeBtn) activeBtn.classList.remove('active');
-        activeBtn = document.querySelector(`[data-action="${action}"]`);
-        if (activeBtn) activeBtn.classList.add('active');
+  const EP_LABELS = {
+    account: 'Account',
+    br:      'BR Stats',
+    cs:      'CS Stats',
+    search:  'Search',
+    uid:     'UID Generator',
+    health:  'Health',
+  };
 
-        out.textContent = '// Loading…';
-        badge.textContent = '…';
-        badge.className = 'status-badge pending';
+  async function call(url, action) {
+    if (activeBtn) activeBtn.classList.remove('active');
+    activeBtn = document.querySelector(`[data-action="${action}"]`);
+    if (activeBtn) activeBtn.classList.add('active', 'loading');
 
-        try {
-          const res  = await fetch(url, options);
-          const data = await res.json();
-          out.textContent  = JSON.stringify(data, null, 2);
-          badge.textContent = res.ok ? `${res.status} OK` : `${res.status} ERR`;
-          badge.className  = `status-badge ${res.ok ? 'ok' : 'err'}`;
-        } catch (e) {
-          out.textContent  = `// Error: ${e}`;
-          badge.textContent = 'FAIL';
-          badge.className  = 'status-badge err';
-        }
-      }
+    out.innerHTML = '<span class="muted">// Sending request…</span>';
+    badge.textContent = '…';
+    badge.className   = 'status-badge pending';
+    activeEp.textContent = EP_LABELS[action] || '';
+    respTime.textContent = '';
 
-      function copyOutput() {
-        navigator.clipboard.writeText(out.textContent)
-          .then(() => {
-            const b = document.querySelector('.copy-btn');
-            b.textContent = 'Copied!';
-            setTimeout(() => (b.textContent = 'Copy'), 1500);
-          });
-      }
+    const t0 = Date.now();
+    try {
+      const res  = await fetch(url);
+      const ms   = Date.now() - t0;
+      const data = await res.json();
+      out.innerHTML    = highlight(JSON.stringify(data, null, 2));
+      badge.textContent = res.ok ? `${res.status} OK` : `${res.status} ERR`;
+      badge.className   = `status-badge ${res.ok ? 'ok' : 'err'}`;
+      respTime.textContent = `${ms}ms`;
+    } catch (e) {
+      out.innerHTML    = `<span class="err-text">// Error: ${e}</span>`;
+      badge.textContent = 'ERR';
+      badge.className   = 'status-badge err';
+      respTime.textContent = `${Date.now() - t0}ms`;
+    } finally {
+      if (activeBtn) activeBtn.classList.remove('loading');
+    }
+  }
 
-      /* ── Endpoint Actions ──────────────────────────── */
-      function runAccount() {
-        call(`/api/v1/account?region=${encodeURIComponent(region())}&uid=${encodeURIComponent(uid())}`, {}, 'account');
-      }
-      function runBr() {
-        call(`/api/v1/playerstats?region=${encodeURIComponent(region())}&uid=${encodeURIComponent(uid())}&matchmode=CAREER`, {}, 'br');
-      }
-      function runCs() {
-        call(`/api/v1/playertcstats?region=${encodeURIComponent(region())}&uid=${encodeURIComponent(uid())}&matchmode=CAREER`, {}, 'cs');
-      }
-      function runUidGen() {
-        call('/api/uid-generator?mode=random&count=5&length=10&teamXdarks=1', {}, 'uid');
-      }
-      function runSearch() {
-        const kw = uid(); // reuse the UID field as keyword for search
-        call(`/api/v1/search?region=${encodeURIComponent(region())}&keyword=${encodeURIComponent(kw)}`, {}, 'search');
-      }
-      function runHealth() {
-        call('/api/health', {}, 'health');
-      }
-    </script>
-  </body>
+  function copyOutput() {
+    const txt = out.innerText || out.textContent;
+    navigator.clipboard.writeText(txt).then(() => {
+      const lbl = document.getElementById('copy-label');
+      lbl.textContent = 'Copied!';
+      setTimeout(() => lbl.textContent = 'Copy', 1600);
+    });
+  }
+
+  function clearOutput() {
+    out.innerHTML = '<span class="muted">// Ready — choose an endpoint above</span>';
+    badge.textContent = '—';
+    badge.className   = 'status-badge';
+    activeEp.textContent = '';
+    respTime.textContent = '';
+    if (activeBtn) { activeBtn.classList.remove('active'); activeBtn = null; }
+  }
+
+  /* ── Actions ────────────────────────────────── */
+  const enc = encodeURIComponent;
+  function runAccount() { call(`/api/v1/account?region=${enc(region())}&uid=${enc(uid())}`, 'account'); }
+  function runBr()      { call(`/api/v1/playerstats?region=${enc(region())}&uid=${enc(uid())}&matchmode=${matchmode()}`, 'br'); }
+  function runCs()      { call(`/api/v1/playertcstats?region=${enc(region())}&uid=${enc(uid())}&matchmode=${matchmode()}`, 'cs'); }
+  function runSearch()  { call(`/api/v1/search?region=${enc(region())}&keyword=${enc(uid())}`, 'search'); }
+  function runUidGen()  { call('/api/uid-generator?mode=random&count=5&length=10&teamXdarks=1', 'uid'); }
+  function runHealth()  { call('/api/health', 'health'); }
+  </script>
+</body>
 </html>
