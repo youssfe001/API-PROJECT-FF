@@ -55,8 +55,13 @@ function parseWishList(buffer) {
       if (f === 2) value = Number(v.value);
     }
 
+    const resolved = itemId ? lookupItem(itemId) : null;
     items.push({
       itemId,
+      itemName: resolved?.name || null,
+      itemType: resolved?.type || null,
+      itemRare: resolved?.rare || null,
+      collectionType: resolved?.collectionType || null,
       value,
       rawHex: itemBuf.toString("hex"),
     });
