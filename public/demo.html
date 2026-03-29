@@ -931,7 +931,9 @@
     if (action === 'wishlist') return renderWishlist(data);
     if (action === 'health')   return renderHealth(data);
     if (action === 'guest')    return renderGuest(data);
-    if (action === 'uidgen')   return renderUidGenerator(data);
+    if (action === 'uidgen')      return renderUidGenerator(data);
+    if (action === 'likespam')    return renderLikeSpam(data);
+    if (action === 'guestcreate') return renderGuestCreate(data);
     return `<pre style="color:var(--text-primary);white-space:pre-wrap">${esc(JSON.stringify(data,null,2))}</pre>`;
   }
 
