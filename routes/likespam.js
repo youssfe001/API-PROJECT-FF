@@ -1,11 +1,15 @@
 /**
  * routes/likespam.js
  * ──────────────────────────────────────────────────────────────────
- * Two modes:
- *   1. Simple  — POST /like-spam  { region, uid, count?, delayMs? }
- *                Builds LikeProfile protobuf automatically
- *   2. Raw     — POST /like-spam/raw  { region, encryptedHexBody, endpoint?, count?, delayMs? }
- *                Sends pre-encrypted hex (advanced / custom endpoint)
+ * Like flow (matching reference OB52 implementation):
+ *   1. Get player info → read likes BEFORE
+ *   2. Send N like requests (LikeProfile)
+ *   3. Get player info → read likes AFTER
+ *   4. Return: before, after, likesGiven, playerName
+ *
+ * Modes:
+ *   POST /like-spam       { region, uid, count?, delayMs? }
+ *   POST /like-spam/raw   { region, encryptedHexBody, endpoint?, count?, delayMs? }
  * ──────────────────────────────────────────────────────────────────
  */
 
@@ -14,7 +18,7 @@ const router = express.Router();
 
 const { ffRequest, ffRequestEncrypted } = require("../lib/request");
 const { requireRegion, requireUid, ApiError } = require("../lib/validate");
-const { encodeProto } = require("../lib/proto");
+const { encodeProto, decodeProto } = require("../lib/proto");
 const { FF_ENDPOINTS } = require("../config/constants");
 
 /* ── helpers ─────────────────────────────────────────────────── */
@@ -41,16 +45,49 @@ function wait(ms) {
   return new Promise((r) => setTimeout(r, ms));
 }
 
+/**
+ * Fetch player's current like count via GetPlayerPersonalShow
+ * Returns { likes, nickname, uid } or null on error
+ */
+async function getPlayerLikes(region, uid) {
+  try {
+    const reqBuf = encodeProto(
+      { accountId: BigInt(uid), callSignSrc: 7, needGalleryInfo: false },
+      "PlayerPersonalShow.request"
+    );
+    const respBuf = await ffRequest({
+      region,
+      endpoint: FF_ENDPOINTS.GET_PLAYER_PERSONAL_SHOW,
+      hexBody: reqBuf.toString("hex"),
+    });
+    const decoded = decodeProto(respBuf, "PlayerPersonalShow.response");
+    const basic = decoded?.basicinfo || {};
+    return {
+      likes:    Number(basic.liked || 0),
+      nickname: basic.nickname || "",
+      uid:      String(basic.accountid || uid),
+    };
+  } catch (err) {
+    console.log(`[like-spam] getPlayerLikes error: ${err.message}`);
+    return null;
+  }
+}
+
 /* ── Mode 1: simple (uid + region) ───────────────────────────── */
 
 router.post("/like-spam", async (req, res, next) => {
   try {
-    const region = requireRegion(req.body.region);
-    const uid    = requireUid(req.body.uid);
-    const count  = parseIntInRange(req.body.count,   "count",   10, 1, 500);
+    const region  = requireRegion(req.body.region);
+    const uid     = requireUid(req.body.uid);
+    const count   = parseIntInRange(req.body.count,   "count",   10, 1, 500);
     const delayMs = parseIntInRange(req.body.delayMs, "delayMs", 0,  0, 5000);
 
-    // Build LikeProfile protobuf (uid + region per reference impl)
+    // Step 1: Get likes BEFORE
+    const before = await getPlayerLikes(region, uid);
+    const likesBefore = before?.likes ?? null;
+    const playerName  = before?.nickname ?? "";
+
+    // Step 2: Build LikeProfile protobuf & send N requests
     const protoBuf = encodeProto({ uid: uid, region: region }, "LikeProfile.request");
     const hexBody  = protoBuf.toString("hex");
 
@@ -70,11 +107,22 @@ router.post("/like-spam", async (req, res, next) => {
       if (i < count - 1) await wait(delayMs);
     }
 
+    // Step 3: Get likes AFTER
+    const after = await getPlayerLikes(region, uid);
+    const likesAfter = after?.likes ?? null;
+    const likesGiven = (likesBefore !== null && likesAfter !== null)
+      ? likesAfter - likesBefore
+      : null;
+
     res.json({
-      mode: "simple",
+      status: likesGiven !== null && likesGiven > 0 ? 1 : 2,
+      PlayerNickname: playerName,
+      UID: uid,
+      LikesBeforeCommand: likesBefore,
+      LikesAfterCommand: likesAfter,
+      LikesGivenByAPI: likesGiven,
       endpoint: FF_ENDPOINTS.LIKE_PROFILE,
       region,
-      uid,
       count,
       delayMs,
       summary: { success, failed },
