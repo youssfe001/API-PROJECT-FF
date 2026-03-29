@@ -1266,6 +1266,7 @@
       respTime.textContent = `${Date.now() - t0}ms`;
     } finally {
       if (activeBtn) activeBtn.classList.remove('loading');
+      _busy = false;
     }
   }
 
