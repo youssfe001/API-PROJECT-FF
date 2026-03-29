@@ -50,8 +50,8 @@ router.post("/like-spam", async (req, res, next) => {
     const count  = parseIntInRange(req.body.count,   "count",   10, 1, 500);
     const delayMs = parseIntInRange(req.body.delayMs, "delayMs", 0,  0, 5000);
 
-    // Build LikeProfile protobuf
-    const protoBuf = encodeProto({ accountId: uid }, "LikeProfile.request");
+    // Build LikeProfile protobuf (uid + region per reference impl)
+    const protoBuf = encodeProto({ uid: uid, region: region }, "LikeProfile.request");
     const hexBody  = protoBuf.toString("hex");
 
     const results = [];
