@@ -855,16 +855,26 @@
     const items = data.response?.items || [];
     return `
     <div>
-      <div class="wishlist-header">WISHLIST ITEMS · UID ${esc(data.uid)}</div>
+      <div class="wishlist-header">WISHLIST · ${items.length} ITEM${items.length !== 1 ? 'S' : ''} · UID ${esc(data.uid)}</div>
       ${!items.length
         ? `<div class="wishlist-empty">No wishlist items found for this player.</div>`
-        : `<div class="wishlist-grid">
-            ${items.map(it => `
-            <div class="wishlist-item">
-              <div class="wishlist-item-id">${it.itemId || '—'}</div>
-              <div class="wishlist-item-val">${it.value !== undefined ? `val: ${it.value}` : ''}</div>
-              <div class="wishlist-item-label">ITEM</div>
-            </div>`).join('')}
+        : `<div class="wishlist-grid-v2">
+            ${items.map(it => {
+              const name = it.itemName || `Item #${it.itemId || '?'}`;
+              const rare = it.itemRare || 'NONE';
+              const type = it.itemType || it.collectionType || '';
+              const col = rareColor(rare);
+              return `
+              <div class="wl-card" style="border-color:${col}33">
+                <div class="wl-card-img">
+                  <img src="${itemImg(it.itemId)}" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" loading="lazy"/>
+                  <div class="wl-card-fallback" style="display:none;color:${col}">${esc(name.slice(0,2).toUpperCase())}</div>
+                </div>
+                <div class="wl-card-name" title="${esc(name)}">${esc(name)}</div>
+                ${type ? `<div class="wl-card-type">${esc(type.replace(/_/g,' '))}</div>` : ''}
+                <div class="wl-card-rare" style="color:${col}">${rareName(rare)}</div>
+              </div>`;
+            }).join('')}
            </div>`
       }
     </div>`;
