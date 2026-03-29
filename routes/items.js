@@ -9,8 +9,144 @@
 
 const express = require("express");
 const router = express.Router();
+const sharp = require("sharp");
 const { lookupItem, resolveItems, searchItems } = require("../lib/items");
 const { ApiError } = require("../lib/validate");
+
+const FF_RESOURCES_BASE = "https://raw.githubusercontent.com/0xme/ff-resources/main/pngs/300x300";
+const UNKNOWN_ICON_NAME = "UI_EPFP_unknown.png";
+const REMOTE_ICON_CACHE = new Map();
+const PROCESSED_ICON_CACHE = new Map();
+
+function clamp(value, min, max) {
+  return Math.min(Math.max(value, min), max);
+}
+
+function parsePositiveInt(value, fallback, name, min, max) {
+  if (value === undefined || value === null || value === "") return fallback;
+
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed) || !Number.isInteger(parsed)) {
+    throw new ApiError(`Invalid '${name}' query parameter. Must be an integer.`);
+  }
+
+  if (parsed < min || parsed > max) {
+    throw new ApiError(`Invalid '${name}' query parameter. Must be between ${min} and ${max}.`);
+  }
+
+  return parsed;
+}
+
+function encodePathSegment(value) {
+  return encodeURIComponent(String(value)).replace(/%2F/g, "/");
+}
+
+async function fetchRemoteBuffer(url) {
+  if (REMOTE_ICON_CACHE.has(url)) {
+    return REMOTE_ICON_CACHE.get(url);
+  }
+
+  const pending = (async () => {
+    const response = await fetch(url, {
+      redirect: "follow",
+      headers: {
+        "user-agent": "freefire-api/1.0",
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Remote fetch failed (${response.status}) for ${url}`);
+    }
+
+    return Buffer.from(await response.arrayBuffer());
+  })();
+
+  REMOTE_ICON_CACHE.set(url, pending);
+
+  try {
+    const buffer = await pending;
+    REMOTE_ICON_CACHE.set(url, buffer);
+    return buffer;
+  } catch (error) {
+    REMOTE_ICON_CACHE.delete(url);
+    throw error;
+  }
+}
+
+function iconCandidates(item) {
+  const urls = [];
+
+  if (item?.icon) {
+    urls.push(`${FF_RESOURCES_BASE}/${encodePathSegment(item.icon)}.png`);
+  }
+
+  if (item?.iconUrl) {
+    urls.push(item.iconUrl);
+  }
+
+  urls.push(`${FF_RESOURCES_BASE}/${UNKNOWN_ICON_NAME}`);
+  return [...new Set(urls.filter(Boolean))];
+}
+
+async function resolveIconSource(item) {
+  let lastError = null;
+
+  for (const sourceUrl of iconCandidates(item)) {
+    try {
+      const buffer = await fetchRemoteBuffer(sourceUrl);
+      return { buffer, sourceUrl };
+    } catch (error) {
+      lastError = error;
+    }
+  }
+
+  throw lastError || new Error("Unable to resolve icon source.");
+}
+
+async function buildIconBuffer(sourceBuffer, targetSize) {
+  return sharp(sourceBuffer, { failOn: "none" })
+    .resize(targetSize, targetSize, {
+      fit: "contain",
+      background: { r: 0, g: 0, b: 0, alpha: 0 },
+    })
+    .sharpen({ sigma: 1.15, m1: 0.8, m2: 1.4 })
+    .png({ compressionLevel: 9, adaptiveFiltering: true })
+    .toBuffer();
+}
+
+router.get("/items/icon/:id.png", async (req, res, next) => {
+  try {
+    const item = lookupItem(req.params.id);
+    if (!item) {
+      throw new ApiError(`Unknown item id '${req.params.id}'.`, 404);
+    }
+
+    const displaySize = parsePositiveInt(req.query.size, 96, "size", 32, 512);
+    const upscaleFactor = parsePositiveInt(req.query.upscale, 2, "upscale", 1, 4);
+    const targetSize = clamp(displaySize * upscaleFactor, 32, 2048);
+
+    const { buffer: sourceBuffer, sourceUrl } = await resolveIconSource(item);
+    const cacheKey = `${sourceUrl}|${targetSize}`;
+
+    let output = PROCESSED_ICON_CACHE.get(cacheKey);
+    if (!output) {
+      output = await buildIconBuffer(sourceBuffer, targetSize);
+      PROCESSED_ICON_CACHE.set(cacheKey, output);
+    }
+
+    res.set({
+      "content-type": "image/png",
+      "cache-control": "public, max-age=86400, s-maxage=86400",
+      "x-icon-source": sourceUrl,
+      "x-icon-display-size": String(displaySize),
+      "x-icon-output-size": String(targetSize),
+    });
+
+    res.send(output);
+  } catch (err) {
+    next(err);
+  }
+});
 
 router.get("/items", (req, res, next) => {
   try {

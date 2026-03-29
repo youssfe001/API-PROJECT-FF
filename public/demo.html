@@ -650,7 +650,13 @@
   };
   function rareColor(r) { return RARE_COLORS[r] || '#888'; }
   function rareName(r) { return (r||'').replace('_Plus',' +').replace('NONE','Common'); }
-  function itemImg(id) { return `https://raw.githubusercontent.com/starexxx/FFItems/main/assets/icons/${id}.png`; }
+  function itemImg(itemOrId, size = 96, upscale = 2) {
+    const id = typeof itemOrId === 'object' ? (itemOrId?.id || itemOrId?.itemId) : itemOrId;
+    const proxy = typeof itemOrId === 'object' ? itemOrId?.proxyIconPath : null;
+    if (!id && !proxy) return '/api/items/icon/0.png';
+    const base = proxy || `/api/items/icon/${encodeURIComponent(id)}.png`;
+    return `${base}?size=${size}&upscale=${upscale}`;
+  }
   function resolvedName(item) {
     if (!item) return null;
     return item.name || item.itemName || null;
@@ -974,7 +980,7 @@
               return `
               <div class="wl-card" style="border-color:${col}33">
                 <div class="wl-card-img">
-                  <img src="${itemImg(it.itemId)}" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" loading="lazy"/>
+                  <img src="${itemImg(it, 112, 3)}" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" loading="lazy"/>
                   <div class="wl-card-fallback" style="display:none;color:${col}">${esc(name.slice(0,2).toUpperCase())}</div>
                 </div>
                 <div class="wl-card-name" title="${esc(name)}">${esc(name)}</div>

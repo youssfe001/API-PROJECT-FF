@@ -1472,11 +1472,15 @@ select option { background: #1a0800; color: var(--text-primary); }
 }
 
 .wl-card-img {
-  width: 56px;
-  height: 56px;
-  border-radius: 8px;
+  width: 84px;
+  height: 84px;
+  border-radius: 14px;
   overflow: hidden;
-  background: rgba(0,0,0,0.2);
+  background:
+    radial-gradient(circle at 30% 25%, rgba(255,255,255,0.14), transparent 48%),
+    linear-gradient(180deg, rgba(255,255,255,0.05), rgba(0,0,0,0.18));
+  border: 1px solid rgba(255,255,255,0.08);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.05);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1486,6 +1490,8 @@ select option { background: #1a0800; color: var(--text-primary); }
   width: 100%;
   height: 100%;
   object-fit: contain;
+  image-rendering: -webkit-optimize-contrast;
+  filter: drop-shadow(0 8px 18px rgba(0,0,0,0.35));
 }
 
 .wl-card-fallback {

@@ -120,7 +120,12 @@ Base path: `/api`
 ### Utility
 - `GET /api/uid-generator?mode=random&count=5&length=10&teamXdarks=1`
 - `GET /api/guest-generator?region=IND`
+- `GET /api/items?id=101000005`
+- `GET /api/items/search?q=olivia&limit=10`
+- `GET /api/items/icon/101000005.png?size=112&upscale=3`
 - `POST /api/like-spam`
+
+Item metadata is enriched from the `jinix6/ItemID` dataset and icon routes can upscale + sharpen PNGs for cleaner UI rendering.
 
 ---
 
