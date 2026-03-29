@@ -108,12 +108,14 @@ async function resolveIconSource(item) {
 }
 
 async function buildIconBuffer(sourceBuffer, targetSize) {
-  return sharp(sourceBuffer, { failOn: "none" })
+  return sharp(sourceBuffer, { failOn: "none", unlimited: true })
     .resize(targetSize, targetSize, {
       fit: "contain",
+      kernel: sharp.kernel.lanczos3,
+      fastShrinkOnLoad: false,
       background: { r: 0, g: 0, b: 0, alpha: 0 },
     })
-    .sharpen({ sigma: 1.15, m1: 0.8, m2: 1.4 })
+    .sharpen({ sigma: 1.35, m1: 1, m2: 2 })
     .png({ compressionLevel: 9, adaptiveFiltering: true })
     .toBuffer();
 }
@@ -125,9 +127,9 @@ router.get("/items/icon/:id.png", async (req, res, next) => {
       throw new ApiError(`Unknown item id '${req.params.id}'.`, 404);
     }
 
-    const displaySize = parsePositiveInt(req.query.size, 96, "size", 32, 512);
-    const upscaleFactor = parsePositiveInt(req.query.upscale, 2, "upscale", 1, 4);
-    const targetSize = clamp(displaySize * upscaleFactor, 32, 2048);
+    const displaySize = parsePositiveInt(req.query.size, 128, "size", 32, 768);
+    const upscaleFactor = parsePositiveInt(req.query.upscale, 4, "upscale", 1, 6);
+    const targetSize = clamp(displaySize * upscaleFactor, 32, 3072);
 
     const { buffer: sourceBuffer, sourceUrl } = await resolveIconSource(item);
     const cacheKey = `${sourceUrl}|${targetSize}`;
@@ -144,6 +146,7 @@ router.get("/items/icon/:id.png", async (req, res, next) => {
       "x-icon-source": sourceUrl,
       "x-icon-display-size": String(displaySize),
       "x-icon-output-size": String(targetSize),
+      "x-icon-upscale": String(upscaleFactor),
     });
 
     res.send(output);

@@ -86,7 +86,7 @@
       <div class="hero-copy hero-panel">
         <div class="hero-kicker">Free Fire Control Deck</div>
         <h1 class="hero-title">Battlefield-grade dashboard for player intel, collections, and live utility calls.</h1>
-        <p class="hero-subtitle">Track rank, inspect equipped cosmetics, preview wishlist drops, and fire API requests from one command surface with a sharper Free Fire look.</p>
+        <p class="hero-subtitle">Split every feature into its own control block, inspect ban diagnostics, and preview cleaner HD PNG assets with a dedicated item optics lab.</p>
         <div class="hero-tags">
           <span class="hero-tag">Live API Proxy</span>
           <span class="hero-tag">Enriched Item Art</span>
@@ -96,7 +96,7 @@
       <div class="hero-stats hero-panel">
         <div class="hero-stat">
           <span class="hero-stat-label">Endpoints</span>
-          <span class="hero-stat-value">10</span>
+          <span class="hero-stat-value">12</span>
         </div>
         <div class="hero-stat">
           <span class="hero-stat-label">Item Assets</span>
@@ -174,10 +174,10 @@
       </div>
     </div>
 
-    <div class="quick-hint">Shortcuts: <kbd>Enter</kbd> Account · <kbd>Shift</kbd>+<kbd>Enter</kbd> BR Stats · <kbd>Ctrl/Cmd</kbd>+<kbd>Enter</kbd> CS Stats</div>
+    <div class="quick-hint">Shortcuts: <kbd>Enter</kbd> Account · <kbd>Shift</kbd>+<kbd>Enter</kbd> BR Stats · <kbd>Ctrl/Cmd</kbd>+<kbd>Enter</kbd> CS Stats · Optics Lab supports up to <kbd>6x</kbd> upscale.</div>
 
     <!-- ── ENDPOINT CARDS ───────────────────────────── -->
-    <div class="endpoints-grid">
+    <div id="feature-cards-source" class="endpoints-grid feature-source-grid">
 
       <button class="ep-card" data-action="account" onclick="runAccount()">
         <div class="ep-card-glow"></div>
@@ -332,12 +332,12 @@
       <div id="rich-view" class="rich-view">
         <div class="rich-empty">
           <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
-          <span class="rich-empty-label">Choose an endpoint above to fire a request</span>
+          <span class="rich-empty-label">Choose a feature panel above to fire a request</span>
         </div>
       </div>
 
       <!-- Raw JSON view -->
-      <pre id="out" class="response-body rich-hidden">// Ready — choose an endpoint above to fire a request</pre>
+      <pre id="out" class="response-body rich-hidden">// Ready — choose a feature panel above to fire a request</pre>
     </div>
 
     <footer class="site-footer">
@@ -695,7 +695,7 @@
   };
   function rareColor(r) { return RARE_COLORS[r] || '#888'; }
   function rareName(r) { return (r||'').replace('_Plus',' +').replace('NONE','Common'); }
-  function itemImg(itemOrId, size = 96, upscale = 2) {
+  function itemImg(itemOrId, size = 128, upscale = 4) {
     const id = typeof itemOrId === 'object' ? (itemOrId?.id || itemOrId?.itemId) : itemOrId;
     const proxy = typeof itemOrId === 'object' ? itemOrId?.proxyIconPath : null;
     if (!id && !proxy) return '/api/items/icon/0.png';
@@ -731,7 +731,7 @@
     return `
       <div class="visual-item-card" style="--item-accent:${col}">
         <div class="visual-item-media">
-          <img src="${itemImg(item, 132, 3)}" alt="${esc(name)}" loading="lazy"
+          <img src="${itemImg(item, 132, 4)}" alt="${esc(name)}" loading="lazy"
             onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"/>
           <div class="visual-item-fallback" style="display:none">${esc(name.slice(0,2).toUpperCase())}</div>
         </div>
@@ -786,7 +786,7 @@
       <!-- HEADER -->
       <div class="player-header player-header-advanced">
         <div class="player-hero-visual" style="--rank-accent:${brC}">
-          ${heroVisual ? `<img src="${itemImg(heroVisual, 180, 3)}" alt="" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"/>` : ''}
+          ${heroVisual ? `<img src="${itemImg(heroVisual, 180, 4)}" alt="" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"/>` : ''}
           <div class="player-hero-fallback" ${heroVisual ? 'style="display:none"' : ''}>${esc(initials(b.nickname))}</div>
           <div class="player-hero-overlay"></div>
         </div>
@@ -1075,7 +1075,7 @@
               return `
               <div class="wl-card" style="border-color:${col}33">
                 <div class="wl-card-img">
-                  <img src="${itemImg(it, 112, 3)}" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" loading="lazy"/>
+                  <img src="${itemImg(it, 112, 4)}" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" loading="lazy"/>
                   <div class="wl-card-fallback" style="display:none;color:${col}">${esc(name.slice(0,2).toUpperCase())}</div>
                 </div>
                 <div class="wl-card-name" title="${esc(name)}">${esc(name)}</div>
@@ -1085,6 +1085,60 @@
             }).join('')}
            </div>`
       }
+    </div>`;
+  }
+
+
+  function renderItemLookup(data) {
+    const item = data.item || null;
+    if (!data.found || !item) return '<div class="wishlist-empty">Item not found for the requested ID.</div>';
+    const name = item.name || ('Item #' + (item.id || '?'));
+    const rare = item.rare || 'NONE';
+    const type = item.type || item.collectionType || 'ITEM';
+    const source = item.ffIcon ? 'FF Resource' : (item.iconUrl ? 'CDN Fallback' : 'Unknown');
+    return `
+    <div class="player-card">
+      <div class="player-header player-header-advanced">
+        <div class="player-hero-visual" style="--rank-accent:${rareColor(rare)}">
+          <img src="${itemImg(item, Number(itemSize()), Number(itemUpscale()))}" alt="${esc(name)}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"/>
+          <div class="player-hero-fallback" style="display:none">${esc(name.slice(0,2).toUpperCase())}</div>
+          <div class="player-hero-overlay"></div>
+        </div>
+        <div class="player-meta player-meta-advanced">
+          <div class="player-kicker">Item Record</div>
+          <div class="player-name">${esc(name)}</div>
+          <div class="player-uid">ID: ${esc(item.id)} · Source: ${esc(source)}</div>
+          <div class="player-chips">
+            <span class="chip" style="border-color:${rareColor(rare)}55;color:${rareColor(rare)}">${esc(rareName(rare))}</span>
+            <span class="chip chip-region">${esc((type || 'ITEM').replace(/_/g, ' '))}</span>
+            ${item.collectionType ? `<span class="chip" style="background:rgba(255,255,255,.06);color:var(--text-dim)">${esc(item.collectionType)}</span>` : ''}
+            ${sourceBadge(item)}
+          </div>
+          <div class="player-banner-stats">
+            <div class="player-banner-stat"><span class="player-banner-label">Display</span><span class="player-banner-value">${esc(itemSize())} px</span></div>
+            <div class="player-banner-stat"><span class="player-banner-label">Upscale</span><span class="player-banner-value">${esc(itemUpscale())}x</span></div>
+            <div class="player-banner-stat"><span class="player-banner-label">Proxy</span><span class="player-banner-value">HD PNG</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="info-grid">
+        <div class="info-block"><div class="info-block-label">Proxy Path</div><div class="info-block-val" style="font-size:11px">${esc(item.proxyIconPath || '—')}</div></div>
+        <div class="info-block"><div class="info-block-label">Icon Alias</div><div class="info-block-val" style="font-size:11px">${esc(item.ffIcon || item.icon || '—')}</div></div>
+        <div class="info-block"><div class="info-block-label">External Source</div><div class="info-block-val" style="font-size:11px">${esc(item.iconSource || item.iconUrl || '—')}</div></div>
+        <div class="info-block"><div class="info-block-label">Unique</div><div class="info-block-val">${item.isUnique === null ? '—' : (item.isUnique ? 'Yes' : 'No')}</div></div>
+      </div>
+    </div>`;
+  }
+
+  function renderItemSearch(data) {
+    const items = data.items || [];
+    if (!items.length) return `<div class="rich-empty"><span class="rich-empty-label">No item assets found</span></div>`;
+    return `
+    <div>
+      <div class="wishlist-header">ITEM SEARCH · ${items.length} RESULT${items.length !== 1 ? 'S' : ''} · ${esc(data.query || '')}</div>
+      <div class="visual-item-grid">
+        ${items.map(it => resolvedVisualCard(it, 'Item')).join('')}
+      </div>
     </div>`;
   }
 
@@ -1267,6 +1321,9 @@
   const uid       = () => document.getElementById('uid').value.trim();
   const keyword   = () => document.getElementById('keyword').value.trim();
   const matchmode = () => document.getElementById('matchmode').value;
+  const itemId    = () => document.getElementById('item-id').value.trim() || '101000005';
+  const itemSize  = () => document.getElementById('item-size').value;
+  const itemUpscale = () => document.getElementById('item-upscale').value;
 
   const EP_LABELS = {
     account:     'Account',
@@ -1275,6 +1332,8 @@
     search:      'Search',
     bancheck:    'Ban Check',
     wishlist:    'Wishlist',
+    itemlookup:  'Item Lookup',
+    itemsearch:  'Item Search',
     health:      'Health',
     guest:       'Guest Generator',
     likespam:    'Like Spam',
@@ -1301,6 +1360,8 @@
     if (action === 'search')   return renderSearch(data);
     if (action === 'bancheck') return renderBanCheck(data);
     if (action === 'wishlist') return renderWishlist(data);
+    if (action === 'itemlookup') return renderItemLookup(data);
+    if (action === 'itemsearch') return renderItemSearch(data);
     if (action === 'health')   return renderHealth(data);
     if (action === 'guest')    return renderGuest(data);
     if (action === 'uidgen')      return renderUidGenerator(data);
@@ -1415,12 +1476,185 @@
   }
 
   function clearOutput() {
-    richView.innerHTML = `<div class="rich-empty"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg><span class="rich-empty-label">Choose an endpoint above to fire a request</span></div>`;
-    out.innerHTML = '<span class="muted">// Ready — choose an endpoint above</span>';
+    richView.innerHTML = `<div class="rich-empty"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg><span class="rich-empty-label">Choose a feature panel above to fire a request</span></div>`;
+    out.innerHTML = '<span class="muted">// Ready — choose a feature panel above</span>';
     badge.textContent = '—'; badge.className = 'status-badge';
     activeEp.textContent = ''; respTime.textContent = '';
     lastData = null; lastAction = null;
     if (activeBtn) { activeBtn.classList.remove('active'); activeBtn = null; }
+  }
+
+
+  const FEATURE_GROUPS = [
+    {
+      kicker: 'Intel Suite',
+      title: 'Identity + Enforcement',
+      copy: 'Profile lookup and ban verification stay together so anti-bot failures from Shop2Game remain visible without hiding Garena status.',
+      pill: 'Live upstream',
+      actions: ['account', 'bancheck'],
+    },
+    {
+      kicker: 'Combat Board',
+      title: 'Match Performance',
+      copy: 'Battle Royale, Clash Squad, and wishlist flows stay grouped around the selected region, mode, and player UID.',
+      pill: 'Rank telemetry',
+      actions: ['br', 'cs', 'wishlist'],
+    },
+    {
+      kicker: 'Discovery',
+      title: 'Search + Asset Intel',
+      copy: 'Nickname search stays separate from item asset exploration so it is easier to inspect either players or imported PNG resources.',
+      pill: 'Indexed data',
+      actions: ['search'],
+    },
+    {
+      kicker: 'Utility Deck',
+      title: 'Generators + Service Checks',
+      copy: 'Health probes, guest credentials, UID generation, and replay utilities stay isolated from gameplay intel requests.',
+      pill: 'Ops tools',
+      actions: ['health', 'guest', 'uidgen', 'likespam'],
+    },
+  ];
+
+  function buildFeaturePanel(group) {
+    const article = document.createElement('article');
+    article.className = 'feature-panel';
+
+    const head = document.createElement('div');
+    head.className = 'feature-panel-head';
+
+    const headText = document.createElement('div');
+    const kicker = document.createElement('div');
+    kicker.className = 'feature-kicker';
+    kicker.textContent = group.kicker;
+    const title = document.createElement('h2');
+    title.className = 'feature-title-sm';
+    title.textContent = group.title;
+    headText.appendChild(kicker);
+    headText.appendChild(title);
+
+    const pill = document.createElement('span');
+    pill.className = 'feature-pill';
+    pill.textContent = group.pill;
+
+    head.appendChild(headText);
+    head.appendChild(pill);
+
+    const copy = document.createElement('p');
+    copy.className = 'feature-copy';
+    copy.textContent = group.copy;
+
+    const grid = document.createElement('div');
+    grid.className = 'feature-card-grid';
+
+    group.actions.forEach((action) => {
+      const card = document.querySelector(`#feature-cards-source [data-action="${action}"]`);
+      if (card) grid.appendChild(card);
+    });
+
+    article.appendChild(head);
+    article.appendChild(copy);
+    article.appendChild(grid);
+    return article;
+  }
+
+  function buildOpticsLab() {
+    const article = document.createElement('article');
+    article.className = 'feature-panel feature-panel-lab';
+    article.innerHTML = `
+      <div class="feature-panel-head">
+        <div>
+          <div class="feature-kicker">Item Optics Lab</div>
+          <h2 class="feature-title-sm">HD PNG Preview + Upscaling</h2>
+        </div>
+        <span class="feature-pill">6x upscale</span>
+      </div>
+      <p class="feature-copy">Tune icon output size and upscale factor before opening item metadata. This preview uses the same /api/items/icon/:id.png pipeline as the API.</p>
+      <div class="lab-grid">
+        <div class="lab-controls">
+          <div class="input-group">
+            <label class="input-label">Item ID</label>
+            <input id="item-id" type="text" value="101000005" placeholder="Enter item id…" spellcheck="false" autocomplete="off" />
+          </div>
+          <div class="input-group">
+            <label class="input-label">Display Size</label>
+            <div class="select-wrap">
+              <select id="item-size">
+                <option value="96">96 px</option>
+                <option value="128" selected>128 px</option>
+                <option value="160">160 px</option>
+                <option value="192">192 px</option>
+                <option value="256">256 px</option>
+              </select>
+              <svg class="select-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+          </div>
+          <div class="input-group">
+            <label class="input-label">Upscale</label>
+            <div class="select-wrap">
+              <select id="item-upscale">
+                <option value="2">2x</option>
+                <option value="3">3x</option>
+                <option value="4" selected>4x</option>
+                <option value="5">5x</option>
+                <option value="6">6x</option>
+              </select>
+              <svg class="select-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+          </div>
+          <div class="lab-actions">
+            <button class="action-btn lab-action-btn" onclick="runItemLookup()">Open Item Record</button>
+            <button class="action-btn lab-action-btn" onclick="runItemSearch()">Search Asset Catalog</button>
+          </div>
+        </div>
+        <div class="lab-preview-card">
+          <div class="lab-preview-stage">
+            <img id="item-preview-img" src="" alt="Item preview" loading="lazy" />
+          </div>
+          <div class="lab-preview-meta">
+            <div class="lab-preview-title">Preview Route</div>
+            <div class="lab-preview-id" id="item-preview-id">101000005</div>
+            <div class="lab-preview-spec" id="item-preview-spec">128px • 4x upscale</div>
+            <code class="lab-preview-route" id="item-preview-route"></code>
+          </div>
+        </div>
+      </div>`;
+    return article;
+  }
+
+  function initFeatureDeck() {
+    const source = document.getElementById('feature-cards-source');
+    if (!source || source.dataset.ready === '1') return;
+
+    const host = document.createElement('section');
+    host.id = 'feature-deck';
+    host.className = 'feature-grid';
+
+    FEATURE_GROUPS.forEach((group) => {
+      host.appendChild(buildFeaturePanel(group));
+    });
+    host.appendChild(buildOpticsLab());
+
+    source.parentNode.insertBefore(host, source);
+    source.dataset.ready = '1';
+  }
+
+  function syncItemPreview() {
+    const id = itemId();
+    const size = itemSize();
+    const upscale = itemUpscale();
+    const route = `/api/items/icon/${encodeURIComponent(id)}.png?size=${encodeURIComponent(size)}&upscale=${encodeURIComponent(upscale)}`;
+    const img = document.getElementById('item-preview-img');
+    if (img) {
+      img.src = route;
+      img.alt = `Item ${id}`;
+    }
+    const title = document.getElementById('item-preview-id');
+    const spec = document.getElementById('item-preview-spec');
+    const routeOut = document.getElementById('item-preview-route');
+    if (title) title.textContent = `Item #${id}`;
+    if (spec) spec.textContent = `${size}px • ${upscale}x upscale`;
+    if (routeOut) routeOut.textContent = route;
   }
 
   /* ═══════════════════════════════════════════════════
@@ -1433,6 +1667,8 @@
   function runSearch()   { call(`/api/v1/search?region=${enc(region())}&keyword=${enc(keyword() || uid())}`, 'search'); }
   function runBanCheck() { call(`/api/v1/bancheck?uid=${enc(uid())}`, 'bancheck'); }
   function runWishlist() { call(`/api/v1/wishlist?region=${enc(region())}&uid=${enc(uid())}`, 'wishlist'); }
+  function runItemLookup() { syncItemPreview(); call(`/api/items?id=${enc(itemId())}`, 'itemlookup'); }
+  function runItemSearch() { syncItemPreview(); call(`/api/items/search?q=${enc(keyword() || itemId())}&limit=18`, 'itemsearch'); }
   function runHealth()   { call('/api/health', 'health'); }
   function runGuest()    { call(`/api/guest-generator?region=${enc(region())}`, 'guest'); }
   function runLikeSpam() {
@@ -1444,6 +1680,14 @@
     callPost('/api/like-spam', { region: r, uid: u, count: parseInt(cnt)||10, delayMs: parseInt(delay)||100 }, 'likespam');
   }
   function runUidGen()   { call('/api/uid-generator?mode=random&count=5&length=10&teamXdarks=1', 'uidgen'); }
+
+  initFeatureDeck();
+  ['item-id', 'item-size', 'item-upscale'].forEach((id) => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('input', syncItemPreview);
+    if (el) el.addEventListener('change', syncItemPreview);
+  });
+  syncItemPreview();
 
   document.addEventListener('keydown', (e) => {
     if (e.key !== 'Enter') return;

@@ -46,31 +46,57 @@ function normalizePeriod(value) {
   return Number.isFinite(parsed) ? parsed : 0;
 }
 
+function shop2gameFailure(response, data, text) {
+  const protectionSignals = [
+    data && data.url ? String(data.url) : "",
+    text || "",
+    response.headers.get("x-datadome") || "",
+  ].join(" ");
+
+  if (/captcha|datadome|geo\.captcha-delivery/i.test(protectionSignals)) {
+    return {
+      ok: false,
+      status: "captcha_required",
+      httpStatus: response.status,
+      retryable: true,
+      message: "Shop2Game blocked the lookup behind captcha protection.",
+    };
+  }
+
+  if (response.status === 403) {
+    return {
+      ok: false,
+      status: "captcha_required",
+      httpStatus: response.status,
+      retryable: true,
+      message: "Shop2Game rejected the lookup with anti-bot protection.",
+    };
+  }
+
+  return {
+    ok: false,
+    status: "http_error",
+    httpStatus: response.status,
+    retryable: response.status >= 500,
+    message: "Shop2Game lookup failed with status " + response.status + ".",
+  };
+}
+
 async function lookupPlayer(uid) {
   try {
     const payload = { app_id: 100067, login_id: uid, app_server_id: 0 };
-    const { response, data } = await fetchJson(SHOP2GAME_URL, {
+    const { response, data, text } = await fetchJson(SHOP2GAME_URL, {
       method: "POST",
       headers: SHOP2GAME_HEADERS,
       body: JSON.stringify(payload),
     });
 
     if (!response.ok) {
-      return {
-        ok: false,
-        status: "http_error",
-        httpStatus: response.status,
-        message: "Shop2Game lookup failed with status " + response.status + ".",
-      };
+      return shop2gameFailure(response, data, text);
     }
 
     if (data && data.url && /captcha|datadome/i.test(String(data.url))) {
-      return {
-        ok: false,
-        status: "captcha_required",
-        httpStatus: response.status,
-        message: "Shop2Game blocked the lookup behind captcha protection.",
-      };
+      return shop2gameFailure(response, data, text);
     }
 
     if (!data || !data.nickname) {
@@ -78,6 +104,7 @@ async function lookupPlayer(uid) {
         ok: false,
         status: "not_found",
         httpStatus: response.status,
+        retryable: false,
         message: "Player ID was not found in Shop2Game lookup.",
       };
     }
@@ -86,6 +113,7 @@ async function lookupPlayer(uid) {
       ok: true,
       status: "success",
       httpStatus: response.status,
+      retryable: false,
       nickname: data.nickname || null,
       region: data.region || null,
     };
@@ -94,6 +122,7 @@ async function lookupPlayer(uid) {
       ok: false,
       status: "network_error",
       httpStatus: null,
+      retryable: true,
       message: error.message,
     };
   }
@@ -109,6 +138,7 @@ async function lookupBanStatus(uid) {
         ok: false,
         status: "http_error",
         httpStatus: response.status,
+        retryable: response.status >= 500,
         message: "Garena anti-hack returned status " + response.status + ".",
       };
     }
@@ -118,6 +148,7 @@ async function lookupBanStatus(uid) {
         ok: false,
         status: data && data.status ? data.status : "invalid_payload",
         httpStatus: response.status,
+        retryable: true,
         message: data && data.msg ? "Garena anti-hack rejected the request: " + data.msg : "Failed to retrieve ban status.",
       };
     }
@@ -129,6 +160,7 @@ async function lookupBanStatus(uid) {
       ok: true,
       status: "success",
       httpStatus: response.status,
+      retryable: false,
       isBanned,
       periodMonths,
       banStatus: isBanned
@@ -140,6 +172,7 @@ async function lookupBanStatus(uid) {
       ok: false,
       status: "network_error",
       httpStatus: null,
+      retryable: true,
       message: error.message,
     };
   }
@@ -160,12 +193,14 @@ function formatResponse(uid, playerLookup, banLookup) {
       ok: playerLookup.ok,
       status: playerLookup.status,
       httpStatus: playerLookup.httpStatus,
+      retryable: Boolean(playerLookup.retryable),
       message: playerLookup.ok ? null : playerLookup.message,
     },
     banLookup: {
       ok: banLookup.ok,
       status: banLookup.status,
       httpStatus: banLookup.httpStatus,
+      retryable: Boolean(banLookup.retryable),
       message: banLookup.ok ? null : banLookup.message,
     },
   };
