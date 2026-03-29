@@ -678,42 +678,47 @@
 
   function renderAccount(data) {
     const b  = data.response?.basicInfo || {};
+    const pr = data.response?.profileInfo || {};
     const s  = data.response?.socialInfo || {};
     const c  = data.response?.clanBasicInfo;
+    const cp = data.response?.captainBasicInfo;
     const p  = data.response?.petInfo;
     const cr = data.response?.creditScoreInfo;
+    const ep = data.response?.historyEpInfo || [];
+    const dc = data.response?.diamondCostRes;
     const ir = data.response?.itemsResolved || {};
 
-    const brRN = brRankName(b.rank);
-    const csRN = csRankName(b.csRank);
-    const brC  = rankColor(b.rank);
-    const csC  = rankColor(b.csRank);
+    const brRN = brRankName(b.rank);  const csRN = csRankName(b.csRank);
+    const brC  = rankColor(b.rank);   const csC  = rankColor(b.csRank);
+    const GENDERS = {0:'—',1:'Male',2:'Female'};
+    const LANGS = {0:'—',1:'EN',2:'PT',3:'ES',4:'ID',5:'TH',6:'VN',7:'AR',8:'TW',9:'RU',10:'HI'};
 
     return `
     <div class="player-card">
+      <!-- HEADER -->
       <div class="player-header">
         <div class="player-avatar">${esc(initials(b.nickname))}</div>
         <div class="player-meta">
           <div class="player-name">${esc(b.nickname || 'Unknown')}</div>
-          <div class="player-uid">UID: ${esc(b.accountId || data.uid)} &nbsp;·&nbsp; ${esc(b.region || data.region)}
-            ${b.lastLoginAt ? ` &nbsp;·&nbsp; <span style="color:var(--text-dim);font-size:11px">Last seen: ${timeAgo(b.lastLoginAt)}</span>` : ''}
-          </div>
+          <div class="player-uid">UID: ${esc(b.accountId || data.uid)} · ${esc(b.region || data.region)}${b.lastLoginAt ? ` · <span style="color:var(--text-dim);font-size:11px">Last seen: ${timeAgo(b.lastLoginAt)}</span>` : ''}</div>
           <div class="player-chips">
-            ${b.level  ? `<span class="chip chip-level">LV ${b.level}</span>` : ''}
+            ${b.level ? `<span class="chip chip-level">LV ${b.level}${b.exp ? ` (${fmtNum(b.exp)} XP)` : ''}</span>` : ''}
             ${b.region ? `<span class="chip chip-region">${esc(b.region)}</span>` : ''}
+            ${b.accountType ? `<span class="chip" style="background:rgba(255,255,255,.06);color:var(--text-dim)">Type ${b.accountType}</span>` : ''}
             ${b.haselitepass ? `<span class="chip chip-elite">ELITE PASS</span>` : ''}
-            ${c?.clanName ? `<span class="chip chip-clan">${esc(c.clanName)} Lv${c.clanLevel||'?'}</span>` : ''}
             ${b.releaseVersion ? `<span class="chip" style="background:rgba(255,255,255,.06);color:var(--text-dim)">${esc(b.releaseVersion)}</span>` : ''}
+            ${b.membershipState ? `<span class="chip" style="color:#a78bfa;border-color:rgba(167,139,250,0.3)">MEMBER</span>` : ''}
           </div>
         </div>
       </div>
 
+      <!-- RANKS -->
       <div class="rank-row">
         <div class="rank-card">
           <div class="rank-card-label">BR Rank</div>
           <div class="rank-name" style="color:${brC}">${brRN}</div>
           ${b.rankingPoints ? `<div class="rank-pts">${fmtNum(b.rankingPoints)} pts</div>` : ''}
-          ${b.maxRank ? `<div class="rank-pts" style="color:var(--text-dim)">Peak: ${brRankName(b.maxRank)}</div>` : ''}
+          ${b.maxRank ? `<div class="rank-pts" style="color:var(--text-dim)">Peak: ${brRankName(b.maxRank)}${b.maxRankingPoints ? ' ('+fmtNum(b.maxRankingPoints)+')' : ''}</div>` : ''}
         </div>
         <div class="rank-card">
           <div class="rank-card-label">CS Rank</div>
@@ -723,62 +728,143 @@
         </div>
       </div>
 
+      <!-- INFO GRID -->
       <div class="info-grid">
-        <div class="info-block">
-          <div class="info-block-label">Liked</div>
-          <div class="info-block-val accent">${fmtNum(b.liked)}</div>
-        </div>
-        <div class="info-block">
-          <div class="info-block-label">Season</div>
-          <div class="info-block-val">${b.seasonId || '—'}</div>
-        </div>
-        <div class="info-block">
-          <div class="info-block-label">Credit Score</div>
-          <div class="info-block-val ${(cr?.creditScore||0) >= 90 ? 'ok' : ''}">${cr?.creditScore ?? '—'}</div>
-        </div>
+        <div class="info-block"><div class="info-block-label">Liked</div><div class="info-block-val accent">${fmtNum(b.liked)}</div></div>
+        <div class="info-block"><div class="info-block-label">Season</div><div class="info-block-val">${b.seasonId || '—'}</div></div>
+        <div class="info-block"><div class="info-block-label">Credit Score</div><div class="info-block-val ${(cr?.creditScore||0) >= 90 ? 'ok' : ''}">${cr?.creditScore ?? '—'}</div></div>
         ${ir.title?.name ? `<div class="info-block"><div class="info-block-label">Title</div><div class="info-block-val" style="color:${rareColor(ir.title.rare)}">${esc(ir.title.name)}</div></div>` : b.title ? `<div class="info-block"><div class="info-block-label">Title</div><div class="info-block-val">#${b.title}</div></div>` : ''}
-        ${p?.name ? `<div class="info-block"><div class="info-block-label">Pet</div><div class="info-block-val">${esc(p.name)} Lv${p.level||'?'}</div></div>` : ''}
-        ${ir.badge?.name ? `<div class="info-block"><div class="info-block-label">Badge</div><div class="info-block-val" style="color:${rareColor(ir.badge.rare)}">${esc(ir.badge.name)}</div></div>` : b.badgeId ? `<div class="info-block"><div class="info-block-label">Badge</div><div class="info-block-val">#${b.badgeId}</div></div>` : ''}
+        ${ir.badge?.name ? `<div class="info-block"><div class="info-block-label">Badge</div><div class="info-block-val" style="color:${rareColor(ir.badge.rare)}">${esc(ir.badge.name)}</div></div>` : b.badgeId ? `<div class="info-block"><div class="info-block-label">Badge</div><div class="info-block-val">#${b.badgeId} (x${b.badgeCnt||0})</div></div>` : ''}
+        ${ir.banner?.name ? `<div class="info-block"><div class="info-block-label">Banner</div><div class="info-block-val" style="color:${rareColor(ir.banner.rare)}">${esc(ir.banner.name)}</div></div>` : b.bannerId ? `<div class="info-block"><div class="info-block-label">Banner</div><div class="info-block-val">#${b.bannerId}</div></div>` : ''}
+        ${ir.headPic?.name ? `<div class="info-block"><div class="info-block-label">Avatar</div><div class="info-block-val" style="color:${rareColor(ir.headPic.rare)}">${esc(ir.headPic.name)}</div></div>` : b.headPic ? `<div class="info-block"><div class="info-block-label">Avatar</div><div class="info-block-val">#${b.headPic}</div></div>` : ''}
+        ${ir.pin?.name ? `<div class="info-block"><div class="info-block-label">Pin</div><div class="info-block-val" style="color:${rareColor(ir.pin.rare)}">${esc(ir.pin.name)}</div></div>` : b.pinId ? `<div class="info-block"><div class="info-block-label">Pin</div><div class="info-block-val">#${b.pinId}</div></div>` : ''}
+        ${ir.gameBag?.name ? `<div class="info-block"><div class="info-block-label">Game Bag</div><div class="info-block-val" style="color:${rareColor(ir.gameBag.rare)}">${esc(ir.gameBag.name)}</div></div>` : b.gameBagShow ? `<div class="info-block"><div class="info-block-label">Game Bag</div><div class="info-block-val">#${b.gameBagShow}</div></div>` : ''}
         ${b.createAt ? `<div class="info-block"><div class="info-block-label">Created</div><div class="info-block-val" style="font-size:11px">${new Date(Number(b.createAt)*1000).toLocaleDateString()}</div></div>` : ''}
+        ${dc?.diamondCost ? `<div class="info-block"><div class="info-block-label">Diamonds Spent</div><div class="info-block-val" style="color:#60a5fa">${fmtNum(dc.diamondCost)}</div></div>` : ''}
       </div>
+
+      <!-- SOCIAL INFO -->
+      ${(s.gender || s.language || s.signature || s.battleTag?.length || s.socialTag?.length || s.modePrefer) ? `
+      <div class="items-section">
+        <div class="items-section-label">Social Info</div>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;font-size:12px;color:var(--text-muted)">
+          ${s.gender ? `<span>Gender: <b style="color:var(--text-primary)">${GENDERS[s.gender]||s.gender}</b></span>` : ''}
+          ${s.language ? `<span>Lang: <b style="color:var(--text-primary)">${LANGS[s.language]||s.language}</b></span>` : ''}
+          ${s.modePrefer ? `<span>Prefers: <b style="color:var(--text-primary)">Mode ${s.modePrefer}</b></span>` : ''}
+          ${s.timeOnline ? `<span>Online: <b style="color:var(--text-primary)">${s.timeOnline}h</b></span>` : ''}
+          ${s.timeActive ? `<span>Active: <b style="color:var(--text-primary)">${s.timeActive}h</b></span>` : ''}
+        </div>
+        ${s.battleTag?.length ? `<div style="margin-top:6px"><span style="font-size:10px;color:var(--text-dim)">BATTLE TAGS:</span> ${s.battleTag.map(t=>`<span class="chip" style="font-size:9px">${t}</span>`).join(' ')}</div>` : ''}
+        ${s.socialTag?.length ? `<div style="margin-top:4px"><span style="font-size:10px;color:var(--text-dim)">SOCIAL TAGS:</span> ${s.socialTag.map(t=>`<span class="chip" style="font-size:9px">${t}</span>`).join(' ')}</div>` : ''}
+      </div>` : ''}
+
+      <!-- CLAN -->
+      ${c ? `
+      <div class="items-section">
+        <div class="items-section-label">Clan</div>
+        <div style="display:flex;flex-wrap:wrap;gap:12px;font-size:12px">
+          <span style="color:var(--ember);font-weight:700;font-size:14px">${esc(c.clanName||'—')}</span>
+          <span style="color:var(--text-muted)">Lv ${c.clanLevel||'?'}</span>
+          <span style="color:var(--text-muted)">${c.memberNum||0}/${c.capacity||0} members</span>
+          ${c.honorPoint ? `<span style="color:var(--fire-gold)">${fmtNum(c.honorPoint)} honor</span>` : ''}
+          ${cp?.nickname ? `<span style="color:var(--text-dim)">Captain: ${esc(cp.nickname)}</span>` : ''}
+        </div>
+      </div>` : ''}
+
+      <!-- PET -->
+      ${p ? `
+      <div class="items-section">
+        <div class="items-section-label">Pet</div>
+        <div style="display:flex;flex-wrap:wrap;gap:12px;font-size:12px;align-items:center">
+          <span style="color:var(--fire-gold);font-weight:700;font-size:14px">${esc(p.name||'Unknown')}</span>
+          <span style="color:var(--text-muted)">Lv ${p.level||0} · ${fmtNum(p.exp||0)} XP</span>
+          ${p.isSelected ? `<span class="chip chip-elite" style="font-size:9px;padding:1px 5px">ACTIVE</span>` : ''}
+          ${p.skinId ? `<span style="color:var(--text-dim)">Skin #${p.skinId}</span>` : ''}
+          ${p.selectedSkillId ? `<span style="color:var(--text-dim)">Skill #${p.selectedSkillId}</span>` : ''}
+        </div>
+      </div>` : ''}
+
+      <!-- CREDIT SCORE DETAIL -->
+      ${cr && (cr.periodicSummaryLikeCnt || cr.weeklyMatchCnt || cr.periodicSummaryIllegalCnt) ? `
+      <div class="items-section">
+        <div class="items-section-label">Credit Score Detail</div>
+        <div style="display:flex;flex-wrap:wrap;gap:12px;font-size:12px;color:var(--text-muted)">
+          ${cr.periodicSummaryLikeCnt ? `<span>Periodic Likes: <b style="color:#22c55e">${cr.periodicSummaryLikeCnt}</b></span>` : ''}
+          ${cr.periodicSummaryIllegalCnt ? `<span>Violations: <b style="color:#ef4444">${cr.periodicSummaryIllegalCnt}</b></span>` : ''}
+          ${cr.weeklyMatchCnt ? `<span>Weekly Matches: <b style="color:var(--text-primary)">${cr.weeklyMatchCnt}</b></span>` : ''}
+          ${cr.periodicSummaryLevel ? `<span>Summary Level: <b style="color:var(--text-primary)">${cr.periodicSummaryLevel}</b></span>` : ''}
+        </div>
+      </div>` : ''}
+
+      <!-- EQUIPPED ITEMS -->
+      ${ir.avatar?.name ? `<div class="items-section"><div class="items-section-label">Character</div><div class="items-chips">${resolvedChip(ir.avatar,'Avatar')}</div></div>` : ''}
 
       ${ir.clothes?.length ? `
       <div class="items-section">
-        <div class="items-section-label">Equipped Items</div>
+        <div class="items-section-label">Equipped Items (${ir.clothes.length})</div>
         <div class="items-chips">${ir.clothes.map(c => resolvedChip(c, 'Outfit')).join('')}</div>
       </div>` : ''}
 
       ${ir.weaponSkins?.length ? `
       <div class="items-section">
-        <div class="items-section-label">Weapon Skins</div>
+        <div class="items-section-label">Weapon Skins (${ir.weaponSkins.length})</div>
         <div class="items-chips">${ir.weaponSkins.map(w => resolvedChip(w, 'Weapon')).join('')}</div>
       </div>` : ''}
 
       ${ir.skills?.length ? `
       <div class="items-section">
-        <div class="items-section-label">Equipped Skills</div>
+        <div class="items-section-label">Equipped Skills (${ir.skills.length})</div>
         <div class="items-chips">${ir.skills.map(sk => resolvedChip(sk, 'Skill')).join('')}</div>
+      </div>` : ''}
+
+      <!-- ELITE PASS HISTORY -->
+      ${ep.length ? `
+      <div class="items-section">
+        <div class="items-section-label">Elite Pass History (${ep.length})</div>
+        <div style="display:flex;flex-wrap:wrap;gap:5px">
+          ${ep.map(e => `<span class="chip" style="font-size:9px;color:${e.ownedPass?'#22c55e':'var(--text-dim)'};border-color:${e.ownedPass?'rgba(34,197,94,0.3)':'var(--border)'}">${esc(e.eventName||'S'+e.epEventId)} Lv${e.maxLevel||'?'}${e.ownedPass?' &#10003;':''}</span>`).join('')}
+        </div>
       </div>` : ''}
 
       ${s.signature ? `<div class="sig-block">"${esc(s.signature)}"</div>` : ''}
     </div>`;
   }
 
+  function kdColor(kd) {
+    const v = parseFloat(kd);
+    if (isNaN(v)) return '';
+    if (v < 1) return 'color:#ef4444';
+    if (v < 2) return 'color:var(--text-primary)';
+    if (v < 4) return 'color:#22c55e';
+    return 'color:#FFD700';
+  }
+
   function renderStatsCol(label, st) {
     if (!st) return `<div class="stat-col"><div class="stat-col-header">${label}</div><div style="color:var(--text-dim);font-size:12px;padding:10px 0;text-align:center">No data</div></div>`;
     const d = st.detailedstats || st.detailedStats || {};
+    const g = st.gamesplayed || st.gamesPlayed || 0;
     const kd = fmtKD(st.kills, d.deaths);
+    const wr = g ? (st.wins/g*100) : 0;
     return `
     <div class="stat-col">
       <div class="stat-col-header">${label}</div>
-      <div class="stat-row"><span class="stat-label">Games</span><span class="stat-val">${fmtNum(st.gamesplayed || st.gamesPlayed)}</span></div>
+      <div class="stat-row"><span class="stat-label">Games</span><span class="stat-val">${fmtNum(g)}</span></div>
       <div class="stat-row"><span class="stat-label">Wins</span><span class="stat-val green">${fmtNum(st.wins)}</span></div>
-      <div class="stat-row"><span class="stat-label">Win Rate</span><span class="stat-val gold">${winRate(st.wins, st.gamesplayed || st.gamesPlayed)}</span></div>
+      <div class="stat-row"><span class="stat-label">Win Rate</span><span class="stat-val gold">${winRate(st.wins,g)}</span></div>
+      ${g ? `<div class="progress-bar-wrap" style="height:6px;margin:2px 0 6px;max-width:100%"><div class="progress-bar" style="width:${Math.min(wr,100)}%;background:linear-gradient(90deg,#22c55e,#FFD700)"></div></div>` : ''}
       <div class="stat-row"><span class="stat-label">Kills</span><span class="stat-val">${fmtNum(st.kills)}</span></div>
-      <div class="stat-row"><span class="stat-label">K/D</span><span class="stat-val blue">${kd}</span></div>
-      ${d.headshots || d.headshotkills || d.headshotKills ? `<div class="stat-row"><span class="stat-label">Headshots</span><span class="stat-val">${fmtNum(d.headshots || d.headshotkills || d.headshotKills)}</span></div>` : ''}
-      ${d.damage ? `<div class="stat-row"><span class="stat-label">Damage</span><span class="stat-val">${fmtNum(d.damage)}</span></div>` : ''}
-      ${d.top10times || d.topntimes ? `<div class="stat-row"><span class="stat-label">Top 10</span><span class="stat-val">${fmtNum(d.top10times || d.topntimes)}</span></div>` : ''}
+      <div class="stat-row"><span class="stat-label">Deaths</span><span class="stat-val dim">${fmtNum(d.deaths)}</span></div>
+      <div class="stat-row"><span class="stat-label">K/D</span><span class="stat-val" style="${kdColor(kd)}">${kd}</span></div>
+      <div class="stat-row"><span class="stat-label">HS Kills</span><span class="stat-val">${fmtNum(d.headshotkills || d.headshotKills || d.headshots)}</span></div>
+      <div class="stat-row"><span class="stat-label">Damage</span><span class="stat-val">${fmtNum(d.damage)}</span></div>
+      <div class="stat-row"><span class="stat-label">Highest Kills</span><span class="stat-val gold">${fmtNum(d.highestkills || d.highestKills)}</span></div>
+      <div class="stat-row"><span class="stat-label">Top 10</span><span class="stat-val">${fmtNum(d.top10times || d.topntimes || d.top10Times || d.topNTimes)}</span></div>
+      <div class="stat-row"><span class="stat-label">Knockdowns</span><span class="stat-val">${fmtNum(d.knockdown || d.knockdowns)}</span></div>
+      <div class="stat-row"><span class="stat-label">Revives</span><span class="stat-val green">${fmtNum(d.revives)}</span></div>
+      <div class="stat-row"><span class="stat-label">Distance</span><span class="stat-val dim">${fmtNum(d.distancetravelled || d.distanceTravelled)}m</span></div>
+      <div class="stat-row"><span class="stat-label">Survival</span><span class="stat-val dim">${fmtNum(d.survivaltime || d.survivalTime)}s</span></div>
+      <div class="stat-row"><span class="stat-label">Road Kills</span><span class="stat-val">${fmtNum(d.roadkills || d.roadKills)}</span></div>
+      <div class="stat-row"><span class="stat-label">Pickups</span><span class="stat-val dim">${fmtNum(d.pickups)}</span></div>
     </div>`;
   }
 
@@ -798,34 +884,45 @@
   function renderCsStats(data) {
     const st = data.response?.csstats || data.response?.csStats || {};
     const d  = st.detailedstats || st.detailedStats || {};
+    const g  = st.gamesplayed || st.gamesPlayed || 0;
     const kd = fmtKD(st.kills, d.deaths);
+    const wr = g ? (st.wins/g*100) : 0;
+    const hsAcc = (d.hitcount||d.hitCount) ? ((d.headshotcount||d.headshotCount||0)/(d.hitcount||d.hitCount)*100).toFixed(1)+'%' : '—';
     return `
     <div class="stats-card">
       <div class="stats-mode-tag">Clash Squad · ${esc(data.matchmode || 'CAREER')}</div>
       <div class="stats-cols">
         <div class="stat-col">
           <div class="stat-col-header">OVERALL</div>
-          <div class="stat-row"><span class="stat-label">Games</span><span class="stat-val">${fmtNum(st.gamesplayed || st.gamesPlayed)}</span></div>
+          <div class="stat-row"><span class="stat-label">Games</span><span class="stat-val">${fmtNum(g)}</span></div>
           <div class="stat-row"><span class="stat-label">Wins</span><span class="stat-val green">${fmtNum(st.wins)}</span></div>
-          <div class="stat-row"><span class="stat-label">Win Rate</span><span class="stat-val gold">${winRate(st.wins, st.gamesplayed || st.gamesPlayed)}</span></div>
+          <div class="stat-row"><span class="stat-label">Win Rate</span><span class="stat-val gold">${winRate(st.wins,g)}</span></div>
+          ${g ? `<div class="progress-bar-wrap" style="height:6px;margin:2px 0 6px;max-width:100%"><div class="progress-bar" style="width:${Math.min(wr,100)}%;background:linear-gradient(90deg,#22c55e,#FFD700)"></div></div>` : ''}
           <div class="stat-row"><span class="stat-label">Kills</span><span class="stat-val">${fmtNum(st.kills)}</span></div>
-          <div class="stat-row"><span class="stat-label">K/D</span><span class="stat-val blue">${kd}</span></div>
+          <div class="stat-row"><span class="stat-label">Deaths</span><span class="stat-val dim">${fmtNum(d.deaths)}</span></div>
+          <div class="stat-row"><span class="stat-label">K/D</span><span class="stat-val" style="${kdColor(kd)}">${kd}</span></div>
+          ${d.ratingpoints||d.ratingPoints ? `<div class="stat-row"><span class="stat-label">Rating</span><span class="stat-val gold">${(d.ratingpoints||d.ratingPoints||0).toFixed?.(1)||fmtNum(d.ratingpoints||d.ratingPoints)}</span></div>` : ''}
+          ${d.ratingenabledgames||d.ratingEnabledGames ? `<div class="stat-row"><span class="stat-label">Rated Games</span><span class="stat-val dim">${fmtNum(d.ratingenabledgames||d.ratingEnabledGames)}</span></div>` : ''}
         </div>
         <div class="stat-col">
-          <div class="stat-col-header">DETAIL</div>
+          <div class="stat-col-header">COMBAT</div>
           <div class="stat-row"><span class="stat-label">MVP</span><span class="stat-val gold">${fmtNum(d.mvpcount || d.mvpCount)}</span></div>
           <div class="stat-row"><span class="stat-label">Assists</span><span class="stat-val">${fmtNum(d.assists)}</span></div>
           <div class="stat-row"><span class="stat-label">Knockdowns</span><span class="stat-val">${fmtNum(d.knockdowns)}</span></div>
+          <div class="stat-row"><span class="stat-label">Revivals</span><span class="stat-val green">${fmtNum(d.revivals)}</span></div>
           <div class="stat-row"><span class="stat-label">Damage</span><span class="stat-val">${fmtNum(d.damage)}</span></div>
           <div class="stat-row"><span class="stat-label">HS Kills</span><span class="stat-val">${fmtNum(d.headshotkills || d.headshotKills)}</span></div>
+          <div class="stat-row"><span class="stat-label">HS Accuracy</span><span class="stat-val blue">${hsAcc}</span></div>
+          <div class="stat-row"><span class="stat-label">Throw Kills</span><span class="stat-val">${fmtNum(d.throwingkills||d.throwingKills)}</span></div>
         </div>
         <div class="stat-col">
-          <div class="stat-col-header">STREAKS</div>
+          <div class="stat-col-header">RECORDS</div>
           <div class="stat-row"><span class="stat-label">Win Streak</span><span class="stat-val green">${fmtNum(d.streakwins || d.streakWins)}</span></div>
+          <div class="stat-row"><span class="stat-label">Best Kills</span><span class="stat-val gold">${fmtNum(d.onegamemostkills||d.oneGameMostKills)}</span></div>
+          <div class="stat-row"><span class="stat-label">Best Damage</span><span class="stat-val gold">${fmtNum(d.onegamemostdamage||d.onegameMostDamage)}</span></div>
           <div class="stat-row"><span class="stat-label">Double K</span><span class="stat-val">${fmtNum(d.doublekills || d.doubleKills)}</span></div>
           <div class="stat-row"><span class="stat-label">Triple K</span><span class="stat-val">${fmtNum(d.triplekills || d.tripleKills)}</span></div>
           <div class="stat-row"><span class="stat-label">Quad K</span><span class="stat-val gold">${fmtNum(d.fourkills || d.fourKills)}</span></div>
-          <div class="stat-row"><span class="stat-label">Best Damage</span><span class="stat-val">${fmtNum(d.onegamemostdamage || d.onegameMostDamage)}</span></div>
         </div>
       </div>
     </div>`;
@@ -847,10 +944,12 @@
             </div>
             <div class="result-meta">
               UID: ${esc(p.accountid || p.accountId)}
-              &nbsp;·&nbsp; ${esc(p.region || '')}
-              &nbsp;·&nbsp; <span style="color:${rankColor(p.rank)}">${brRankName(p.rank)}</span>
-              ${p.liked ? ` &nbsp;·&nbsp; <span style="color:#ef4444">&hearts; ${fmtNum(p.liked)}</span>` : ''}
-              ${p.clanname ? ` &nbsp;·&nbsp; <span style="color:var(--text-dim)">[${esc(p.clanname)}]</span>` : ''}
+              · ${esc(p.region || '')}
+              · <span style="color:${rankColor(p.rank)}">${brRankName(p.rank)}</span>
+              ${p.csrank ? ` · <span style="color:${rankColor(p.csrank)}">CS: ${csRankName(p.csrank)}</span>` : ''}
+              ${p.liked ? ` · <span style="color:#ef4444">&hearts; ${fmtNum(p.liked)}</span>` : ''}
+              ${p.clanname ? ` · <span style="color:var(--text-dim)">[${esc(p.clanname)}]</span>` : ''}
+              ${p.lastloginat ? ` · <span style="color:var(--text-dim);font-size:9px">${timeAgo(p.lastloginat)}</span>` : ''}
             </div>
           </div>
           <div class="result-level">Lv ${p.level || '?'}</div>
@@ -889,16 +988,19 @@
   }
 
   function renderGuest(data) {
+    const pass = data.guest?.password || '';
+    const masked = pass ? pass.slice(0,4) + '····' + pass.slice(-4) : '—';
     return `
     <div class="health-card">
       <div class="health-icon">
         <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--fire-gold)" stroke-width="1.8"><path d="M16 11c1.66 0 3-1.79 3-4s-1.34-4-3-4-3 1.79-3 4 1.34 4 3 4z"/><path d="M8 11c1.66 0 3-1.79 3-4S9.66 3 8 3 5 4.79 5 7s1.34 4 3 4z"/><path d="M8 13c-2.76 0-5 1.79-5 4v2h10v-2c0-2.21-2.24-4-5-4z"/><path d="M16 13c-1.1 0-2.1.29-2.93.78A5.94 5.94 0 0 1 15 17v2h6v-2c0-2.21-2.24-4-5-4z"/></svg>
       </div>
-      <div class="health-status-text">Guest credential ready</div>
-      <div class="health-meta">
-        <span class="health-tag">region: ${esc(data.region || '—')}</span>
-        <span class="health-tag">source: ${esc(data.source || '—')}</span>
-        <span class="health-tag">uid: ${esc(data.guest?.uid || '—')}</span>
+      <div class="health-status-text" style="font-size:20px">Guest Credential</div>
+      <div class="info-grid" style="width:100%;max-width:500px">
+        <div class="info-block"><div class="info-block-label">Region</div><div class="info-block-val">${esc(data.region || '—')}</div></div>
+        <div class="info-block"><div class="info-block-label">Source</div><div class="info-block-val" style="font-size:12px">${esc(data.source || '—')}</div></div>
+        <div class="info-block"><div class="info-block-label">UID</div><div class="info-block-val accent">${esc(data.guest?.uid || '—')}</div></div>
+        <div class="info-block"><div class="info-block-label">Password</div><div class="info-block-val" style="font-size:10px;word-break:break-all;cursor:pointer" title="Click to copy" onclick="navigator.clipboard.writeText('${esc(pass)}')">${esc(masked)}</div></div>
       </div>
     </div>`;
   }
@@ -907,14 +1009,19 @@
     const items = data.items || [];
     return `
     <div>
-      <div class="wishlist-header">UID GENERATOR · ${esc(data.mode || 'random')} · count ${items.length}</div>
-      <div class="wishlist-grid">
-        ${items.slice(0, 12).map(it => `
-          <div class="wishlist-item">
-            <div class="wishlist-item-id">${esc(it.uid || '—')}</div>
-            <div class="wishlist-item-val">teamXdarks: ${esc(it.teamXdarks)}</div>
-            <div class="wishlist-item-label">UID</div>
-          </div>`).join('')}
+      <div class="wishlist-header">UID GENERATOR · ${esc(data.mode || 'random')} · ${items.length} UIDs</div>
+      ${data.endpointHint ? `<div style="font-size:11px;color:var(--text-dim);margin-bottom:8px">Endpoint: ${esc(data.endpointHint)}</div>` : ''}
+      <div class="search-results">
+        ${items.map(it => `
+        <div class="result-item" style="cursor:pointer" onclick="navigator.clipboard.writeText('${esc(it.encryptedHex||'')}')">
+          <div style="font-family:var(--font-mono);font-size:14px;color:var(--fire-gold);font-weight:700;min-width:100px">${esc(it.uid || '—')}</div>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:10px;color:var(--text-dim)">teamXdarks: ${esc(it.teamXdarks)}</div>
+            ${it.encryptedHex ? `<div style="font-size:9px;color:var(--text-dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:400px" title="${esc(it.encryptedHex)}">Encrypted: ${esc(it.encryptedHex)}</div>` : ''}
+            ${it.protobufHex ? `<div style="font-size:9px;color:var(--text-dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:400px" title="${esc(it.protobufHex)}">Proto: ${esc(it.protobufHex)}</div>` : ''}
+          </div>
+          <div style="font-size:9px;color:var(--text-dim)">Click to copy</div>
+        </div>`).join('')}
       </div>
     </div>`;
   }
