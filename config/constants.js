@@ -28,7 +28,13 @@ const FF_ENDPOINTS = {
   GET_PLAYER_STATS:         "/GetPlayerStats",
   GET_PLAYER_TC_STATS:      "/GetPlayerTCStats",
   FUZZY_SEARCH_ACCOUNT:     "/FuzzySearchAccountByName",
+  LIKE_PROFILE:             "/LikeProfile",
 };
+
+const GARENA_GUEST_HOST = "ffmconnect.live.gop.garenanow.com";
+const GARENA_GUEST_PATH = "/oauth/guest/login";
+const GARENA_CLIENT_ID  = "100067";
+const GARENA_CLIENT_SECRET = "2ee44819e9b4598845141067b281621874d0d5d7af9d8f7e00c1e54715b7d1e3";
 
 const MATCH_MODES = {
   BR: { CAREER: 0, NORMAL: 1, RANKED: 2 },
