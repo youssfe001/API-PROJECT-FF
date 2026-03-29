@@ -867,32 +867,6 @@
     </div>` : ''}`;
   }
 
-  function renderGuestCreate(data) {
-    const s = data.summary || {};
-    const accounts = data.accounts || [];
-    return `
-    <div class="health-card">
-      <div class="health-icon">
-        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--fire-gold)" stroke-width="1.8"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
-      </div>
-      <div class="health-status-text">${s.created || 0} Guest(s) Created</div>
-      <div class="health-meta">
-        <span class="health-tag">region: ${esc(data.region || '—')}</span>
-        <span class="health-tag" style="color:#22c55e">created: ${s.created || 0}</span>
-        ${s.failed > 0 ? `<span class="health-tag" style="color:#ef4444">failed: ${s.failed}</span>` : ''}
-      </div>
-    </div>
-    ${accounts.length > 0 ? `
-    <div class="wishlist-grid" style="margin-top:12px">
-      ${accounts.map(a => `
-        <div class="wishlist-item">
-          <div class="wishlist-item-id">UID: ${esc(a.uid)}</div>
-          <div class="wishlist-item-val" style="font-size:10px;word-break:break-all">Pass: ${esc(a.password || '—')}</div>
-          <div class="wishlist-item-label">Guest #${a.index}</div>
-        </div>`).join('')}
-    </div>` : ''}`;
-  }
-
   function renderHealth(data) {
     return `
     <div class="health-card">
