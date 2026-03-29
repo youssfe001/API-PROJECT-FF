@@ -1074,16 +1074,24 @@
     </div>` : ''}`;
   }
 
+  function fmtUptime(sec) {
+    if (!sec && sec !== 0) return '—';
+    const h = Math.floor(sec/3600);
+    const m = Math.floor((sec%3600)/60);
+    const s = Math.floor(sec%60);
+    return (h?h+'h ':'') + (m?m+'m ':'') + s+'s';
+  }
+
   function renderHealth(data) {
     return `
     <div class="health-card">
       <div class="health-icon">
         <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
       </div>
-      <div class="health-status-text">${esc(data.status || 'OK')}</div>
+      <div class="health-status-text">${esc(String(data.status || 'OK').toUpperCase())}</div>
       <div class="health-meta">
-        ${data.uptimeSec !== undefined ? `<span class="health-tag">Uptime: ${Math.round(data.uptimeSec)}s</span>` : ''}
-        ${data.now ? `<span class="health-tag">${new Date(data.now).toLocaleTimeString()}</span>` : ''}
+        ${data.uptimeSec !== undefined ? `<span class="health-tag">Uptime: ${fmtUptime(data.uptimeSec)}</span>` : ''}
+        ${data.now ? `<span class="health-tag">${new Date(data.now).toLocaleString()}</span>` : ''}
       </div>
     </div>`;
   }
