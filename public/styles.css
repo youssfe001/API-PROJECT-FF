@@ -2042,3 +2042,32 @@ select option { background: #1a0800; color: var(--text-primary); }
   .visual-item-grid, .visual-item-grid-featured { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .wishlist-grid-v2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
+
+.source-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 8px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 184, 0, 0.18);
+  background: rgba(255, 184, 0, 0.08);
+  color: var(--fire-gold);
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  line-height: 1;
+}
+
+.source-badge-missing {
+  color: #fca5a5;
+  border-color: rgba(239, 68, 68, 0.22);
+  background: rgba(127, 29, 29, 0.22);
+}
+
+.visual-item-rare-row,
+.wl-card-rare-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}

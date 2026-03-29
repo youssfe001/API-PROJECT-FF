@@ -76,6 +76,10 @@ async function fetchRemoteBuffer(url) {
 function iconCandidates(item) {
   const urls = [];
 
+  if (item?.ffIcon) {
+    urls.push(`${FF_RESOURCES_BASE}/${encodePathSegment(item.ffIcon)}.png`);
+  }
+
   if (item?.icon) {
     urls.push(`${FF_RESOURCES_BASE}/${encodePathSegment(item.icon)}.png`);
   }

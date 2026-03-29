@@ -62,6 +62,11 @@ function parseWishList(buffer) {
       itemType: resolved?.type || null,
       itemRare: resolved?.rare || null,
       collectionType: resolved?.collectionType || null,
+      icon: resolved?.icon || null,
+      iconUrl: resolved?.iconUrl || null,
+      ffIcon: resolved?.ffIcon || null,
+      ffIconKind: resolved?.ffIconKind || null,
+      proxyIconPath: resolved?.proxyIconPath || null,
       value,
       rawHex: itemBuf.toString("hex"),
     });

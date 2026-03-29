@@ -690,6 +690,14 @@
     const base = proxy || `/api/items/icon/${encodeURIComponent(id)}.png`;
     return `${base}?size=${size}&upscale=${upscale}`;
   }
+
+  function sourceBadge(item) {
+    if (!item) return '';
+    if (item.ffIconKind === 'alias') return '<span class="source-badge">FF Alias</span>';
+    if (item.ffIcon) return '<span class="source-badge">FF Resource</span>';
+    if (item.iconUrl) return '<span class="source-badge">CDN Fallback</span>';
+    return '<span class="source-badge source-badge-missing">No Art</span>';
+  }
   function resolvedName(item) {
     if (!item) return null;
     return item.name || item.itemName || null;
@@ -718,7 +726,7 @@
         <div class="visual-item-meta">
           <div class="visual-item-name" title="${esc(name)}">${esc(name)}</div>
           <div class="visual-item-type">${esc(type.replace(/_/g,' '))}</div>
-          <div class="visual-item-rare">${rareName(rare)}</div>
+          <div class="visual-item-rare-row"><div class="visual-item-rare">${rareName(rare)}</div>${sourceBadge(item)}</div>
         </div>
       </div>`;
   }
@@ -1060,7 +1068,7 @@
                 </div>
                 <div class="wl-card-name" title="${esc(name)}">${esc(name)}</div>
                 ${type ? `<div class="wl-card-type">${esc(type.replace(/_/g,' '))}</div>` : ''}
-                <div class="wl-card-rare" style="color:${col}">${rareName(rare)}</div>
+                <div class="wl-card-rare-row"><div class="wl-card-rare" style="color:${col}">${rareName(rare)}</div>${sourceBadge(it)}</div>
               </div>`;
             }).join('')}
            </div>`
