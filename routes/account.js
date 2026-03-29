@@ -4,6 +4,7 @@ const router = express.Router();
 const { ffRequest, ffRequestEncrypted } = require("../lib/request");
 const { encodeProto, decodeProto } = require("../lib/proto");
 const { requireRegion, requireParam, requireUid } = require("../lib/validate");
+const { lookupItem, resolveItems } = require("../lib/items");
 
 function normalizeHex(value) {
   const hex = requireParam(value, "bodyHex").replace(/\s+/g, "").toLowerCase();
