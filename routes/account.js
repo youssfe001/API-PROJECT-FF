@@ -161,11 +161,43 @@ function mapHistoryEpInfo(list) {
   }));
 }
 
+function resolveIdField(id) {
+  if (!id) return undefined;
+  const item = lookupItem(id);
+  return item ? { id, ...item } : { id, name: null };
+}
+
 function formatResponse(raw) {
   if (!raw) return null;
+  const basic   = mapBasicInfo(raw.basicinfo);
+  const profile = mapProfileInfo(raw.profileinfo);
+
+  // Resolve item IDs to names
+  const itemsResolved = {};
+  if (basic) {
+    if (basic.bannerId)    itemsResolved.banner       = resolveIdField(basic.bannerId);
+    if (basic.headPic)     itemsResolved.headPic      = resolveIdField(basic.headPic);
+    if (basic.badgeId)     itemsResolved.badge        = resolveIdField(basic.badgeId);
+    if (basic.title)       itemsResolved.title        = resolveIdField(basic.title);
+    if (basic.pinId)       itemsResolved.pin          = resolveIdField(basic.pinId);
+    if (basic.gameBagShow) itemsResolved.gameBag      = resolveIdField(basic.gameBagShow);
+    if (basic.weaponskinshows?.length) {
+      itemsResolved.weaponSkins = resolveItems(basic.weaponskinshows);
+    }
+  }
+  if (profile) {
+    if (profile.avatarId)  itemsResolved.avatar       = resolveIdField(profile.avatarId);
+    if (profile.clothes?.length) {
+      itemsResolved.clothes = resolveItems(profile.clothes);
+    }
+    if (profile.equipedSkills?.length) {
+      itemsResolved.skills = resolveItems(profile.equipedSkills);
+    }
+  }
+
   return compact({
-    basicInfo: mapBasicInfo(raw.basicinfo),
-    profileInfo: mapProfileInfo(raw.profileinfo),
+    basicInfo: basic,
+    profileInfo: profile,
     clanBasicInfo: mapClanBasicInfo(raw.clanbasicinfo),
     captainBasicInfo: mapBasicInfo(raw.captainbasicinfo),
     petInfo: mapPetInfo(raw.petinfo),
@@ -173,6 +205,7 @@ function formatResponse(raw) {
     diamondCostRes: raw.diamondcostres ? compact({ diamondCost: raw.diamondcostres.diamondcost }) : undefined,
     creditScoreInfo: mapCreditScoreInfo(raw.creditscoreinfo),
     historyEpInfo: mapHistoryEpInfo(raw.historyepinfo),
+    itemsResolved: Object.keys(itemsResolved).length > 0 ? itemsResolved : undefined,
   });
 }
 
