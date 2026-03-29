@@ -641,6 +641,38 @@
   }
 
   /* ═══════════════════════════════════════════════════
+     Rarity Colors & Item Helpers
+  ═══════════════════════════════════════════════════ */
+  const RARE_COLORS = {
+    'White':'#b0b0b0','Green':'#4ade80','Blue':'#60a5fa',
+    'Purple':'#a78bfa','Purple_Plus':'#8b5cf6',
+    'Orange':'#f97316','Orange_Plus':'#ea580c','Red':'#ef4444','NONE':'#666'
+  };
+  function rareColor(r) { return RARE_COLORS[r] || '#888'; }
+  function rareName(r) { return (r||'').replace('_Plus',' +').replace('NONE','Common'); }
+  function itemImg(id) { return `https://raw.githubusercontent.com/starexxx/FFItems/main/assets/icons/${id}.png`; }
+  function resolvedName(item) {
+    if (!item) return null;
+    return item.name || item.itemName || null;
+  }
+  function resolvedChip(item, fallbackLabel) {
+    if (!item) return '';
+    const name = item.name || item.itemName || `ID: ${item.id || item.itemId || '?'}`;
+    const rare = item.rare || item.itemRare || 'NONE';
+    const type = item.type || item.itemType || '';
+    const col = rareColor(rare);
+    return `<span class="item-chip" style="border-color:${col};color:${col}" title="${esc(type)} · ${rareName(rare)}">${esc(name)}</span>`;
+  }
+  function timeAgo(ts) {
+    if (!ts) return '—';
+    const s = Math.floor((Date.now()/1000) - Number(ts));
+    if (s < 60) return 'Just now';
+    if (s < 3600) return Math.floor(s/60) + 'm ago';
+    if (s < 86400) return Math.floor(s/3600) + 'h ago';
+    return Math.floor(s/86400) + 'd ago';
+  }
+
+  /* ═══════════════════════════════════════════════════
      Rich Card Renderers
   ═══════════════════════════════════════════════════ */
 
