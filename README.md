@@ -89,9 +89,13 @@ cp config/guests.example.json config/guests.json
 npm start
 ```
 
-Server URL:
+Public Demo:
 
-- `http://localhost:3000`
+- `https://fyrelab.vercel.app/api/demo`
+
+Public API Base:
+
+- `https://fyrelab.vercel.app/api`
 
 ---
 
@@ -134,19 +138,19 @@ Item metadata is enriched from the `jinix6/ItemID` dataset and icon routes can u
 Health check:
 
 ```bash
-curl http://localhost:3000/api/health
+curl https://fyrelab.vercel.app/api/health
 ```
 
 Account info:
 
 ```bash
-curl "http://localhost:3000/api/v1/account?region=IND&uid=1633864660"
+curl "https://fyrelab.vercel.app/api/v1/account?region=IND&uid=1633864660"
 ```
 
 Like spam (encrypted replay):
 
 ```bash
-curl -X POST http://localhost:3000/api/like-spam \
+curl -X POST https://fyrelab.vercel.app/api/like-spam \
   -H "Content-Type: application/json" \
   -d '{
     "region":"IND",

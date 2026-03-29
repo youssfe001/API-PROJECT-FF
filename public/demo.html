@@ -82,6 +82,39 @@
       </div>
     </header>
 
+    <section class="hero-dashboard">
+      <div class="hero-copy hero-panel">
+        <div class="hero-kicker">Free Fire Control Deck</div>
+        <h1 class="hero-title">Battlefield-grade dashboard for player intel, collections, and live utility calls.</h1>
+        <p class="hero-subtitle">Track rank, inspect equipped cosmetics, preview wishlist drops, and fire API requests from one command surface with a sharper Free Fire look.</p>
+        <div class="hero-tags">
+          <span class="hero-tag">Live API Proxy</span>
+          <span class="hero-tag">Enriched Item Art</span>
+          <span class="hero-tag">Free Fire Theme</span>
+        </div>
+      </div>
+      <div class="hero-stats hero-panel">
+        <div class="hero-stat">
+          <span class="hero-stat-label">Endpoints</span>
+          <span class="hero-stat-value">9</span>
+        </div>
+        <div class="hero-stat">
+          <span class="hero-stat-label">Item Assets</span>
+          <span class="hero-stat-value">30k+</span>
+        </div>
+        <div class="hero-stat">
+          <span class="hero-stat-label">Icon Proxy</span>
+          <span class="hero-stat-value">HD PNG</span>
+        </div>
+        <div class="hero-radar">
+          <div class="hero-radar-ring"></div>
+          <div class="hero-radar-ring hero-radar-ring-2"></div>
+          <div class="hero-radar-sweep"></div>
+          <div class="hero-radar-core"></div>
+        </div>
+      </div>
+    </section>
+
     <!-- ── INPUTS ROW ───────────────────────────────── -->
     <div class="inputs-row">
       <div class="input-group">
@@ -669,6 +702,26 @@
     const col = rareColor(rare);
     return `<span class="item-chip" style="border-color:${col};color:${col}" title="${esc(type)} · ${rareName(rare)}">${esc(name)}</span>`;
   }
+  function resolvedVisualCard(item, fallbackLabel) {
+    if (!item) return '';
+    const name = item.name || item.itemName || `${fallbackLabel || 'Item'} #${item.id || item.itemId || '?'}`;
+    const rare = item.rare || item.itemRare || 'NONE';
+    const type = item.type || item.itemType || fallbackLabel || 'ITEM';
+    const col = rareColor(rare);
+    return `
+      <div class="visual-item-card" style="--item-accent:${col}">
+        <div class="visual-item-media">
+          <img src="${itemImg(item, 132, 3)}" alt="${esc(name)}" loading="lazy"
+            onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"/>
+          <div class="visual-item-fallback" style="display:none">${esc(name.slice(0,2).toUpperCase())}</div>
+        </div>
+        <div class="visual-item-meta">
+          <div class="visual-item-name" title="${esc(name)}">${esc(name)}</div>
+          <div class="visual-item-type">${esc(type.replace(/_/g,' '))}</div>
+          <div class="visual-item-rare">${rareName(rare)}</div>
+        </div>
+      </div>`;
+  }
   function timeAgo(ts) {
     if (!ts) return '—';
     const s = Math.floor((Date.now()/1000) - Number(ts));
@@ -699,12 +752,26 @@
     const GENDERS = {0:'—',1:'Male',2:'Female'};
     const LANGS = {0:'—',1:'EN',2:'PT',3:'ES',4:'ID',5:'TH',6:'VN',7:'AR',8:'TW',9:'RU',10:'HI'};
 
+    const heroVisual = ir.avatar || ir.headPic || ir.banner || ir.gameBag || ir.pin || ir.badge || ir.title || null;
+    const gearGallery = [];
+    if (ir.avatar) gearGallery.push(resolvedVisualCard(ir.avatar, 'Character'));
+    if (ir.headPic) gearGallery.push(resolvedVisualCard(ir.headPic, 'Avatar'));
+    if (ir.banner) gearGallery.push(resolvedVisualCard(ir.banner, 'Banner'));
+    if (ir.gameBag) gearGallery.push(resolvedVisualCard(ir.gameBag, 'Game Bag'));
+    if (ir.pin) gearGallery.push(resolvedVisualCard(ir.pin, 'Pin'));
+    if (ir.badge) gearGallery.push(resolvedVisualCard(ir.badge, 'Badge'));
+
     return `
     <div class="player-card">
       <!-- HEADER -->
-      <div class="player-header">
-        <div class="player-avatar">${esc(initials(b.nickname))}</div>
-        <div class="player-meta">
+      <div class="player-header player-header-advanced">
+        <div class="player-hero-visual" style="--rank-accent:${brC}">
+          ${heroVisual ? `<img src="${itemImg(heroVisual, 180, 3)}" alt="" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"/>` : ''}
+          <div class="player-hero-fallback" ${heroVisual ? 'style="display:none"' : ''}>${esc(initials(b.nickname))}</div>
+          <div class="player-hero-overlay"></div>
+        </div>
+        <div class="player-meta player-meta-advanced">
+          <div class="player-kicker">Operator Profile</div>
           <div class="player-name">${esc(b.nickname || 'Unknown')}</div>
           <div class="player-uid">UID: ${esc(b.accountId || data.uid)} · ${esc(b.region || data.region)}${b.lastLoginAt ? ` · <span style="color:var(--text-dim);font-size:11px">Last seen: ${timeAgo(b.lastLoginAt)}</span>` : ''}</div>
           <div class="player-chips">
@@ -714,6 +781,11 @@
             ${b.haselitepass ? `<span class="chip chip-elite">ELITE PASS</span>` : ''}
             ${b.releaseVersion ? `<span class="chip" style="background:rgba(255,255,255,.06);color:var(--text-dim)">${esc(b.releaseVersion)}</span>` : ''}
             ${b.membershipState ? `<span class="chip" style="color:#a78bfa;border-color:rgba(167,139,250,0.3)">MEMBER</span>` : ''}
+          </div>
+          <div class="player-banner-stats">
+            <div class="player-banner-stat"><span class="player-banner-label">Likes</span><span class="player-banner-value">${fmtNum(b.liked)}</span></div>
+            <div class="player-banner-stat"><span class="player-banner-label">Season</span><span class="player-banner-value">${b.seasonId || '—'}</span></div>
+            <div class="player-banner-stat"><span class="player-banner-label">Credit</span><span class="player-banner-value ${(cr?.creditScore||0) >= 90 ? 'ok-text' : ''}">${cr?.creditScore ?? '—'}</span></div>
           </div>
         </div>
       </div>
@@ -736,9 +808,6 @@
 
       <!-- INFO GRID -->
       <div class="info-grid">
-        <div class="info-block"><div class="info-block-label">Liked</div><div class="info-block-val accent">${fmtNum(b.liked)}</div></div>
-        <div class="info-block"><div class="info-block-label">Season</div><div class="info-block-val">${b.seasonId || '—'}</div></div>
-        <div class="info-block"><div class="info-block-label">Credit Score</div><div class="info-block-val ${(cr?.creditScore||0) >= 90 ? 'ok' : ''}">${cr?.creditScore ?? '—'}</div></div>
         ${ir.title?.name ? `<div class="info-block"><div class="info-block-label">Title</div><div class="info-block-val" style="color:${rareColor(ir.title.rare)}">${esc(ir.title.name)}</div></div>` : b.title ? `<div class="info-block"><div class="info-block-label">Title</div><div class="info-block-val">#${b.title}</div></div>` : ''}
         ${ir.badge?.name ? `<div class="info-block"><div class="info-block-label">Badge</div><div class="info-block-val" style="color:${rareColor(ir.badge.rare)}">${esc(ir.badge.name)}</div></div>` : b.badgeId ? `<div class="info-block"><div class="info-block-label">Badge</div><div class="info-block-val">#${b.badgeId} (x${b.badgeCnt||0})</div></div>` : ''}
         ${ir.banner?.name ? `<div class="info-block"><div class="info-block-label">Banner</div><div class="info-block-val" style="color:${rareColor(ir.banner.rare)}">${esc(ir.banner.name)}</div></div>` : b.bannerId ? `<div class="info-block"><div class="info-block-label">Banner</div><div class="info-block-val">#${b.bannerId}</div></div>` : ''}
@@ -748,6 +817,12 @@
         ${b.createAt ? `<div class="info-block"><div class="info-block-label">Created</div><div class="info-block-val" style="font-size:11px">${new Date(Number(b.createAt)*1000).toLocaleDateString()}</div></div>` : ''}
         ${dc?.diamondCost ? `<div class="info-block"><div class="info-block-label">Diamonds Spent</div><div class="info-block-val" style="color:#60a5fa">${fmtNum(dc.diamondCost)}</div></div>` : ''}
       </div>
+
+      ${gearGallery.length ? `
+      <div class="visual-section">
+        <div class="items-section-label">Featured Cosmetics</div>
+        <div class="visual-item-grid visual-item-grid-featured">${gearGallery.join('')}</div>
+      </div>` : ''}
 
       <!-- SOCIAL INFO -->
       ${(s.gender || s.language || s.signature || s.battleTag?.length || s.socialTag?.length || s.modePrefer) ? `
@@ -806,21 +881,21 @@
       ${ir.avatar?.name ? `<div class="items-section"><div class="items-section-label">Character</div><div class="items-chips">${resolvedChip(ir.avatar,'Avatar')}</div></div>` : ''}
 
       ${ir.clothes?.length ? `
-      <div class="items-section">
+      <div class="visual-section">
         <div class="items-section-label">Equipped Items (${ir.clothes.length})</div>
-        <div class="items-chips">${ir.clothes.map(c => resolvedChip(c, 'Outfit')).join('')}</div>
+        <div class="visual-item-grid">${ir.clothes.map(c => resolvedVisualCard(c, 'Outfit')).join('')}</div>
       </div>` : ''}
 
       ${ir.weaponSkins?.length ? `
-      <div class="items-section">
+      <div class="visual-section">
         <div class="items-section-label">Weapon Skins (${ir.weaponSkins.length})</div>
-        <div class="items-chips">${ir.weaponSkins.map(w => resolvedChip(w, 'Weapon')).join('')}</div>
+        <div class="visual-item-grid">${ir.weaponSkins.map(w => resolvedVisualCard(w, 'Weapon')).join('')}</div>
       </div>` : ''}
 
       ${ir.skills?.length ? `
-      <div class="items-section">
+      <div class="visual-section">
         <div class="items-section-label">Equipped Skills (${ir.skills.length})</div>
-        <div class="items-chips">${ir.skills.map(sk => resolvedChip(sk, 'Skill')).join('')}</div>
+        <div class="visual-item-grid">${ir.skills.map(sk => resolvedVisualCard(sk, 'Skill')).join('')}</div>
       </div>` : ''}
 
       <!-- ELITE PASS HISTORY -->
