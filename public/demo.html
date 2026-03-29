@@ -174,7 +174,7 @@
       </div>
     </div>
 
-    <div class="quick-hint">Shortcuts: <kbd>Enter</kbd> Account · <kbd>Shift</kbd>+<kbd>Enter</kbd> BR Stats · <kbd>Ctrl/Cmd</kbd>+<kbd>Enter</kbd> CS Stats · Optics Lab supports up to <kbd>6x</kbd> upscale.</div>
+    <div class="quick-hint">Shortcuts: <kbd>Enter</kbd> Account · <kbd>Shift</kbd>+<kbd>Enter</kbd> BR Stats · <kbd>Ctrl/Cmd</kbd>+<kbd>Enter</kbd> CS Stats · Optics Lab supports <kbd>AI Fast</kbd> with up to <kbd>6x</kbd> upscale.</div>
 
     <!-- ── ENDPOINT CARDS ───────────────────────────── -->
     <div id="feature-cards-source" class="endpoints-grid feature-source-grid">
@@ -695,12 +695,12 @@
   };
   function rareColor(r) { return RARE_COLORS[r] || '#888'; }
   function rareName(r) { return (r||'').replace('_Plus',' +').replace('NONE','Common'); }
-  function itemImg(itemOrId, size = 128, upscale = 4) {
+  function itemImg(itemOrId, size = 128, upscale = 4, engine = 'ai-fast') {
     const id = typeof itemOrId === 'object' ? (itemOrId?.id || itemOrId?.itemId) : itemOrId;
     const proxy = typeof itemOrId === 'object' ? itemOrId?.proxyIconPath : null;
     if (!id && !proxy) return '/api/items/icon/0.png';
     const base = proxy || `/api/items/icon/${encodeURIComponent(id)}.png`;
-    return `${base}?size=${size}&upscale=${upscale}`;
+    return `${base}?size=${size}&upscale=${upscale}&engine=${encodeURIComponent(engine)}`;
   }
 
   function sourceBadge(item) {
@@ -1324,6 +1324,7 @@
   const itemId    = () => document.getElementById('item-id').value.trim() || '101000005';
   const itemSize  = () => document.getElementById('item-size').value;
   const itemUpscale = () => document.getElementById('item-upscale').value;
+  const itemEngine = () => document.getElementById('item-engine').value;
 
   const EP_LABELS = {
     account:     'Account',
@@ -1602,6 +1603,16 @@
               <svg class="select-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
             </div>
           </div>
+          <div class="input-group">
+            <label class="input-label">Engine</label>
+            <div class="select-wrap">
+              <select id="item-engine">
+                <option value="ai-fast" selected>AI Fast</option>
+                <option value="classic">Classic</option>
+              </select>
+              <svg class="select-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+          </div>
           <div class="lab-actions">
             <button class="action-btn lab-action-btn" onclick="runItemLookup()">Open Item Record</button>
             <button class="action-btn lab-action-btn" onclick="runItemSearch()">Search Asset Catalog</button>
@@ -1614,7 +1625,7 @@
           <div class="lab-preview-meta">
             <div class="lab-preview-title">Preview Route</div>
             <div class="lab-preview-id" id="item-preview-id">101000005</div>
-            <div class="lab-preview-spec" id="item-preview-spec">128px • 4x upscale</div>
+            <div class="lab-preview-spec" id="item-preview-spec">128px • 4x upscale • AI Fast</div>
             <code class="lab-preview-route" id="item-preview-route"></code>
           </div>
         </div>
@@ -1643,7 +1654,8 @@
     const id = itemId();
     const size = itemSize();
     const upscale = itemUpscale();
-    const route = `/api/items/icon/${encodeURIComponent(id)}.png?size=${encodeURIComponent(size)}&upscale=${encodeURIComponent(upscale)}`;
+    const engine = itemEngine();
+    const route = `/api/items/icon/${encodeURIComponent(id)}.png?size=${encodeURIComponent(size)}&upscale=${encodeURIComponent(upscale)}&engine=${encodeURIComponent(engine)}`;
     const img = document.getElementById('item-preview-img');
     if (img) {
       img.src = route;
@@ -1652,8 +1664,9 @@
     const title = document.getElementById('item-preview-id');
     const spec = document.getElementById('item-preview-spec');
     const routeOut = document.getElementById('item-preview-route');
+    const engineLabel = engine === 'classic' ? 'Classic' : 'AI Fast';
     if (title) title.textContent = `Item #${id}`;
-    if (spec) spec.textContent = `${size}px • ${upscale}x upscale`;
+    if (spec) spec.textContent = `${size}px • ${upscale}x upscale • ${engineLabel}`;
     if (routeOut) routeOut.textContent = route;
   }
 
@@ -1682,7 +1695,7 @@
   function runUidGen()   { call('/api/uid-generator?mode=random&count=5&length=10&teamXdarks=1', 'uidgen'); }
 
   initFeatureDeck();
-  ['item-id', 'item-size', 'item-upscale'].forEach((id) => {
+  ['item-id', 'item-size', 'item-upscale', 'item-engine'].forEach((id) => {
     const el = document.getElementById(id);
     if (el) el.addEventListener('input', syncItemPreview);
     if (el) el.addEventListener('change', syncItemPreview);

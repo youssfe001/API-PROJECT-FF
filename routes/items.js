@@ -15,6 +15,7 @@ const { ApiError } = require("../lib/validate");
 
 const FF_RESOURCES_BASE = "https://raw.githubusercontent.com/0xme/ff-resources/main/pngs/300x300";
 const UNKNOWN_ICON_NAME = "UI_EPFP_unknown.png";
+const DEFAULT_ICON_ENGINE = "ai-fast";
 const REMOTE_ICON_CACHE = new Map();
 const PROCESSED_ICON_CACHE = new Map();
 
@@ -39,6 +40,20 @@ function parsePositiveInt(value, fallback, name, min, max) {
 
 function encodePathSegment(value) {
   return encodeURIComponent(String(value)).replace(/%2F/g, "/");
+}
+
+function parseIconEngine(value) {
+  if (value === undefined || value === null || value === "") {
+    return DEFAULT_ICON_ENGINE;
+  }
+
+  const normalized = String(value).trim().toLowerCase();
+  if (normalized === "fast") return DEFAULT_ICON_ENGINE;
+  if (normalized === "ai-fast" || normalized === "classic") {
+    return normalized;
+  }
+
+  throw new ApiError("Invalid 'engine' query parameter. Use 'ai-fast' or 'classic'.");
 }
 
 async function fetchRemoteBuffer(url) {
@@ -107,17 +122,57 @@ async function resolveIconSource(item) {
   throw lastError || new Error("Unable to resolve icon source.");
 }
 
-async function buildIconBuffer(sourceBuffer, targetSize) {
+function createIconPipeline(sourceBuffer, targetSize, kernel) {
   return sharp(sourceBuffer, { failOn: "none", unlimited: true })
+    .ensureAlpha()
     .resize(targetSize, targetSize, {
       fit: "contain",
-      kernel: sharp.kernel.lanczos3,
+      kernel,
       fastShrinkOnLoad: false,
       background: { r: 0, g: 0, b: 0, alpha: 0 },
-    })
+    });
+}
+
+async function buildClassicIconBuffer(sourceBuffer, targetSize) {
+  return createIconPipeline(sourceBuffer, targetSize, sharp.kernel.lanczos3)
     .sharpen({ sigma: 1.35, m1: 1, m2: 2 })
     .png({ compressionLevel: 9, adaptiveFiltering: true })
     .toBuffer();
+}
+
+async function buildAiFastIconBuffer(sourceBuffer, targetSize) {
+  const aiKernel = sharp.kernel.mks2021 || sharp.kernel.lanczos3;
+  const pipeline = createIconPipeline(sourceBuffer, targetSize, aiKernel);
+
+  const [colorBuffer, alphaBuffer] = await Promise.all([
+    pipeline.clone()
+      .removeAlpha()
+      .normalise()
+      .modulate({ brightness: 1.03, saturation: 1.12 })
+      .linear(1.06, -(255 * 0.02))
+      .sharpen({ sigma: 2.1, m1: 1.5, m2: 3.5, x1: 2, y2: 12, y3: 18 })
+      .png({ compressionLevel: 9, adaptiveFiltering: true })
+      .toBuffer(),
+    pipeline.clone()
+      .extractChannel("alpha")
+      .linear(1.08, -6)
+      .sharpen({ sigma: 1.45, m1: 1, m2: 2 })
+      .png({ compressionLevel: 9, adaptiveFiltering: true })
+      .toBuffer(),
+  ]);
+
+  return sharp(colorBuffer, { failOn: "none", unlimited: true })
+    .joinChannel(alphaBuffer)
+    .png({ compressionLevel: 9, adaptiveFiltering: true })
+    .toBuffer();
+}
+
+async function buildIconBuffer(sourceBuffer, targetSize, engine) {
+  if (engine === "classic") {
+    return buildClassicIconBuffer(sourceBuffer, targetSize);
+  }
+
+  return buildAiFastIconBuffer(sourceBuffer, targetSize);
 }
 
 router.get("/items/icon/:id.png", async (req, res, next) => {
@@ -129,14 +184,15 @@ router.get("/items/icon/:id.png", async (req, res, next) => {
 
     const displaySize = parsePositiveInt(req.query.size, 128, "size", 32, 768);
     const upscaleFactor = parsePositiveInt(req.query.upscale, 4, "upscale", 1, 6);
+    const engine = parseIconEngine(req.query.engine);
     const targetSize = clamp(displaySize * upscaleFactor, 32, 3072);
 
     const { buffer: sourceBuffer, sourceUrl } = await resolveIconSource(item);
-    const cacheKey = `${sourceUrl}|${targetSize}`;
+    const cacheKey = `${sourceUrl}|${targetSize}|${engine}`;
 
     let output = PROCESSED_ICON_CACHE.get(cacheKey);
     if (!output) {
-      output = await buildIconBuffer(sourceBuffer, targetSize);
+      output = await buildIconBuffer(sourceBuffer, targetSize, engine);
       PROCESSED_ICON_CACHE.set(cacheKey, output);
     }
 
@@ -147,6 +203,7 @@ router.get("/items/icon/:id.png", async (req, res, next) => {
       "x-icon-display-size": String(displaySize),
       "x-icon-output-size": String(targetSize),
       "x-icon-upscale": String(upscaleFactor),
+      "x-icon-engine": engine,
     });
 
     res.send(output);
