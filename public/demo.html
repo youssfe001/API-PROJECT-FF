@@ -963,11 +963,25 @@
   }
 
   function renderError(msg) {
+    // Try to detect common errors and give helpful hints
+    let hint = '';
+    const m = String(msg||'').toLowerCase();
+    if (m.includes('region'))        hint = 'Check your region selection — must be a supported region.';
+    else if (m.includes('uid'))      hint = 'Verify the UID is correct and numeric.';
+    else if (m.includes('401'))      hint = 'Authentication failed — guest credentials may be expired.';
+    else if (m.includes('timeout'))  hint = 'Server took too long to respond. Try again.';
+    else if (m.includes('econnrefused') || m.includes('enotfound')) hint = 'Cannot reach the game server. It may be down.';
+
     return `
-    <div class="error-card">
-      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-      <div class="error-card-title">Request Failed</div>
-      <div class="error-card-msg">${esc(msg)}</div>
+    <div class="error-card-v2">
+      <div class="error-icon">
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      </div>
+      <div class="error-body">
+        <div class="error-card-title">Request Failed</div>
+        <div class="error-card-msg">${esc(msg)}</div>
+        ${hint ? `<div class="error-hint">${esc(hint)}</div>` : ''}
+      </div>
     </div>`;
   }
 
