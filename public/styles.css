@@ -1401,6 +1401,228 @@ select option { background: #1a0800; color: var(--text-primary); }
   font-size: 13px;
 }
 
+/* ── ITEM CHIPS (resolved items in account) ────────── */
+.items-section {
+  margin-top: 2px;
+  padding: 10px 14px;
+  background: rgba(255,107,0,0.02);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+
+.items-section-label {
+  font-size: 9px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+  font-family: var(--font-hd);
+}
+
+.items-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.item-chip {
+  display: inline-block;
+  padding: 3px 9px;
+  border-radius: 14px;
+  border: 1px solid;
+  font-size: 10px;
+  font-family: var(--font-mono);
+  font-weight: 500;
+  background: rgba(0,0,0,0.2);
+  white-space: nowrap;
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: background 0.15s;
+}
+
+.item-chip:hover {
+  background: rgba(255,255,255,0.05);
+}
+
+/* ── WISHLIST V2 GRID ──────────────────────────────── */
+.wishlist-grid-v2 {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 10px;
+}
+
+.wl-card {
+  background: rgba(255,107,0,0.03);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px 10px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  transition: border-color 0.2s, transform 0.15s, box-shadow 0.2s;
+}
+
+.wl-card:hover {
+  border-color: var(--border-bright);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+}
+
+.wl-card-img {
+  width: 56px;
+  height: 56px;
+  border-radius: 8px;
+  overflow: hidden;
+  background: rgba(0,0,0,0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.wl-card-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.wl-card-fallback {
+  font-family: var(--font-hd);
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.wl-card-name {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-primary);
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.wl-card-type {
+  font-size: 9px;
+  letter-spacing: 0.5px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+}
+
+.wl-card-rare {
+  font-size: 10px;
+  font-weight: 700;
+  font-family: var(--font-hd);
+  letter-spacing: 0.5px;
+}
+
+/* ── PROGRESS BAR ──────────────────────────────────── */
+.progress-bar-wrap {
+  width: 100%;
+  max-width: 300px;
+  height: 20px;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid var(--border);
+  overflow: hidden;
+  position: relative;
+}
+
+.progress-bar {
+  height: 100%;
+  border-radius: 10px;
+  transition: width 0.3s ease;
+}
+
+.progress-label {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-family: var(--font-mono);
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+/* ── LIKE RESULTS FEED ─────────────────────────────── */
+.like-results-feed {
+  max-height: 200px;
+  overflow-y: auto;
+  margin-top: 12px;
+  font-size: 11px;
+  font-family: var(--font-mono);
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.like-result-row {
+  padding: 3px 8px;
+  border-radius: 4px;
+}
+
+.like-result-row.ok  { color: #4ade80; }
+.like-result-row.fail { color: #f87171; background: rgba(239,68,68,0.05); }
+.like-ok  { color: #22c55e; font-weight: bold; }
+.like-fail { color: #ef4444; font-weight: bold; }
+.like-err  { color: rgba(239,68,68,0.6); margin-left: 6px; font-size: 10px; }
+
+/* ── ERROR V2 ──────────────────────────────────────── */
+.error-card-v2 {
+  background: rgba(239,68,68,0.06);
+  border: 1px solid rgba(239,68,68,0.25);
+  border-radius: var(--radius);
+  padding: 24px;
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  min-height: 120px;
+}
+
+.error-icon {
+  flex-shrink: 0;
+  width: 52px; height: 52px;
+  border-radius: 50%;
+  border: 2px solid rgba(239,68,68,0.3);
+  background: rgba(239,68,68,0.08);
+  display: flex; align-items: center; justify-content: center;
+}
+
+.error-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.error-card-v2 .error-card-title {
+  font-family: var(--font-hd);
+  font-size: 16px;
+  color: var(--err);
+  letter-spacing: 1px;
+}
+
+.error-card-v2 .error-card-msg {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: rgba(239,68,68,0.7);
+  word-break: break-word;
+}
+
+.error-hint {
+  font-size: 12px;
+  color: rgba(255,184,0,0.7);
+  padding: 8px 12px;
+  background: rgba(255,184,0,0.06);
+  border: 1px solid rgba(255,184,0,0.15);
+  border-radius: 8px;
+  margin-top: 4px;
+}
+
 /* ── FOOTER ─────────────────────────────────────────── */
 .site-footer {
   text-align: center;
