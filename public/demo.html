@@ -1217,10 +1217,12 @@
       respTime.textContent = `${Date.now() - t0}ms`;
     } finally {
       if (activeBtn) activeBtn.classList.remove('loading');
+      _busy = false;
     }
   }
 
   async function callPost(url, body, action) {
+    if (_busy) return; _busy = true;
     if (activeBtn) activeBtn.classList.remove('active');
     activeBtn = document.querySelector(`[data-action="${action}"]`);
     if (activeBtn) activeBtn.classList.add('active', 'loading');
