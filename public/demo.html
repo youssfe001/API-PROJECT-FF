@@ -1009,6 +1009,20 @@
   function runWishlist() { call(`/api/v1/wishlist?region=${enc(region())}&uid=${enc(uid())}`, 'wishlist'); }
   function runHealth()   { call('/api/health', 'health'); }
   function runGuest()    { call(`/api/guest-generator?region=${enc(region())}`, 'guest'); }
+  function runLikeSpam() {
+    const r = region(), u = uid();
+    const cnt = prompt('How many likes? (1-500)', '10');
+    if (!cnt) return;
+    const delay = prompt('Delay between requests in ms? (0-5000)', '100');
+    if (delay === null) return;
+    callPost('/api/like-spam', { region: r, uid: u, count: parseInt(cnt)||10, delayMs: parseInt(delay)||100 }, 'likespam');
+  }
+  function runGuestCreate() {
+    const r = region();
+    const cnt = prompt('How many guest accounts? (1-10)', '1');
+    if (!cnt) return;
+    callPost(`/api/guest-generator/create?region=${enc(r)}`, { region: r, count: parseInt(cnt)||1 }, 'guestcreate');
+  }
   function runUidGen()   { call('/api/uid-generator?mode=random&count=5&length=10&teamXdarks=1', 'uidgen'); }
 
   document.addEventListener('keydown', (e) => {
