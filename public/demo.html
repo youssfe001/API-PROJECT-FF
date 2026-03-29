@@ -978,6 +978,53 @@
     }
   }
 
+  async function callPost(url, body, action) {
+    if (activeBtn) activeBtn.classList.remove('active');
+    activeBtn = document.querySelector(`[data-action="${action}"]`);
+    if (activeBtn) activeBtn.classList.add('active', 'loading');
+
+    badge.textContent = '…'; badge.className = 'status-badge pending';
+    activeEp.textContent = EP_LABELS[action] || '';
+    respTime.textContent = '';
+
+    richView.innerHTML = `<div class="rich-loading"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation:spin .8s linear infinite"><path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0"/></svg> Sending…</div>`;
+    out.innerHTML = '<span class="muted">// Sending POST request…</span>';
+
+    const t0 = Date.now();
+    try {
+      const res  = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+      const ms   = Date.now() - t0;
+      const text = await res.text();
+      let data;
+      try { data = text ? JSON.parse(text) : {}; } catch { data = { raw: text }; }
+      lastData   = data; lastAction = action;
+
+      if (res.ok) {
+        richView.innerHTML = buildRichCard(action, data);
+        badge.textContent  = `${res.status} OK`;
+        badge.className    = 'status-badge ok';
+      } else {
+        richView.innerHTML = renderError(data.message || JSON.stringify(data));
+        badge.textContent  = `${res.status} ERR`;
+        badge.className    = 'status-badge err';
+      }
+      out.innerHTML = highlight(JSON.stringify(data, null, 2));
+      respTime.textContent = `${ms}ms`;
+    } catch (e) {
+      richView.innerHTML   = renderError(String(e));
+      out.innerHTML        = `<span class="err-text">// Error: ${esc(String(e))}</span>`;
+      badge.textContent    = 'ERR';
+      badge.className      = 'status-badge err';
+      respTime.textContent = `${Date.now() - t0}ms`;
+    } finally {
+      if (activeBtn) activeBtn.classList.remove('loading');
+    }
+  }
+
   function copyOutput() {
     const txt = currentView === 'json'
       ? (out.innerText || out.textContent)
