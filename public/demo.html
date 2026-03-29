@@ -1101,12 +1101,6 @@
     if (delay === null) return;
     callPost('/api/like-spam', { region: r, uid: u, count: parseInt(cnt)||10, delayMs: parseInt(delay)||100 }, 'likespam');
   }
-  function runGuestCreate() {
-    const r = region();
-    const cnt = prompt('How many guest accounts? (1-10)', '1');
-    if (!cnt) return;
-    callPost(`/api/guest-generator/create?region=${enc(r)}`, { region: r, count: parseInt(cnt)||1 }, 'guestcreate');
-  }
   function runUidGen()   { call('/api/uid-generator?mode=random&count=5&length=10&teamXdarks=1', 'uidgen'); }
 
   document.addEventListener('keydown', (e) => {
