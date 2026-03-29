@@ -96,7 +96,7 @@
       <div class="hero-stats hero-panel">
         <div class="hero-stat">
           <span class="hero-stat-label">Endpoints</span>
-          <span class="hero-stat-value">9</span>
+          <span class="hero-stat-value">10</span>
         </div>
         <div class="hero-stat">
           <span class="hero-stat-label">Item Assets</span>
@@ -223,6 +223,18 @@
         <div class="ep-info">
           <span class="ep-name">Search</span>
           <span class="ep-path">/FuzzySearchAccountByName</span>
+        </div>
+        <span class="ep-method">GET</span>
+      </button>
+
+      <button class="ep-card" data-action="bancheck" onclick="runBanCheck()">
+        <div class="ep-card-glow"></div>
+        <div class="ep-icon-wrap">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3l7 4v5c0 4.5-2.9 7.88-7 9-4.1-1.12-7-4.5-7-9V7l7-4z"/><path d="M9.5 12.5l1.7 1.7 3.3-4.2"/></svg>
+        </div>
+        <div class="ep-info">
+          <span class="ep-name">Ban Check</span>
+          <span class="ep-path">/v1/bancheck</span>
         </div>
         <span class="ep-method">GET</span>
       </button>
@@ -1171,6 +1183,36 @@
     return (h?h+'h ':'') + (m?m+'m ':'') + s+'s';
   }
 
+  function renderBanCheck(data) {
+    const player = data.playerLookup || {};
+    const ban = data.banLookup || {};
+    const ok = !!ban.ok;
+    const banned = data.isBanned === true;
+    const statusColor = !ok ? '#f59e0b' : (banned ? '#ef4444' : '#22c55e');
+    const statusText = data.banStatus || (!ok ? 'Ban status unavailable' : 'Unknown');
+    return `
+    <div class="health-card">
+      <div class="health-icon" style="border-color:${statusColor}55;background:${ok ? (banned ? "rgba(239,68,68,0.08)" : "rgba(34,197,94,0.08)") : "rgba(245,158,11,0.08)"}">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="${statusColor}" stroke-width="1.8"><path d="M12 3l7 4v5c0 4.5-2.9 7.88-7 9-4.1-1.12-7-4.5-7-9V7l7-4z"/><path d="M9.5 12.5l1.7 1.7 3.3-4.2"/></svg>
+      </div>
+      <div class="health-status-text" style="color:${statusColor}">${esc(statusText)}</div>
+      <div class="health-meta">
+        <span class="health-tag">UID: ${esc(data.uid || "—")}</span>
+        <span class="health-tag">Nickname: ${esc(data.nickname || "Unavailable")}</span>
+        <span class="health-tag">Region: ${esc(data.region || "Unavailable")}</span>
+        ${data.banPeriod ? `<span class="health-tag">Period: ${esc(data.banPeriod)}</span>` : ""}
+      </div>
+      <div class="info-grid" style="width:100%;max-width:720px;margin-top:10px">
+        <div class="info-block"><div class="info-block-label">Player Lookup</div><div class="info-block-val">${esc(player.ok ? "OK" : (player.status || "failed"))}</div></div>
+        <div class="info-block"><div class="info-block-label">Lookup HTTP</div><div class="info-block-val">${esc(player.httpStatus ?? "—")}</div></div>
+        <div class="info-block"><div class="info-block-label">Ban Lookup</div><div class="info-block-val">${esc(ban.ok ? "OK" : (ban.status || "failed"))}</div></div>
+        <div class="info-block"><div class="info-block-label">Ban HTTP</div><div class="info-block-val">${esc(ban.httpStatus ?? "—")}</div></div>
+      </div>
+      ${player.message ? `<div class="error-hint" style="margin-top:10px">Player source: ${esc(player.message)}</div>` : ""}
+      ${ban.message ? `<div class="error-hint" style="margin-top:8px">Ban source: ${esc(ban.message)}</div>` : ""}
+    </div>`;
+  }
+
   function renderHealth(data) {
     return `
     <div class="health-card">
@@ -1231,6 +1273,7 @@
     br:          'BR Stats',
     cs:          'CS Stats',
     search:      'Search',
+    bancheck:    'Ban Check',
     wishlist:    'Wishlist',
     health:      'Health',
     guest:       'Guest Generator',
@@ -1256,6 +1299,7 @@
     if (action === 'br')       return renderBrStats(data);
     if (action === 'cs')       return renderCsStats(data);
     if (action === 'search')   return renderSearch(data);
+    if (action === 'bancheck') return renderBanCheck(data);
     if (action === 'wishlist') return renderWishlist(data);
     if (action === 'health')   return renderHealth(data);
     if (action === 'guest')    return renderGuest(data);
@@ -1387,6 +1431,7 @@
   function runBr()       { call(`/api/v1/playerstats?region=${enc(region())}&uid=${enc(uid())}&matchmode=${matchmode()}`, 'br'); }
   function runCs()       { call(`/api/v1/playertcstats?region=${enc(region())}&uid=${enc(uid())}&matchmode=${matchmode()}`, 'cs'); }
   function runSearch()   { call(`/api/v1/search?region=${enc(region())}&keyword=${enc(keyword() || uid())}`, 'search'); }
+  function runBanCheck() { call(`/api/v1/bancheck?uid=${enc(uid())}`, 'bancheck'); }
   function runWishlist() { call(`/api/v1/wishlist?region=${enc(region())}&uid=${enc(uid())}`, 'wishlist'); }
   function runHealth()   { call('/api/health', 'health'); }
   function runGuest()    { call(`/api/guest-generator?region=${enc(region())}`, 'guest'); }

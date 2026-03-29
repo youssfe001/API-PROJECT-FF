@@ -12,7 +12,7 @@
 
 - واجهة REST واضحة بدل التعامل المباشر مع الحزم المعقدة.
 - توحيد التحقق من المدخلات والأخطاء.
-- دعم endpoints جاهزة للحساب والإحصائيات والبحث والـ wishlist.
+- دعم endpoints جاهزة للحساب والإحصائيات والبحث والـ wishlist وفحص الحظر.
 - أدوات إضافية مثل `uid-generator`, `guest-generator`, و`like-spam`.
 
 ---
@@ -47,6 +47,7 @@ routes/
   playerstats.js
   playertcstats.js
   search.js
+  bancheck.js
   galleryshow.js
   wishlist.js
   uidgenerator.js
@@ -117,6 +118,7 @@ Base path: `/api`
 
 ### Search / Gallery / Wishlist
 - `GET /api/v1/search?region=IND&keyword=player`
+- `GET /api/v1/bancheck?uid=1633864660`
 - `POST /api/galleryshow`
 - `GET /api/v1/wishlist?region=IND&uid=1633864660`
 - `POST /api/wishlist`
@@ -130,6 +132,8 @@ Base path: `/api`
 - `POST /api/like-spam`
 
 Item metadata is enriched from the `jinix6/ItemID` dataset and icon routes can upscale + sharpen PNGs for cleaner UI rendering.
+
+`GET /api/v1/bancheck` combines a Shop2Game player lookup with Garena anti-hack status. If Shop2Game blocks the request with captcha/DataDome or Garena rejects the anti-hack call, the API returns explicit upstream status details so the failure reason is visible.
 
 ---
 
@@ -145,6 +149,12 @@ Account info:
 
 ```bash
 curl "https://fyrelab.vercel.app/api/v1/account?region=IND&uid=1633864660"
+```
+
+Ban check:
+
+```bash
+curl "https://fyrelab.vercel.app/api/v1/bancheck?uid=1633864660"
 ```
 
 Like spam (encrypted replay):
