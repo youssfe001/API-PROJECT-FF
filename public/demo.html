@@ -840,10 +840,18 @@
       <div class="search-results">
         ${infos.map(p => `
         <div class="result-item">
-          <div class="result-avatar">${esc(initials(p.nickname))}</div>
+          <div class="result-avatar" style="border-color:${rankColor(p.rank)}">${esc(initials(p.nickname))}</div>
           <div class="result-info">
-            <div class="result-name">${esc(p.nickname || 'Unknown')}</div>
-            <div class="result-meta">UID: ${esc(p.accountid || p.accountId)} &nbsp;·&nbsp; ${esc(p.region || '')} &nbsp;·&nbsp; <span style="color:${rankColor(p.rank)}">${brRankName(p.rank)}</span></div>
+            <div class="result-name">${esc(p.nickname || 'Unknown')}
+              ${p.haselitepass ? ' <span class="chip chip-elite" style="font-size:9px;padding:1px 5px">EP</span>' : ''}
+            </div>
+            <div class="result-meta">
+              UID: ${esc(p.accountid || p.accountId)}
+              &nbsp;·&nbsp; ${esc(p.region || '')}
+              &nbsp;·&nbsp; <span style="color:${rankColor(p.rank)}">${brRankName(p.rank)}</span>
+              ${p.liked ? ` &nbsp;·&nbsp; <span style="color:#ef4444">&hearts; ${fmtNum(p.liked)}</span>` : ''}
+              ${p.clanname ? ` &nbsp;·&nbsp; <span style="color:var(--text-dim)">[${esc(p.clanname)}]</span>` : ''}
+            </div>
           </div>
           <div class="result-level">Lv ${p.level || '?'}</div>
         </div>`).join('')}
