@@ -924,20 +924,39 @@
     const results = data.results || [];
     const total = (s.success||0) + (s.failed||0);
     const pct = total ? Math.round((s.success||0)/total*100) : 0;
+    const given = data.LikesGivenByAPI;
+    const statusOk = data.status === 1;
     return `
     <div class="health-card">
-      <div class="health-icon">
-        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="1.8"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+      <div class="health-icon" style="border-color:${statusOk ? 'rgba(239,68,68,0.4)' : 'rgba(255,184,0,0.4)'};background:${statusOk ? 'rgba(239,68,68,0.07)' : 'rgba(255,184,0,0.07)'}">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="${statusOk ? '#ef4444' : 'none'}" stroke="${statusOk ? '#ef4444' : '#f59e0b'}" stroke-width="1.8"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
       </div>
-      <div class="health-status-text">Like Spam Complete</div>
+      <div class="health-status-text" style="color:${statusOk ? '#ef4444' : '#f59e0b'}">${statusOk ? '+'+given+' Likes!' : 'Like Spam Complete'}</div>
+
+      ${data.PlayerNickname ? `<div style="font-size:14px;color:var(--text-primary);font-weight:700">${esc(data.PlayerNickname)} <span style="color:var(--text-dim);font-weight:400;font-size:11px">UID: ${esc(data.UID||data.uid)}</span></div>` : ''}
+
+      <div class="rank-row" style="width:100%;max-width:400px;margin-top:4px">
+        <div class="rank-card">
+          <div class="rank-card-label">Before</div>
+          <div class="rank-name" style="color:var(--text-muted)">${data.LikesBeforeCommand !== null ? fmtNum(data.LikesBeforeCommand) : '—'}</div>
+        </div>
+        <div class="rank-card">
+          <div class="rank-card-label">After</div>
+          <div class="rank-name" style="color:#ef4444">${data.LikesAfterCommand !== null ? fmtNum(data.LikesAfterCommand) : '—'}</div>
+        </div>
+        <div class="rank-card" style="border-color:${statusOk ? 'rgba(34,197,94,0.3)' : 'rgba(255,184,0,0.3)'}">
+          <div class="rank-card-label">Given</div>
+          <div class="rank-name" style="color:${statusOk ? '#22c55e' : '#f59e0b'}">${given !== null ? (given > 0 ? '+'+given : given) : '—'}</div>
+        </div>
+      </div>
+
       <div class="health-meta">
         <span class="health-tag">region: ${esc(data.region || '—')}</span>
-        <span class="health-tag">uid: ${esc(data.uid || '—')}</span>
         <span class="health-tag" style="color:#22c55e">${s.success || 0} sent</span>
         <span class="health-tag" style="color:#ef4444">${s.failed || 0} failed</span>
         <span class="health-tag">delay: ${data.delayMs || 0}ms</span>
       </div>
-      <div class="progress-bar-wrap" style="margin-top:10px">
+      <div class="progress-bar-wrap" style="margin-top:6px">
         <div class="progress-bar" style="width:${pct}%;background:linear-gradient(90deg,#22c55e,#4ade80)"></div>
         <span class="progress-label">${pct}% success</span>
       </div>
