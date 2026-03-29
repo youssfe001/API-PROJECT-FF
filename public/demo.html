@@ -1175,7 +1175,9 @@
     return `<pre style="color:var(--text-primary);white-space:pre-wrap">${esc(JSON.stringify(data,null,2))}</pre>`;
   }
 
+  let _busy = false;
   async function call(url, action) {
+    if (_busy) return; _busy = true;
     if (activeBtn) activeBtn.classList.remove('active');
     activeBtn = document.querySelector(`[data-action="${action}"]`);
     if (activeBtn) activeBtn.classList.add('active', 'loading');
