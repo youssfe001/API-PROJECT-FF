@@ -12,6 +12,7 @@ app.use((req, res, next) => {
 });
 
 app.use(express.static(path.join(__dirname, "public")));
+app.use("/data", express.static(path.join(__dirname, "data")));
 
 app.get("/api/demo", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "demo.html"));
