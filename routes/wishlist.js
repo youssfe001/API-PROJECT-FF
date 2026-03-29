@@ -5,6 +5,7 @@ const { ffRequest, ffRequestEncrypted } = require("../lib/request");
 const { encodeProto } = require("../lib/proto");
 const { requireRegion, requireParam, requireUid } = require("../lib/validate");
 const { decodeVarint } = require("../lib/protobuf/varint");
+const { lookupItem } = require("../lib/items");
 
 function normalizeHex(value, name = "bodyHex") {
   const hex = requireParam(value, name).replace(/\s+/g, "").toLowerCase();
