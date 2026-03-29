@@ -922,6 +922,8 @@
   function renderLikeSpam(data) {
     const s = data.summary || {};
     const results = data.results || [];
+    const total = (s.success||0) + (s.failed||0);
+    const pct = total ? Math.round((s.success||0)/total*100) : 0;
     return `
     <div class="health-card">
       <div class="health-icon">
@@ -931,14 +933,18 @@
       <div class="health-meta">
         <span class="health-tag">region: ${esc(data.region || '—')}</span>
         <span class="health-tag">uid: ${esc(data.uid || '—')}</span>
-        <span class="health-tag" style="color:#22c55e">✓ ${s.success || 0}</span>
-        <span class="health-tag" style="color:#ef4444">✗ ${s.failed || 0}</span>
+        <span class="health-tag" style="color:#22c55e">${s.success || 0} sent</span>
+        <span class="health-tag" style="color:#ef4444">${s.failed || 0} failed</span>
         <span class="health-tag">delay: ${data.delayMs || 0}ms</span>
+      </div>
+      <div class="progress-bar-wrap" style="margin-top:10px">
+        <div class="progress-bar" style="width:${pct}%;background:linear-gradient(90deg,#22c55e,#4ade80)"></div>
+        <span class="progress-label">${pct}% success</span>
       </div>
     </div>
     ${results.length > 0 ? `
-    <div style="max-height:200px;overflow-y:auto;margin-top:12px;font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--text-secondary)">
-      ${results.map(r => `<div style="padding:2px 0">${r.ok ? '✅' : '❌'} #${r.index} ${r.error ? '— '+esc(r.error) : ''}</div>`).join('')}
+    <div class="like-results-feed">
+      ${results.map(r => `<div class="like-result-row ${r.ok?'ok':'fail'}">${r.ok ? '<span class="like-ok">&#10003;</span>' : '<span class="like-fail">&#10007;</span>'} #${r.index} ${r.error ? '<span class="like-err">'+esc(r.error)+'</span>' : ''}</div>`).join('')}
     </div>` : ''}`;
   }
 
