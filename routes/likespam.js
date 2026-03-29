@@ -87,24 +87,31 @@ router.post("/like-spam", async (req, res, next) => {
     const likesBefore = before?.likes ?? null;
     const playerName  = before?.nickname ?? "";
 
-    // Step 2: Build LikeProfile protobuf & send N requests
+    // Step 2: Build LikeProfile protobuf & send N requests in parallel batches
     const protoBuf = encodeProto({ uid: uid, region: region }, "LikeProfile.request");
     const hexBody  = protoBuf.toString("hex");
 
+    const BATCH_SIZE = 20; // concurrent batch size (like asyncio.gather)
     const results = [];
     let success = 0;
     let failed  = 0;
 
-    for (let i = 0; i < count; i++) {
-      try {
-        await ffRequest({ region, endpoint: FF_ENDPOINTS.LIKE_PROFILE, hexBody });
-        success++;
-        results.push({ index: i + 1, ok: true });
-      } catch (err) {
-        failed++;
-        results.push({ index: i + 1, ok: false, error: err.message });
+    for (let start = 0; start < count; start += BATCH_SIZE) {
+      const batchEnd = Math.min(start + BATCH_SIZE, count);
+      const batch = [];
+      for (let i = start; i < batchEnd; i++) {
+        batch.push(
+          ffRequest({ region, endpoint: FF_ENDPOINTS.LIKE_PROFILE, hexBody })
+            .then(() => ({ index: i + 1, ok: true }))
+            .catch((err) => ({ index: i + 1, ok: false, error: err.message }))
+        );
       }
-      if (i < count - 1) await wait(delayMs);
+      const batchResults = await Promise.all(batch);
+      for (const r of batchResults) {
+        results.push(r);
+        if (r.ok) success++; else failed++;
+      }
+      if (start + BATCH_SIZE < count && delayMs > 0) await wait(delayMs);
     }
 
     // Step 3: Get likes AFTER
