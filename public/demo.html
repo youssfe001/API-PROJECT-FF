@@ -677,11 +677,12 @@
   ═══════════════════════════════════════════════════ */
 
   function renderAccount(data) {
-    const b = data.response?.basicInfo || {};
-    const s = data.response?.socialInfo || {};
-    const c = data.response?.clanBasicInfo;
-    const p = data.response?.petInfo;
+    const b  = data.response?.basicInfo || {};
+    const s  = data.response?.socialInfo || {};
+    const c  = data.response?.clanBasicInfo;
+    const p  = data.response?.petInfo;
     const cr = data.response?.creditScoreInfo;
+    const ir = data.response?.itemsResolved || {};
 
     const brRN = brRankName(b.rank);
     const csRN = csRankName(b.csRank);
@@ -694,12 +695,15 @@
         <div class="player-avatar">${esc(initials(b.nickname))}</div>
         <div class="player-meta">
           <div class="player-name">${esc(b.nickname || 'Unknown')}</div>
-          <div class="player-uid">UID: ${esc(b.accountId || data.uid)} &nbsp;·&nbsp; ${esc(b.region || data.region)}</div>
+          <div class="player-uid">UID: ${esc(b.accountId || data.uid)} &nbsp;·&nbsp; ${esc(b.region || data.region)}
+            ${b.lastLoginAt ? ` &nbsp;·&nbsp; <span style="color:var(--text-dim);font-size:11px">Last seen: ${timeAgo(b.lastLoginAt)}</span>` : ''}
+          </div>
           <div class="player-chips">
             ${b.level  ? `<span class="chip chip-level">LV ${b.level}</span>` : ''}
             ${b.region ? `<span class="chip chip-region">${esc(b.region)}</span>` : ''}
             ${b.haselitepass ? `<span class="chip chip-elite">ELITE PASS</span>` : ''}
-            ${c?.clanName ? `<span class="chip chip-clan">${esc(c.clanName)}</span>` : ''}
+            ${c?.clanName ? `<span class="chip chip-clan">${esc(c.clanName)} Lv${c.clanLevel||'?'}</span>` : ''}
+            ${b.releaseVersion ? `<span class="chip" style="background:rgba(255,255,255,.06);color:var(--text-dim)">${esc(b.releaseVersion)}</span>` : ''}
           </div>
         </div>
       </div>
@@ -709,11 +713,13 @@
           <div class="rank-card-label">BR Rank</div>
           <div class="rank-name" style="color:${brC}">${brRN}</div>
           ${b.rankingPoints ? `<div class="rank-pts">${fmtNum(b.rankingPoints)} pts</div>` : ''}
+          ${b.maxRank ? `<div class="rank-pts" style="color:var(--text-dim)">Peak: ${brRankName(b.maxRank)}</div>` : ''}
         </div>
         <div class="rank-card">
           <div class="rank-card-label">CS Rank</div>
           <div class="rank-name" style="color:${csC}">${csRN}</div>
           ${b.csRankingPoints ? `<div class="rank-pts">${fmtNum(b.csRankingPoints)} pts</div>` : ''}
+          ${b.csMaxRank ? `<div class="rank-pts" style="color:var(--text-dim)">Peak: ${csRankName(b.csMaxRank)}</div>` : ''}
         </div>
       </div>
 
@@ -728,12 +734,31 @@
         </div>
         <div class="info-block">
           <div class="info-block-label">Credit Score</div>
-          <div class="info-block-val ${cr?.creditScore >= 90 ? 'ok' : ''}">${cr?.creditScore ?? '—'}</div>
+          <div class="info-block-val ${(cr?.creditScore||0) >= 90 ? 'ok' : ''}">${cr?.creditScore ?? '—'}</div>
         </div>
-        ${b.title ? `<div class="info-block"><div class="info-block-label">Title ID</div><div class="info-block-val">${b.title}</div></div>` : ''}
-        ${p?.name ? `<div class="info-block"><div class="info-block-label">Pet</div><div class="info-block-val">${esc(p.name)} Lv${p.level}</div></div>` : ''}
-        ${b.badgeId ? `<div class="info-block"><div class="info-block-label">Badge</div><div class="info-block-val">${b.badgeId}</div></div>` : ''}
+        ${ir.title?.name ? `<div class="info-block"><div class="info-block-label">Title</div><div class="info-block-val" style="color:${rareColor(ir.title.rare)}">${esc(ir.title.name)}</div></div>` : b.title ? `<div class="info-block"><div class="info-block-label">Title</div><div class="info-block-val">#${b.title}</div></div>` : ''}
+        ${p?.name ? `<div class="info-block"><div class="info-block-label">Pet</div><div class="info-block-val">${esc(p.name)} Lv${p.level||'?'}</div></div>` : ''}
+        ${ir.badge?.name ? `<div class="info-block"><div class="info-block-label">Badge</div><div class="info-block-val" style="color:${rareColor(ir.badge.rare)}">${esc(ir.badge.name)}</div></div>` : b.badgeId ? `<div class="info-block"><div class="info-block-label">Badge</div><div class="info-block-val">#${b.badgeId}</div></div>` : ''}
+        ${b.createAt ? `<div class="info-block"><div class="info-block-label">Created</div><div class="info-block-val" style="font-size:11px">${new Date(Number(b.createAt)*1000).toLocaleDateString()}</div></div>` : ''}
       </div>
+
+      ${ir.clothes?.length ? `
+      <div class="items-section">
+        <div class="items-section-label">Equipped Items</div>
+        <div class="items-chips">${ir.clothes.map(c => resolvedChip(c, 'Outfit')).join('')}</div>
+      </div>` : ''}
+
+      ${ir.weaponSkins?.length ? `
+      <div class="items-section">
+        <div class="items-section-label">Weapon Skins</div>
+        <div class="items-chips">${ir.weaponSkins.map(w => resolvedChip(w, 'Weapon')).join('')}</div>
+      </div>` : ''}
+
+      ${ir.skills?.length ? `
+      <div class="items-section">
+        <div class="items-section-label">Equipped Skills</div>
+        <div class="items-chips">${ir.skills.map(sk => resolvedChip(sk, 'Skill')).join('')}</div>
+      </div>` : ''}
 
       ${s.signature ? `<div class="sig-block">"${esc(s.signature)}"</div>` : ''}
     </div>`;
