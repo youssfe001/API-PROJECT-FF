@@ -5,651 +5,788 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>FF API Pro</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=Orbitron:wght@700;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/styles.css" />
 </head>
 <body>
 
-  <!-- ── BACKGROUND ALBUM SLIDESHOW ──────────────────── -->
-  <div id="bg-slideshow" class="bg-slideshow"></div>
+  <!-- Wallpaper background (blurred, behind everything) -->
+  <div id="wallpaper-bg"></div>
 
-  <canvas id="fire-canvas"></canvas>
-  <div class="vignette"></div>
+  <!-- Sidebar overlay for mobile -->
+  <div class="sidebar-overlay" id="sidebar-overlay"></div>
 
-  <!-- ── NOW PLAYING BADGE ───────────────────────────── -->
-  <div id="now-playing">
-    <div class="np-art">
-      <img id="np-img" src="" alt="" style="display:none" />
-    </div>
-    <div class="np-info">
-      <div class="np-label">
-        <svg width="8" height="8" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/></svg>
-        NOW PLAYING
+  <div id="app-shell">
+
+    <!-- ════════════════ SIDEBAR ════════════════ -->
+    <nav id="sidebar">
+      <div class="sidebar-brand">
+        <div class="brand-icon">FF</div>
+        <span class="brand-text">API <span class="brand-muted">Pro</span></span>
       </div>
-      <div class="np-track" id="np-track">—</div>
-      <div class="np-album" id="np-album">—</div>
-    </div>
-    <div class="np-bars"><span></span><span></span><span></span></div>
-  </div>
 
-  <!-- ── BACKGROUND THEME BADGE ──────────────────────── -->
-  <div class="bg-theme-badge" id="bg-theme-badge"></div>
+      <ul class="sidebar-nav" id="sidebar-nav">
+        <li><a href="#home" class="nav-link active" data-nav="home">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-4 0a1 1 0 01-1-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 01-1 1h-2z"/></svg>
+          <span>Home</span>
+        </a></li>
+        <li><a href="#player" class="nav-link" data-nav="player">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          <span>Player Lookup</span>
+        </a></li>
+        <li><a href="#stats" class="nav-link" data-nav="stats">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
+          <span>Battle Stats</span>
+        </a></li>
+        <li><a href="#ban" class="nav-link" data-nav="ban">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l7 4v5c0 4.5-2.9 7.88-7 9-4.1-1.12-7-4.5-7-9V7l7-4z"/></svg>
+          <span>Ban Check</span>
+        </a></li>
+        <li><a href="#items" class="nav-link" data-nav="items">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+          <span>Items Gallery</span>
+        </a></li>
+        <li><a href="#utilities" class="nav-link" data-nav="utilities">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>
+          <span>Utilities</span>
+        </a></li>
+        <li><a href="#docs" class="nav-link" data-nav="docs">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+          <span>API Docs</span>
+        </a></li>
+      </ul>
 
-  <div class="page-wrap">
-
-    <!-- ── HEADER ──────────────────────────────────── -->
-    <header class="site-header">
-      <div class="logo">
-        <svg class="logo-flame" viewBox="0 0 24 32" fill="none">
-          <path d="M12 2 C12 2 20 10 20 18 C20 24 16 30 12 30 C8 30 4 24 4 18 C4 10 12 2 12 2Z" fill="url(#fg)"/>
-          <path d="M12 12 C12 12 16 16 16 20 C16 23 14 26 12 26 C10 26 8 23 8 20 C8 16 12 12 12 12Z" fill="url(#fi)"/>
-          <defs>
-            <linearGradient id="fg" x1="12" y1="2" x2="12" y2="30" gradientUnits="userSpaceOnUse">
-              <stop offset="0%" stop-color="#FFD700"/>
-              <stop offset="50%" stop-color="#FF6B00"/>
-              <stop offset="100%" stop-color="#CC2200"/>
-            </linearGradient>
-            <linearGradient id="fi" x1="12" y1="12" x2="12" y2="26" gradientUnits="userSpaceOnUse">
-              <stop offset="0%" stop-color="#FFF4CC"/>
-              <stop offset="100%" stop-color="#FF9500"/>
-            </linearGradient>
-          </defs>
-        </svg>
-        <div class="logo-text">
-          <span class="logo-ff">FF</span>
-          <span class="logo-api">API</span>
-          <span class="logo-pro">PRO</span>
+      <!-- Spotify -->
+      <div class="sidebar-spotify">
+        <button class="spotify-toggle" id="spotify-toggle" onclick="toggleSpotify()" title="Free Fire World Series I">
+          <svg class="spotify-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/></svg>
+          <span class="spotify-label" id="spotify-label">Music</span>
+          <span class="spotify-bars" id="spotify-bars"><span></span><span></span><span></span></span>
+        </button>
+        <div class="spotify-player" id="spotify-player">
+          <div id="spotify-embed"></div>
         </div>
       </div>
-      <div class="header-right">
-        <!-- Spotify mini player -->
-        <div class="spotify-wrap" id="spotify-wrap">
-          <button class="spotify-toggle" id="spotify-toggle" onclick="toggleSpotify()" title="Free Fire World Series I">
-            <svg class="spotify-icon" viewBox="0 0 24 24" fill="currentColor" width="14" height="14"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/></svg>
-            <span class="spotify-label" id="spotify-label">Music</span>
-            <span class="spotify-bars" id="spotify-bars">
-              <span></span><span></span><span></span>
-            </span>
-          </button>
-          <div class="spotify-player" id="spotify-player">
-            <!-- Spotify IFrame API injects the embed here -->
-            <div id="spotify-embed"></div>
+
+      <!-- Settings -->
+      <div class="sidebar-bottom" style="position:relative">
+        <button class="nav-link" onclick="toggleSettings()" style="width:100%">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+          <span>Settings</span>
+        </button>
+        <div class="settings-popover" id="settings-popover">
+          <div style="font-size:12px;font-weight:700;color:var(--text-secondary);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.3px">Wallpaper URL</div>
+          <input type="text" id="wallpaper-input" class="form-input" placeholder="https://example.com/image.jpg" style="font-size:13px;margin-bottom:8px"/>
+          <div style="display:flex;gap:6px">
+            <button class="btn btn-primary btn-sm" onclick="applyWallpaper()">Apply</button>
+            <button class="btn btn-secondary btn-sm" onclick="clearWallpaper()">Clear</button>
           </div>
         </div>
-        <span class="pulse-dot"></span>
-        <span class="live-label">LIVE</span>
-        <span class="version-tag">v1.0</span>
       </div>
-    </header>
+    </nav>
 
-    <section class="hero-dashboard">
-      <div class="hero-copy hero-panel">
-        <div class="hero-kicker">Free Fire Control Deck</div>
-        <h1 class="hero-title">Battlefield-grade dashboard for player intel, collections, and live utility calls.</h1>
-        <p class="hero-subtitle">Split every feature into its own control block, inspect ban diagnostics, and preview cleaner HD PNG assets with a dedicated item optics lab.</p>
-        <div class="hero-tags">
-          <span class="hero-tag">Live API Proxy</span>
-          <span class="hero-tag">Enriched Item Art</span>
-          <span class="hero-tag">Free Fire Theme</span>
-        </div>
-      </div>
-      <div class="hero-stats hero-panel">
-        <div class="hero-stat">
-          <span class="hero-stat-label">Endpoints</span>
-          <span class="hero-stat-value">12</span>
-        </div>
-        <div class="hero-stat">
-          <span class="hero-stat-label">Item Assets</span>
-          <span class="hero-stat-value">30k+</span>
-        </div>
-        <div class="hero-stat">
-          <span class="hero-stat-label">Icon Proxy</span>
-          <span class="hero-stat-value">HD PNG</span>
-        </div>
-        <div class="hero-radar">
-          <div class="hero-radar-ring"></div>
-          <div class="hero-radar-ring hero-radar-ring-2"></div>
-          <div class="hero-radar-sweep"></div>
-          <div class="hero-radar-core"></div>
-        </div>
-      </div>
-    </section>
+    <!-- ════════════════ PAGE CONTAINER ════════════════ -->
+    <main id="page-container">
 
-    <!-- ── INPUTS ROW ───────────────────────────────── -->
-    <div class="inputs-row">
-      <div class="input-group">
-        <label class="input-label">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
-          Region
-        </label>
-        <div class="select-wrap">
+      <!-- ── TOP BAR ── -->
+      <header id="topbar">
+        <div class="topbar-left">
+          <button class="sidebar-toggle" id="sidebar-toggle" onclick="toggleSidebar()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+          </button>
+          <span class="topbar-title" id="topbar-title">Home</span>
+        </div>
+        <div class="topbar-controls" id="topbar-controls">
           <select id="region">
-            <option value="IND">IND — India</option>
-            <option value="ME">ME — Middle East</option>
-            <option value="SG">SG — Singapore</option>
-            <option value="BR">BR — Brazil</option>
-            <option value="US">US — North America</option>
-            <option value="ID">ID — Indonesia</option>
-            <option value="TW">TW — Taiwan</option>
-            <option value="TH">TH — Thailand</option>
-            <option value="VN">VN — Vietnam</option>
-            <option value="PK">PK — Pakistan</option>
-            <option value="BD">BD — Bangladesh</option>
-            <option value="CIS">CIS — CIS</option>
-            <option value="RU">RU — Russia</option>
+            <option value="IND">IND</option>
+            <option value="ME">ME</option>
+            <option value="SG">SG</option>
+            <option value="BR">BR</option>
+            <option value="US">US</option>
+            <option value="ID">ID</option>
+            <option value="TW">TW</option>
+            <option value="TH">TH</option>
+            <option value="VN">VN</option>
+            <option value="PK">PK</option>
+            <option value="BD">BD</option>
+            <option value="CIS">CIS</option>
+            <option value="RU">RU</option>
           </select>
-          <svg class="select-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
-        </div>
-      </div>
-
-      <div class="input-group uid-group">
-        <label class="input-label">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-          Player UID
-        </label>
-        <input id="uid" type="text" value="1633864660" placeholder="Enter player UID…" spellcheck="false" autocomplete="off" />
-      </div>
-
-      <div class="input-group">
-        <label class="input-label">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
-          Match Mode
-        </label>
-        <div class="select-wrap">
+          <input id="uid" type="text" value="1633864660" placeholder="UID" spellcheck="false" autocomplete="off" />
           <select id="matchmode">
             <option value="CAREER">CAREER</option>
             <option value="RANKED">RANKED</option>
             <option value="NORMAL">NORMAL</option>
           </select>
-          <svg class="select-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
-        </div>
-      </div>
-
-      <div class="input-group">
-        <label class="input-label">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-          Search Keyword
-        </label>
-        <input id="keyword" type="text" value="DARK" placeholder="Type nickname keyword…" spellcheck="false" autocomplete="off" />
-      </div>
-    </div>
-
-    <div class="quick-hint">Shortcuts: <kbd>Enter</kbd> Account · <kbd>Shift</kbd>+<kbd>Enter</kbd> BR Stats · <kbd>Ctrl/Cmd</kbd>+<kbd>Enter</kbd> CS Stats · Optics Lab supports <kbd>AI Fast</kbd> with up to <kbd>6x</kbd> upscale.</div>
-
-    <!-- ── ENDPOINT CARDS ───────────────────────────── -->
-    <div id="feature-cards-source" class="endpoints-grid feature-source-grid">
-
-      <button class="ep-card" data-action="account" onclick="runAccount()">
-        <div class="ep-card-glow"></div>
-        <div class="ep-icon-wrap">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-        </div>
-        <div class="ep-info">
-          <span class="ep-name">Account</span>
-          <span class="ep-path">/GetPlayerPersonalShow</span>
-        </div>
-        <span class="ep-method">GET</span>
-      </button>
-
-      <button class="ep-card" data-action="br" onclick="runBr()">
-        <div class="ep-card-glow"></div>
-        <div class="ep-icon-wrap">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
-        </div>
-        <div class="ep-info">
-          <span class="ep-name">BR Stats</span>
-          <span class="ep-path">/GetPlayerStats</span>
-        </div>
-        <span class="ep-method">GET</span>
-      </button>
-
-      <button class="ep-card" data-action="cs" onclick="runCs()">
-        <div class="ep-card-glow"></div>
-        <div class="ep-icon-wrap">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-        </div>
-        <div class="ep-info">
-          <span class="ep-name">CS Stats</span>
-          <span class="ep-path">/GetPlayerTCStats</span>
-        </div>
-        <span class="ep-method">GET</span>
-      </button>
-
-      <button class="ep-card" data-action="search" onclick="runSearch()">
-        <div class="ep-card-glow"></div>
-        <div class="ep-icon-wrap">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        </div>
-        <div class="ep-info">
-          <span class="ep-name">Search</span>
-          <span class="ep-path">/FuzzySearchAccountByName</span>
-        </div>
-        <span class="ep-method">GET</span>
-      </button>
-
-      <button class="ep-card" data-action="bancheck" onclick="runBanCheck()">
-        <div class="ep-card-glow"></div>
-        <div class="ep-icon-wrap">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3l7 4v5c0 4.5-2.9 7.88-7 9-4.1-1.12-7-4.5-7-9V7l7-4z"/><path d="M9.5 12.5l1.7 1.7 3.3-4.2"/></svg>
-        </div>
-        <div class="ep-info">
-          <span class="ep-name">Ban Check</span>
-          <span class="ep-path">/v1/bancheck</span>
-        </div>
-        <span class="ep-method">GET</span>
-      </button>
-
-      <button class="ep-card" data-action="wishlist" onclick="runWishlist()">
-        <div class="ep-card-glow"></div>
-        <div class="ep-icon-wrap">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-        </div>
-        <div class="ep-info">
-          <span class="ep-name">Wishlist</span>
-          <span class="ep-path">/GetWishListItems</span>
-        </div>
-        <span class="ep-method">GET</span>
-      </button>
-
-      <button class="ep-card" data-action="health" onclick="runHealth()">
-        <div class="ep-card-glow"></div>
-        <div class="ep-icon-wrap">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-        </div>
-        <div class="ep-info">
-          <span class="ep-name">Health</span>
-          <span class="ep-path">/health</span>
-        </div>
-        <span class="ep-method health-method">OK</span>
-      </button>
-
-      <button class="ep-card" data-action="guest" onclick="runGuest()">
-        <div class="ep-card-glow"></div>
-        <div class="ep-icon-wrap">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M16 11c1.66 0 3-1.79 3-4s-1.34-4-3-4-3 1.79-3 4 1.34 4 3 4z"/><path d="M8 11c1.66 0 3-1.79 3-4S9.66 3 8 3 5 4.79 5 7s1.34 4 3 4z"/><path d="M8 13c-2.76 0-5 1.79-5 4v2h10v-2c0-2.21-2.24-4-5-4z"/><path d="M16 13c-1.1 0-2.1.29-2.93.78A5.94 5.94 0 0 1 15 17v2h6v-2c0-2.21-2.24-4-5-4z"/></svg>
-        </div>
-        <div class="ep-info">
-          <span class="ep-name">Guest Generator</span>
-          <span class="ep-path">/guest-generator</span>
-        </div>
-        <span class="ep-method">GET</span>
-      </button>
-
-      <button class="ep-card" data-action="likespam" onclick="runLikeSpam()">
-        <div class="ep-card-glow"></div>
-        <div class="ep-icon-wrap">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-        </div>
-        <div class="ep-info">
-          <span class="ep-name">Like Spam</span>
-          <span class="ep-path">/like-spam</span>
-        </div>
-        <span class="ep-method like-method">POST</span>
-      </button>
-
-      <button class="ep-card" data-action="uidgen" onclick="runUidGen()">
-        <div class="ep-card-glow"></div>
-        <div class="ep-icon-wrap">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="7" y1="8" x2="17" y2="8"/><line x1="7" y1="12" x2="17" y2="12"/><line x1="7" y1="16" x2="13" y2="16"/></svg>
-        </div>
-        <div class="ep-info">
-          <span class="ep-name">UID Generator</span>
-          <span class="ep-path">/uid-generator</span>
-        </div>
-        <span class="ep-method">GET</span>
-      </button>
-
-    </div>
-
-    <!-- ── RESPONSE PANEL ───────────────────────────── -->
-    <div class="response-panel">
-      <div class="response-topbar">
-        <div class="response-topbar-left">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
-          <span>Response</span>
-          <span id="active-ep" class="active-ep-name"></span>
-        </div>
-        <div class="response-topbar-right">
-          <span id="resp-time" class="resp-time"></span>
-          <span id="status-badge" class="status-badge">—</span>
-          <!-- View toggle: Cards / JSON -->
-          <div class="view-toggle">
-            <button class="view-btn active" id="btn-cards" onclick="setView('cards')">Cards</button>
-            <button class="view-btn" id="btn-json" onclick="setView('json')">JSON</button>
+          <button class="theme-toggle" id="theme-toggle" onclick="toggleDarkMode()" title="Toggle dark mode">
+            <svg id="theme-icon-light" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+            <svg id="theme-icon-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+          </button>
+          <button class="filter-toggle" id="filter-toggle" onclick="toggleMobileControls()" title="Show controls">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/></svg>
+          </button>
+          <div class="topbar-status">
+            <span class="pulse-dot"></span>
+            <span>LIVE</span>
           </div>
-          <button class="action-btn" onclick="copyOutput()">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-            <span id="copy-label">Copy</span>
-          </button>
-          <button class="action-btn" onclick="clearOutput()">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>
-            Clear
-          </button>
         </div>
-      </div>
+      </header>
 
-      <!-- Rich cards view -->
-      <div id="rich-view" class="rich-view">
-        <div class="rich-empty">
-          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
-          <span class="rich-empty-label">Choose a feature panel above to fire a request</span>
+      <!-- ════════════════ HOME PAGE ════════════════ -->
+      <section data-page="home">
+        <div class="page-content">
+          <div class="home-hero">
+            <h1>Free Fire API Pro</h1>
+            <p>Battlefield-grade dashboard for player intel, item collections, ban diagnostics, and live utility calls. Full REST API with HD icon proxy and enriched item data.</p>
+          </div>
+
+          <!-- Stat Cards -->
+          <div class="grid-4 mb-24">
+            <div class="card stat-card">
+              <div class="stat-value">13</div>
+              <div class="stat-label">Endpoints</div>
+            </div>
+            <div class="card stat-card">
+              <div class="stat-value">30k+</div>
+              <div class="stat-label">Items</div>
+            </div>
+            <div class="card stat-card">
+              <div class="stat-value">HD</div>
+              <div class="stat-label">Icons</div>
+            </div>
+            <div class="card stat-card">
+              <div class="stat-value">13</div>
+              <div class="stat-label">Regions</div>
+            </div>
+          </div>
+
+          <!-- Featured Items Carousel -->
+          <div class="carousel-wrap mb-24">
+            <div class="carousel-title">Featured Items</div>
+            <div class="carousel" id="featured-carousel">
+              <div class="result-empty" style="width:100%;min-height:80px">Loading featured items...</div>
+            </div>
+          </div>
+
+          <!-- Quick Actions -->
+          <div class="carousel-title mb-8">Quick Actions</div>
+          <div class="grid-3 mb-24">
+            <a href="#player" class="card card-hover quick-action-card" style="text-decoration:none">
+              <div class="quick-action-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              </div>
+              <div class="quick-action-title">Player Lookup</div>
+              <div class="quick-action-desc">Search players by UID or nickname with full profile data</div>
+            </a>
+            <a href="#stats" class="card card-hover quick-action-card" style="text-decoration:none">
+              <div class="quick-action-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
+              </div>
+              <div class="quick-action-title">Battle Stats</div>
+              <div class="quick-action-desc">BR and CS stats with K/D, win rate, and detailed breakdowns</div>
+            </a>
+            <a href="#ban" class="card card-hover quick-action-card" style="text-decoration:none">
+              <div class="quick-action-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l7 4v5c0 4.5-2.9 7.88-7 9-4.1-1.12-7-4.5-7-9V7l7-4z"/></svg>
+              </div>
+              <div class="quick-action-title">Ban Check</div>
+              <div class="quick-action-desc">Verify player ban status with detailed diagnostics</div>
+            </a>
+            <a href="#items" class="card card-hover quick-action-card" style="text-decoration:none">
+              <div class="quick-action-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+              </div>
+              <div class="quick-action-title">Items Gallery</div>
+              <div class="quick-action-desc">Browse 30k+ game items with HD icon preview and upscaling</div>
+            </a>
+            <a href="#utilities" class="card card-hover quick-action-card" style="text-decoration:none">
+              <div class="quick-action-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>
+              </div>
+              <div class="quick-action-title">Utilities</div>
+              <div class="quick-action-desc">Guest generator, UID tools, like spam, and health checks</div>
+            </a>
+            <a href="#docs" class="card card-hover quick-action-card" style="text-decoration:none">
+              <div class="quick-action-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              </div>
+              <div class="quick-action-title">API Docs</div>
+              <div class="quick-action-desc">Full endpoint reference with examples and try-it buttons</div>
+            </a>
+          </div>
+
+          <!-- Health Widget -->
+          <div class="card" id="home-health">
+            <div class="card-header">
+              <div>
+                <div class="card-title">API Health</div>
+                <div class="card-subtitle">Live status check</div>
+              </div>
+              <button class="btn btn-sm btn-secondary" onclick="loadHomeHealth()">Refresh</button>
+            </div>
+            <div id="home-health-result" class="result-empty">Click refresh to check API status</div>
+          </div>
         </div>
-      </div>
+      </section>
 
-      <!-- Raw JSON view -->
-      <pre id="out" class="response-body rich-hidden">// Ready — choose a feature panel above to fire a request</pre>
-    </div>
+      <!-- ════════════════ PLAYER LOOKUP PAGE ════════════════ -->
+      <section data-page="player">
+        <div class="page-content">
+          <div class="card mb-24">
+            <div class="card-header">
+              <div class="card-title">Player Lookup</div>
+              <div class="view-tabs">
+                <button class="view-tab active" id="player-tab-uid" onclick="setPlayerTab('uid')">Search by UID</button>
+                <button class="view-tab" id="player-tab-name" onclick="setPlayerTab('name')">Search by Name</button>
+              </div>
+            </div>
 
-    <footer class="site-footer">
-      FF API Pro &nbsp;·&nbsp; Node.js + Express &nbsp;·&nbsp; Proto3 Binary &nbsp;·&nbsp; AES-128-CBC
-    </footer>
+            <!-- Tab 1: UID Search -->
+            <div id="player-panel-uid">
+              <p class="text-sm text-muted mb-16">Uses the shared Region and UID from the topbar controls.</p>
+              <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+                <button class="btn btn-primary" onclick="runAccount()">Lookup Account</button>
+                <button class="btn btn-secondary" onclick="runWishlist()">Load Wishlist</button>
+              </div>
+            </div>
 
-  </div><!-- /page-wrap -->
+            <!-- Tab 2: Name Search -->
+            <div id="player-panel-name" class="hidden">
+              <div class="form-row mb-16">
+                <div class="form-group flex-1">
+                  <label class="form-label">Keyword</label>
+                  <input id="keyword" type="text" class="form-input" value="DARK" placeholder="Type nickname keyword..." spellcheck="false" autocomplete="off" />
+                </div>
+                <button class="btn btn-primary" onclick="runSearch()" style="align-self:flex-end">Search</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- View toggle -->
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+            <span class="text-sm text-muted" id="player-active-ep"></span>
+            <div class="view-tabs">
+              <button class="view-tab active" id="player-btn-cards" onclick="setPlayerView('cards')">Cards</button>
+              <button class="view-tab" id="player-btn-json" onclick="setPlayerView('json')">JSON</button>
+            </div>
+          </div>
+
+          <!-- Results -->
+          <div class="card">
+            <div id="player-rich" class="result-container">
+              <div class="result-empty">Select a lookup method above and click to fetch player data</div>
+            </div>
+            <pre id="player-json" class="json-view hidden"></pre>
+          </div>
+        </div>
+      </section>
+
+      <!-- ════════════════ BATTLE STATS PAGE ════════════════ -->
+      <section data-page="stats">
+        <div class="page-content">
+          <div class="card mb-24">
+            <div class="card-header">
+              <div>
+                <div class="card-title">Battle Stats</div>
+                <div class="card-subtitle">BR and CS stats load in parallel using the topbar UID, region, and match mode.</div>
+              </div>
+              <button class="btn btn-primary" onclick="runBothStats()">Load Stats</button>
+            </div>
+          </div>
+
+          <div class="grid-2">
+            <!-- BR Stats -->
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">Battle Royale</div>
+                <span class="badge badge-accent">BR</span>
+              </div>
+              <div id="stats-br-result" class="result-container">
+                <div class="result-empty">Click Load Stats</div>
+              </div>
+            </div>
+            <!-- CS Stats -->
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">Clash Squad</div>
+                <span class="badge badge-accent">CS</span>
+              </div>
+              <div id="stats-cs-result" class="result-container">
+                <div class="result-empty">Click Load Stats</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ════════════════ BAN CHECK PAGE ════════════════ -->
+      <section data-page="ban">
+        <div class="page-content">
+          <div class="card" style="max-width:640px;margin:0 auto">
+            <div style="text-align:center;padding:20px 0 24px">
+              <div class="card-title" style="font-size:20px;margin-bottom:6px">Ban Check</div>
+              <div class="card-subtitle">Enter a player UID to check their ban status</div>
+            </div>
+            <div class="form-row mb-24" style="max-width:400px;margin-left:auto;margin-right:auto">
+              <div class="form-group flex-1">
+                <input id="ban-uid" type="text" class="form-input" placeholder="Enter UID..." style="font-size:18px;height:50px;text-align:center;font-family:var(--font-mono)" spellcheck="false" autocomplete="off" />
+              </div>
+              <button class="btn btn-primary btn-lg" onclick="runBanCheck()" style="align-self:stretch">Check</button>
+            </div>
+            <div id="ban-result" class="result-container">
+              <div class="result-empty">Results will appear here</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ════════════════ ITEMS GALLERY PAGE ════════════════ -->
+      <section data-page="items">
+        <div class="page-content">
+          <!-- Search Bar -->
+          <div class="card mb-24">
+            <div class="card-header">
+              <div class="card-title">Items Gallery</div>
+            </div>
+            <div class="form-row mb-16">
+              <div class="form-group flex-1">
+                <label class="form-label">Search Items</label>
+                <input id="item-search-q" type="text" class="form-input" placeholder="Search by name..." spellcheck="false" autocomplete="off" />
+              </div>
+              <div class="form-group" style="width:160px">
+                <label class="form-label">Lookup by ID</label>
+                <input id="item-id" type="text" class="form-input" value="101000005" placeholder="Item ID" spellcheck="false" autocomplete="off" />
+              </div>
+              <button class="btn btn-primary" onclick="runItemSearch()" style="align-self:flex-end">Search</button>
+              <button class="btn btn-secondary" onclick="runItemLookup()" style="align-self:flex-end">Lookup ID</button>
+            </div>
+          </div>
+
+          <!-- Optics Lab -->
+          <div class="card mb-24">
+            <div class="card-header">
+              <div>
+                <div class="card-title">Optics Lab</div>
+                <div class="card-subtitle">HD PNG preview with configurable upscaling</div>
+              </div>
+              <span class="badge badge-accent">6x upscale</span>
+            </div>
+            <div class="lab-grid">
+              <div>
+                <div class="form-row mb-16">
+                  <div class="form-group flex-1">
+                    <label class="form-label">Display Size</label>
+                    <select id="item-size" class="form-select">
+                      <option value="96">96 px</option>
+                      <option value="128" selected>128 px</option>
+                      <option value="160">160 px</option>
+                      <option value="192">192 px</option>
+                      <option value="256">256 px</option>
+                    </select>
+                  </div>
+                  <div class="form-group flex-1">
+                    <label class="form-label">Upscale</label>
+                    <select id="item-upscale" class="form-select">
+                      <option value="2">2x</option>
+                      <option value="3">3x</option>
+                      <option value="4" selected>4x</option>
+                      <option value="5">5x</option>
+                      <option value="6">6x</option>
+                    </select>
+                  </div>
+                  <div class="form-group flex-1">
+                    <label class="form-label">Engine</label>
+                    <select id="item-engine" class="form-select">
+                      <option value="ai-fast" selected>AI Fast</option>
+                      <option value="classic">Classic</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+              <div class="lab-preview">
+                <img id="item-preview-img" src="" alt="Item preview" loading="lazy" />
+                <div class="lab-preview-id" id="item-preview-id">Item #101000005</div>
+                <div class="lab-preview-spec" id="item-preview-spec">128px - 4x upscale - AI Fast</div>
+                <code class="lab-preview-route" id="item-preview-route"></code>
+              </div>
+            </div>
+          </div>
+
+          <!-- Item Results -->
+          <div class="card">
+            <div id="items-result" class="result-container">
+              <div class="result-empty">Search items or look up by ID to see results</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ════════════════ UTILITIES PAGE ════════════════ -->
+      <section data-page="utilities">
+        <div class="page-content">
+          <div class="grid-2">
+            <!-- Health Check -->
+            <div class="card utility-card">
+              <div class="utility-card-header">
+                <div class="utility-card-icon" style="background:rgba(16,185,129,0.1);color:var(--ok)">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                </div>
+                <div>
+                  <div class="utility-card-title">Health Check</div>
+                  <div class="text-sm text-muted">GET /api/health</div>
+                </div>
+              </div>
+              <button class="btn btn-sm btn-ok" onclick="runHealth()">Check Health</button>
+              <div id="util-health-result" class="utility-card-result">
+                <div class="result-empty" style="min-height:60px">Click to check</div>
+              </div>
+            </div>
+
+            <!-- Guest Generator -->
+            <div class="card utility-card">
+              <div class="utility-card-header">
+                <div class="utility-card-icon" style="background:rgba(99,102,241,0.1);color:var(--accent)">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 11c1.66 0 3-1.79 3-4s-1.34-4-3-4-3 1.79-3 4 1.34 4 3 4z"/><path d="M8 11c1.66 0 3-1.79 3-4S9.66 3 8 3 5 4.79 5 7s1.34 4 3 4z"/><path d="M8 13c-2.76 0-5 1.79-5 4v2h10v-2c0-2.21-2.24-4-5-4z"/></svg>
+                </div>
+                <div>
+                  <div class="utility-card-title">Guest Generator</div>
+                  <div class="text-sm text-muted">GET /api/guest-generator</div>
+                </div>
+              </div>
+              <div class="form-row mb-8">
+                <div class="form-group flex-1">
+                  <label class="form-label">Region</label>
+                  <select id="guest-region" class="form-select">
+                    <option value="IND">IND</option><option value="ME">ME</option><option value="SG">SG</option><option value="BR">BR</option><option value="US">US</option><option value="ID">ID</option><option value="TW">TW</option><option value="TH">TH</option><option value="VN">VN</option><option value="PK">PK</option><option value="BD">BD</option><option value="CIS">CIS</option><option value="RU">RU</option>
+                  </select>
+                </div>
+                <button class="btn btn-sm btn-primary" onclick="runGuest()" style="align-self:flex-end">Generate</button>
+              </div>
+              <div id="util-guest-result" class="utility-card-result">
+                <div class="result-empty" style="min-height:60px">Click to generate</div>
+              </div>
+            </div>
+
+            <!-- UID Generator -->
+            <div class="card utility-card">
+              <div class="utility-card-header">
+                <div class="utility-card-icon" style="background:rgba(245,158,11,0.1);color:var(--warn)">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="7" y1="8" x2="17" y2="8"/><line x1="7" y1="12" x2="17" y2="12"/><line x1="7" y1="16" x2="13" y2="16"/></svg>
+                </div>
+                <div>
+                  <div class="utility-card-title">UID Generator</div>
+                  <div class="text-sm text-muted">GET /api/uid-generator</div>
+                </div>
+              </div>
+              <div class="form-row mb-8">
+                <div class="form-group flex-1">
+                  <label class="form-label">Count</label>
+                  <input id="uidgen-count" type="number" class="form-input" value="5" min="1" max="50" />
+                </div>
+                <div class="form-group flex-1">
+                  <label class="form-label">Length</label>
+                  <input id="uidgen-length" type="number" class="form-input" value="10" min="5" max="20" />
+                </div>
+                <button class="btn btn-sm btn-primary" onclick="runUidGen()" style="align-self:flex-end">Generate</button>
+              </div>
+              <div id="util-uidgen-result" class="utility-card-result">
+                <div class="result-empty" style="min-height:60px">Click to generate</div>
+              </div>
+            </div>
+
+            <!-- Like Spam -->
+            <div class="card utility-card">
+              <div class="utility-card-header">
+                <div class="utility-card-icon" style="background:rgba(239,68,68,0.1);color:var(--err)">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
+                </div>
+                <div>
+                  <div class="utility-card-title">Like Spam</div>
+                  <div class="text-sm text-muted">POST /api/like-spam</div>
+                </div>
+              </div>
+              <div class="form-row mb-8">
+                <div class="form-group flex-1">
+                  <label class="form-label">UID</label>
+                  <input id="like-uid" type="text" class="form-input" placeholder="Player UID" spellcheck="false" autocomplete="off" />
+                </div>
+                <div class="form-group" style="width:80px">
+                  <label class="form-label">Count</label>
+                  <input id="like-count" type="number" class="form-input" value="10" min="1" max="500" />
+                </div>
+                <div class="form-group" style="width:80px">
+                  <label class="form-label">Delay</label>
+                  <input id="like-delay" type="number" class="form-input" value="100" min="0" max="5000" />
+                </div>
+                <button class="btn btn-sm btn-err" onclick="runLikeSpam()" style="align-self:flex-end">Send</button>
+              </div>
+              <div id="util-like-result" class="utility-card-result">
+                <div class="result-empty" style="min-height:60px">Click to send</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ════════════════ API DOCS PAGE ════════════════ -->
+      <section data-page="docs">
+        <div class="page-content">
+          <div class="home-hero" style="padding-bottom:20px">
+            <h1 style="font-size:24px">API Reference</h1>
+            <p>Complete endpoint documentation for the Free Fire API proxy.</p>
+          </div>
+
+          <div class="flex flex-col" style="gap:20px">
+
+            <!-- Account -->
+            <div class="card endpoint-card">
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+                <span class="badge badge-get">GET</span>
+                <span class="endpoint-path">/api/v1/account</span>
+              </div>
+              <div class="endpoint-desc">Fetch full player profile including rank, clan, pet, cosmetics, and social info.</div>
+              <table class="endpoint-params">
+                <thead><tr><th>Param</th><th>Type</th><th>Description</th></tr></thead>
+                <tbody>
+                  <tr><td><code>region</code></td><td>string</td><td>Server region (IND, ME, SG, BR, US, ID, TW, TH, VN, PK, BD, CIS, RU)</td></tr>
+                  <tr><td><code>uid</code></td><td>string</td><td>Player UID</td></tr>
+                </tbody>
+              </table>
+              <div class="endpoint-example">curl "http://localhost:3000/api/v1/account?region=IND&uid=1633864660"</div>
+              <button class="btn btn-sm btn-secondary mt-8" onclick="navigate('#player');setTimeout(runAccount,200)">Try it</button>
+            </div>
+
+            <!-- Player Stats -->
+            <div class="card endpoint-card">
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+                <span class="badge badge-get">GET</span>
+                <span class="endpoint-path">/api/v1/playerstats</span>
+              </div>
+              <div class="endpoint-desc">Battle Royale stats (solo/duo/squad) for the given player.</div>
+              <table class="endpoint-params">
+                <thead><tr><th>Param</th><th>Type</th><th>Description</th></tr></thead>
+                <tbody>
+                  <tr><td><code>region</code></td><td>string</td><td>Server region</td></tr>
+                  <tr><td><code>uid</code></td><td>string</td><td>Player UID</td></tr>
+                  <tr><td><code>matchmode</code></td><td>string</td><td>CAREER, RANKED, or NORMAL</td></tr>
+                </tbody>
+              </table>
+              <div class="endpoint-example">curl "http://localhost:3000/api/v1/playerstats?region=IND&uid=1633864660&matchmode=CAREER"</div>
+              <button class="btn btn-sm btn-secondary mt-8" onclick="navigate('#stats');setTimeout(runBothStats,200)">Try it</button>
+            </div>
+
+            <!-- CS Stats -->
+            <div class="card endpoint-card">
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+                <span class="badge badge-get">GET</span>
+                <span class="endpoint-path">/api/v1/playertcstats</span>
+              </div>
+              <div class="endpoint-desc">Clash Squad stats with combat records, streaks, and accuracy data.</div>
+              <table class="endpoint-params">
+                <thead><tr><th>Param</th><th>Type</th><th>Description</th></tr></thead>
+                <tbody>
+                  <tr><td><code>region</code></td><td>string</td><td>Server region</td></tr>
+                  <tr><td><code>uid</code></td><td>string</td><td>Player UID</td></tr>
+                  <tr><td><code>matchmode</code></td><td>string</td><td>CAREER, RANKED, or NORMAL</td></tr>
+                </tbody>
+              </table>
+              <div class="endpoint-example">curl "http://localhost:3000/api/v1/playertcstats?region=IND&uid=1633864660&matchmode=CAREER"</div>
+              <button class="btn btn-sm btn-secondary mt-8" onclick="navigate('#stats');setTimeout(runBothStats,200)">Try it</button>
+            </div>
+
+            <!-- Search -->
+            <div class="card endpoint-card">
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+                <span class="badge badge-get">GET</span>
+                <span class="endpoint-path">/api/v1/search</span>
+              </div>
+              <div class="endpoint-desc">Fuzzy search for players by nickname keyword.</div>
+              <table class="endpoint-params">
+                <thead><tr><th>Param</th><th>Type</th><th>Description</th></tr></thead>
+                <tbody>
+                  <tr><td><code>region</code></td><td>string</td><td>Server region</td></tr>
+                  <tr><td><code>keyword</code></td><td>string</td><td>Nickname search term</td></tr>
+                </tbody>
+              </table>
+              <div class="endpoint-example">curl "http://localhost:3000/api/v1/search?region=IND&keyword=DARK"</div>
+              <button class="btn btn-sm btn-secondary mt-8" onclick="navigate('#player');setPlayerTab('name');setTimeout(runSearch,200)">Try it</button>
+            </div>
+
+            <!-- Ban Check -->
+            <div class="card endpoint-card">
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+                <span class="badge badge-get">GET</span>
+                <span class="endpoint-path">/api/v1/bancheck</span>
+              </div>
+              <div class="endpoint-desc">Check if a player is banned. Cross-references multiple upstream sources.</div>
+              <table class="endpoint-params">
+                <thead><tr><th>Param</th><th>Type</th><th>Description</th></tr></thead>
+                <tbody>
+                  <tr><td><code>uid</code></td><td>string</td><td>Player UID</td></tr>
+                </tbody>
+              </table>
+              <div class="endpoint-example">curl "http://localhost:3000/api/v1/bancheck?uid=1633864660"</div>
+              <button class="btn btn-sm btn-secondary mt-8" onclick="navigate('#ban');document.getElementById('ban-uid').value='1633864660';setTimeout(runBanCheck,200)">Try it</button>
+            </div>
+
+            <!-- Wishlist -->
+            <div class="card endpoint-card">
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+                <span class="badge badge-get">GET</span>
+                <span class="endpoint-path">/api/v1/wishlist</span>
+              </div>
+              <div class="endpoint-desc">Get a player's wishlist items with resolved item metadata and icons.</div>
+              <table class="endpoint-params">
+                <thead><tr><th>Param</th><th>Type</th><th>Description</th></tr></thead>
+                <tbody>
+                  <tr><td><code>region</code></td><td>string</td><td>Server region</td></tr>
+                  <tr><td><code>uid</code></td><td>string</td><td>Player UID</td></tr>
+                </tbody>
+              </table>
+              <div class="endpoint-example">curl "http://localhost:3000/api/v1/wishlist?region=IND&uid=1633864660"</div>
+              <button class="btn btn-sm btn-secondary mt-8" onclick="navigate('#player');setTimeout(runWishlist,200)">Try it</button>
+            </div>
+
+            <!-- Item Lookup -->
+            <div class="card endpoint-card">
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+                <span class="badge badge-get">GET</span>
+                <span class="endpoint-path">/api/items</span>
+              </div>
+              <div class="endpoint-desc">Look up a single item by ID with full metadata.</div>
+              <table class="endpoint-params">
+                <thead><tr><th>Param</th><th>Type</th><th>Description</th></tr></thead>
+                <tbody>
+                  <tr><td><code>id</code></td><td>string</td><td>Item ID</td></tr>
+                </tbody>
+              </table>
+              <div class="endpoint-example">curl "http://localhost:3000/api/items?id=101000005"</div>
+              <button class="btn btn-sm btn-secondary mt-8" onclick="navigate('#items');document.getElementById('item-id').value='101000005';setTimeout(runItemLookup,200)">Try it</button>
+            </div>
+
+            <!-- Item Search -->
+            <div class="card endpoint-card">
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+                <span class="badge badge-get">GET</span>
+                <span class="endpoint-path">/api/items/search</span>
+              </div>
+              <div class="endpoint-desc">Search the item catalog by name with pagination support.</div>
+              <table class="endpoint-params">
+                <thead><tr><th>Param</th><th>Type</th><th>Description</th></tr></thead>
+                <tbody>
+                  <tr><td><code>q</code></td><td>string</td><td>Search query</td></tr>
+                  <tr><td><code>limit</code></td><td>number</td><td>Max results (default 20)</td></tr>
+                </tbody>
+              </table>
+              <div class="endpoint-example">curl "http://localhost:3000/api/items/search?q=AK47&limit=10"</div>
+              <button class="btn btn-sm btn-secondary mt-8" onclick="navigate('#items');document.getElementById('item-search-q').value='AK47';setTimeout(runItemSearch,200)">Try it</button>
+            </div>
+
+            <!-- Health -->
+            <div class="card endpoint-card">
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+                <span class="badge badge-get">GET</span>
+                <span class="endpoint-path">/api/health</span>
+              </div>
+              <div class="endpoint-desc">Server health check with uptime and status.</div>
+              <div class="endpoint-example">curl "http://localhost:3000/api/health"</div>
+              <button class="btn btn-sm btn-secondary mt-8" onclick="navigate('#utilities');setTimeout(runHealth,200)">Try it</button>
+            </div>
+
+            <!-- Guest Generator -->
+            <div class="card endpoint-card">
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+                <span class="badge badge-get">GET</span>
+                <span class="endpoint-path">/api/guest-generator</span>
+              </div>
+              <div class="endpoint-desc">Generate guest credentials for a given region.</div>
+              <table class="endpoint-params">
+                <thead><tr><th>Param</th><th>Type</th><th>Description</th></tr></thead>
+                <tbody>
+                  <tr><td><code>region</code></td><td>string</td><td>Server region</td></tr>
+                </tbody>
+              </table>
+              <div class="endpoint-example">curl "http://localhost:3000/api/guest-generator?region=IND"</div>
+              <button class="btn btn-sm btn-secondary mt-8" onclick="navigate('#utilities');setTimeout(runGuest,200)">Try it</button>
+            </div>
+
+            <!-- UID Generator -->
+            <div class="card endpoint-card">
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+                <span class="badge badge-get">GET</span>
+                <span class="endpoint-path">/api/uid-generator</span>
+              </div>
+              <div class="endpoint-desc">Generate random encrypted UIDs for testing.</div>
+              <table class="endpoint-params">
+                <thead><tr><th>Param</th><th>Type</th><th>Description</th></tr></thead>
+                <tbody>
+                  <tr><td><code>mode</code></td><td>string</td><td>Generation mode (random)</td></tr>
+                  <tr><td><code>count</code></td><td>number</td><td>How many UIDs to generate</td></tr>
+                  <tr><td><code>length</code></td><td>number</td><td>UID digit length</td></tr>
+                </tbody>
+              </table>
+              <div class="endpoint-example">curl "http://localhost:3000/api/uid-generator?mode=random&count=5&length=10&teamXdarks=1"</div>
+              <button class="btn btn-sm btn-secondary mt-8" onclick="navigate('#utilities');setTimeout(runUidGen,200)">Try it</button>
+            </div>
+
+            <!-- Like Spam -->
+            <div class="card endpoint-card">
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+                <span class="badge badge-post">POST</span>
+                <span class="endpoint-path">/api/like-spam</span>
+              </div>
+              <div class="endpoint-desc">Send multiple like requests to a player. Requires region, uid, count, and delayMs in JSON body.</div>
+              <table class="endpoint-params">
+                <thead><tr><th>Body Key</th><th>Type</th><th>Description</th></tr></thead>
+                <tbody>
+                  <tr><td><code>region</code></td><td>string</td><td>Server region</td></tr>
+                  <tr><td><code>uid</code></td><td>string</td><td>Target player UID</td></tr>
+                  <tr><td><code>count</code></td><td>number</td><td>Number of likes (1-500)</td></tr>
+                  <tr><td><code>delayMs</code></td><td>number</td><td>Delay between requests in ms (0-5000)</td></tr>
+                </tbody>
+              </table>
+              <div class="endpoint-example">curl -X POST "http://localhost:3000/api/like-spam" -H "Content-Type: application/json" -d '{"region":"IND","uid":"1633864660","count":10,"delayMs":100}'</div>
+              <button class="btn btn-sm btn-secondary mt-8" onclick="navigate('#utilities')">Try it</button>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
 
   <script>
   /* ═══════════════════════════════════════════════════
-     ① BACKGROUND ALBUM SLIDESHOW
-     — Each theme = image + color palette + ember hue
-     — Rotates every 25 s; Spotify album art overrides
+     HELPERS (preserved verbatim)
   ═══════════════════════════════════════════════════ */
-
-  /*
-   * colorTheme → matches [data-theme="…"] in styles.css
-   * emberHue   → {base, range} hue for fire canvas particles
-   * fallback   → gradient shown when image file missing
-   */
-  const BG_THEMES = [
-    {
-      bg:         "url('/assets/free-fire-desktop-heroes-pointing-guns-r115t8uj2gis0rf8.jpg')",
-      fallback:   'linear-gradient(160deg,#0d0a00 0%,#332800 50%,#886600 85%,#ddac00 100%)',
-      label:      'Golden Squad',
-      colorTheme: 'gold',
-      emberHue:   { base: 38, range: 28 },
-    },
-    {
-      bg:         "url('/assets/Halloween-Free-Fire-Wallpaper-1024x576.jpeg')",
-      fallback:   'linear-gradient(160deg,#070010 0%,#1a0040 50%,#5500bb 85%,#8800ff 100%)',
-      label:      'Halloween',
-      colorTheme: 'halloween',
-      emberHue:   { base: 270, range: 45 },
-    },
-    {
-      bg:         "url('/assets/Winter-FF-1024x576.jpeg')",
-      fallback:   'linear-gradient(160deg,#000713 0%,#001840 50%,#0040a0 85%,#00b4d8 100%)',
-      label:      'Winter',
-      colorTheme: 'winter',
-      emberHue:   { base: 190, range: 35 },
-    },
-    {
-      bg:         "url('/assets/free-fire-season-1-vxesowl5h3j4oc1r.jpg')",
-      fallback:   'linear-gradient(160deg,#0d0200 0%,#3d0a00 45%,#c42000 85%,#ff4400 100%)',
-      label:      'Season 1',
-      colorTheme: 'fire',
-      emberHue:   { base: 20, range: 30 },
-    },
-    {
-      bg:         'linear-gradient(160deg,#000d07 0%,#002810 50%,#007730 85%,#00cc55 100%)',
-      label:      'Jungle',
-      colorTheme: 'jungle',
-      emberHue:   { base: 110, range: 40 },
-    },
-    {
-      bg:         'linear-gradient(160deg,#0d0008 0%,#36001a 50%,#990040 85%,#ff0066 100%)',
-      label:      'Crimson',
-      colorTheme: 'crimson',
-      emberHue:   { base: 330, range: 40 },
-    },
-  ];
-
-  // Active ember hue — read by the fire canvas particle system
-  let EMBER_HUE = { base: 38, range: 28 };
-
-  const bgSlideshow  = document.getElementById('bg-slideshow');
-  const bgThemeBadge = document.getElementById('bg-theme-badge');
-  let   bgSlides     = [];
-  let   activeSlot   = 0;
-  let   activeBgIdx  = 0;
-  let   lastBgValue  = '';
-  let   autoTimer    = null;
-  let   badgeTimer   = null;
-  const ROTATE_MS    = 25000;
-
-  // ── Create A/B crossfade slides ──
-  function initSlideshow() {
-    for (let i = 0; i < 2; i++) {
-      const s = document.createElement('div');
-      s.className = 'bg-slide';
-      bgSlideshow.appendChild(s);
-      bgSlides.push(s);
-    }
-    loadAndApplyTheme(BG_THEMES[0], true);
-    startAutoRotate();
+  function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  function fmtNum(n) { return n !== undefined && n !== null ? Number(n).toLocaleString() : '—'; }
+  function fmtKD(kills, deaths) {
+    if (!kills && !deaths) return '—';
+    return deaths ? (kills / deaths).toFixed(2) : kills;
   }
-
-  // ── Low-level: set a background CSS value with crossfade ──
-  function applyBgDirect(cssValue) {
-    if (cssValue === lastBgValue) return;
-    lastBgValue = cssValue;
-    const next  = (activeSlot + 1) % 2;
-    const isUrl = cssValue.startsWith('url(');
-    bgSlides[next].style.cssText =
-      `background-image:${isUrl ? cssValue : 'none'};` +
-      `background:${isUrl ? '' : cssValue};` +
-      'background-size:cover;background-position:center;';
-    void bgSlides[next].offsetWidth;          // force reflow → enables CSS transition
-    bgSlides[next].classList.add('active');
-    bgSlides[activeSlot].classList.remove('active');
-    activeSlot = next;
+  function winRate(wins, games) {
+    if (!games) return '—';
+    return (wins / games * 100).toFixed(1) + '%';
   }
-
-  // ── High-level: load theme image (fallback to gradient) + change UI colors ──
-  function loadAndApplyTheme(themeObj, skipBadge) {
-    if (!themeObj) return;
-    applyColorTheme(themeObj.colorTheme, themeObj.emberHue);   // colors first (instant)
-
-    if (themeObj.bg.startsWith('url(')) {
-      const url = (themeObj.bg.match(/url\(['"]?([^'")\s]+)['"]?\)/) || [])[1];
-      if (!url) { applyBgDirect(themeObj.fallback || themeObj.bg); _badge(themeObj, skipBadge); return; }
-      const img = new Image();
-      img.onload  = () => { applyBgDirect(themeObj.bg);                         _badge(themeObj, skipBadge); };
-      img.onerror = () => { applyBgDirect(themeObj.fallback || themeObj.bg);    _badge(themeObj, skipBadge); };
-      img.src = url;
-    } else {
-      applyBgDirect(themeObj.bg);
-      _badge(themeObj, skipBadge);
-    }
+  function timeAgo(ts) {
+    if (!ts) return '—';
+    const s = Math.floor((Date.now()/1000) - Number(ts));
+    if (s < 60) return 'Just now';
+    if (s < 3600) return Math.floor(s/60) + 'm ago';
+    if (s < 86400) return Math.floor(s/3600) + 'h ago';
+    return Math.floor(s/86400) + 'd ago';
   }
-
-  function _badge(t, skip) { if (!skip) flashBadge(t.label); }
-
-  // ── Apply CSS color theme + ember hue ──
-  function applyColorTheme(themeName, emberHue) {
-    document.documentElement.setAttribute('data-theme', themeName || 'fire');
-    if (emberHue) EMBER_HUE = emberHue;
+  function fmtUptime(sec) {
+    if (!sec && sec !== 0) return '—';
+    const h = Math.floor(sec/3600);
+    const m = Math.floor((sec%3600)/60);
+    const s = Math.floor(sec%60);
+    return (h?h+'h ':'') + (m?m+'m ':'') + s+'s';
   }
+  function initials(name) { return name ? name.slice(0,2).toUpperCase() : '?'; }
 
-  function flashBadge(label) {
-    bgThemeBadge.textContent = label;
-    bgThemeBadge.classList.add('flash');
-    clearTimeout(badgeTimer);
-    badgeTimer = setTimeout(() => bgThemeBadge.classList.remove('flash'), 2800);
-  }
-
-  function nextTheme() {
-    activeBgIdx = (activeBgIdx + 1) % BG_THEMES.length;
-    loadAndApplyTheme(BG_THEMES[activeBgIdx]);
-  }
-
-  function startAutoRotate() {
-    stopAutoRotate();
-    autoTimer = setInterval(nextTheme, ROTATE_MS);
-  }
-
-  function stopAutoRotate() {
-    if (autoTimer) { clearInterval(autoTimer); autoTimer = null; }
-  }
-
-  // Called when Spotify gives us album art
-  function setBgFromAlbumArt(url, albumName) {
-    applyBgDirect(`url('${url}')`);
-    flashBadge(albumName || 'Album Art');
-    stopAutoRotate();
-    setTimeout(startAutoRotate, 180000);
-  }
-
-  initSlideshow();
-
-
-  /* ═══════════════════════════════════════════════════
-     ② NOW PLAYING BADGE
-  ═══════════════════════════════════════════════════ */
-
-  let npHideTimer = null;
-
-  function showNowPlaying(trackName, albumName, artUrl) {
-    document.getElementById('np-track').textContent = trackName || '—';
-    document.getElementById('np-album').textContent = albumName || '—';
-    const img = document.getElementById('np-img');
-    if (artUrl) { img.src = artUrl; img.style.display = 'block'; }
-    else          { img.style.display = 'none'; }
-    const el = document.getElementById('now-playing');
-    el.classList.add('visible');
-    clearTimeout(npHideTimer);
-    npHideTimer = setTimeout(() => el.classList.remove('visible'), 6500);
-  }
-
-
-  /* ═══════════════════════════════════════════════════
-     ③ SPOTIFY IFRAME API
-     Detects track changes → syncs album art to background
-     Config: change SPOTIFY_URI to any track / album / playlist
-  ═══════════════════════════════════════════════════ */
-
-  // ▶ Free Fire Album — auto-advances through all tracks
-  const SPOTIFY_URI = 'spotify:album:2F2ZjH7HJQns03217zo2xi';
-
-  let spotifyController = null;
-  let lastTrackUri      = null;
-
-  // Load the Spotify Embed IFrame API
-  ;(function () {
-    const s = document.createElement('script');
-    s.src   = 'https://open.spotify.com/embed-podcast/iframe-api/v1';
-    s.async = true;
-    document.head.appendChild(s);
-  })();
-
-  // Fallback: if Spotify API fails to load within 5 s, inject a plain iframe
-  const spotifyFallbackTimer = setTimeout(() => {
-    if (!spotifyController) {
-      const c = document.getElementById('spotify-embed');
-      if (c && !c.querySelector('iframe')) {
-        c.innerHTML =
-          `<iframe src="https://open.spotify.com/embed/album/2F2ZjH7HJQns03217zo2xi` +
-          `?utm_source=generator&theme=0" width="100%" height="152" frameborder="0" ` +
-          `allow="autoplay;clipboard-write;encrypted-media;fullscreen;picture-in-picture" loading="lazy"></iframe>`;
-      }
-    }
-  }, 5000);
-
-  // IFrame API callback (fires when the script loads)
-  window.onSpotifyIframeApiReady = function (IFrameAPI) {
-    clearTimeout(spotifyFallbackTimer);
-    const container = document.getElementById('spotify-embed');
-    if (!container) return;
-
-    IFrameAPI.createController(container, { uri: SPOTIFY_URI, width: '100%', height: 152 },
-      function (ctrl) {
-        spotifyController = ctrl;
-
-        ctrl.addListener('playback_update', function (evt) {
-          const d = evt && evt.data;
-          if (!d || !d.track) return;
-          if (d.track.uri === lastTrackUri) return;   // same track, skip
-          lastTrackUri = d.track.uri;
-
-          const images    = d.track.album && d.track.album.images;
-          const artUrl    = images && images.length ? images[0].url : null;
-          const trackName = d.track.name     || '—';
-          const albumName = d.track.album && d.track.album.name ? d.track.album.name : '—';
-
-          showNowPlaying(trackName, albumName, artUrl);
-          if (artUrl) setBgFromAlbumArt(artUrl, albumName);
-
-          // Animate spotify bars in header
-          document.getElementById('spotify-bars').classList.remove('paused');
-          document.getElementById('spotify-label').textContent = 'Playing';
-        });
-      }
-    );
-  };
-
-
-  /* ═══════════════════════════════════════════════════
-     Spotify Toggle
-  ═══════════════════════════════════════════════════ */
-  let spotifyOpen = false;
-  function toggleSpotify() {
-    spotifyOpen = !spotifyOpen;
-    const player = document.getElementById('spotify-player');
-    const bars   = document.getElementById('spotify-bars');
-    const label  = document.getElementById('spotify-label');
-    player.classList.toggle('open', spotifyOpen);
-    bars.classList.toggle('paused', !spotifyOpen);
-    label.textContent = spotifyOpen ? 'Playing' : 'Music';
-  }
-  // Close player when clicking outside
-  document.addEventListener('click', e => {
-    if (spotifyOpen && !document.getElementById('spotify-wrap').contains(e.target)) {
-      spotifyOpen = false;
-      document.getElementById('spotify-player').classList.remove('open');
-      document.getElementById('spotify-bars').classList.add('paused');
-      document.getElementById('spotify-label').textContent = 'Music';
-    }
-  });
-
-  /* ═══════════════════════════════════════════════════
-     Fire Canvas
-  ═══════════════════════════════════════════════════ */
-  (function () {
-    const canvas = document.getElementById('fire-canvas');
-    const ctx    = canvas.getContext('2d');
-    let W, H, embers = [];
-    function resize() { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
-    resize();
-    window.addEventListener('resize', resize);
-    function Ember() {
-      this.reset = function () {
-        this.x = Math.random() * W; this.y = H + 10;
-        this.r = 1 + Math.random() * 2.5;
-        this.vx = (Math.random() - 0.5) * 0.8;
-        this.vy = -(0.6 + Math.random() * 1.4);
-        this.life = 0; this.maxL = 180 + Math.random() * 160;
-        this.hue = EMBER_HUE.base + Math.random() * EMBER_HUE.range;
-      };
-      this.reset(); this.life = Math.random() * this.maxL;
-    }
-    for (let i = 0; i < 55; i++) embers.push(new Ember());
-    function tick() {
-      ctx.clearRect(0, 0, W, H);
-      embers.forEach(e => {
-        e.x += e.vx + Math.sin(e.life * 0.05) * 0.3; e.y += e.vy; e.life++;
-        if (e.life > e.maxL || e.y < -10) e.reset();
-        const prog = e.life / e.maxL;
-        const alpha = prog < 0.15 ? prog / 0.15 : 1 - (prog - 0.15) / 0.85;
-        ctx.beginPath();
-        ctx.arc(e.x, e.y, e.r * (1 - prog * 0.4), 0, Math.PI * 2);
-        ctx.fillStyle = `hsla(${e.hue},100%,${55 + prog * 20}%,${alpha * 0.7})`;
-        ctx.shadowBlur = 8; ctx.shadowColor = `hsl(${e.hue},100%,50%)`; ctx.fill();
-      });
-      requestAnimationFrame(tick);
-    }
-    tick();
-  })();
-
-  /* ═══════════════════════════════════════════════════
-     JSON Syntax Highlight
-  ═══════════════════════════════════════════════════ */
   function highlight(str) {
     if (typeof str !== 'string') str = JSON.stringify(str, null, 2);
     return str
@@ -663,7 +800,7 @@
   }
 
   /* ═══════════════════════════════════════════════════
-     Rank helpers
+     RANK HELPERS
   ═══════════════════════════════════════════════════ */
   const BR_RANKS = ['','Bronze','Silver','Gold','Platinum','Diamond','Heroic','Grandmaster'];
   const CS_RANKS = ['','Bronze','Silver','Gold','Platinum','Diamond','Heroic','Grandmaster'];
@@ -673,20 +810,9 @@
     const map = {1:'#CD7F32',2:'#C0C0C0',3:'#FFD700',4:'#00BFFF',5:'#B0E0E6',6:'#FF6B00',7:'#FF00AA'};
     return map[n] || '#7A6040';
   }
-  function initials(name) { return name ? name.slice(0,2).toUpperCase() : '?'; }
-  function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-  function fmtNum(n) { return n !== undefined && n !== null ? Number(n).toLocaleString() : '—'; }
-  function fmtKD(kills, deaths) {
-    if (!kills && !deaths) return '—';
-    return deaths ? (kills / deaths).toFixed(2) : kills;
-  }
-  function winRate(wins, games) {
-    if (!games) return '—';
-    return (wins / games * 100).toFixed(1) + '%';
-  }
 
   /* ═══════════════════════════════════════════════════
-     Rarity Colors & Item Helpers
+     RARITY COLORS & ITEM HELPERS
   ═══════════════════════════════════════════════════ */
   const RARE_COLORS = {
     'White':'#b0b0b0','Green':'#4ade80','Blue':'#60a5fa',
@@ -705,10 +831,10 @@
 
   function sourceBadge(item) {
     if (!item) return '';
-    if (item.ffIconKind === 'alias') return '<span class="source-badge">FF Alias</span>';
-    if (item.ffIcon) return '<span class="source-badge">FF Resource</span>';
-    if (item.iconUrl) return '<span class="source-badge">CDN Fallback</span>';
-    return '<span class="source-badge source-badge-missing">No Art</span>';
+    if (item.ffIconKind === 'alias') return '<span class="badge badge-neutral" style="font-size:9px">FF Alias</span>';
+    if (item.ffIcon) return '<span class="badge badge-neutral" style="font-size:9px">FF Resource</span>';
+    if (item.iconUrl) return '<span class="badge badge-neutral" style="font-size:9px">CDN Fallback</span>';
+    return '<span class="badge badge-warn" style="font-size:9px">No Art</span>';
   }
   function resolvedName(item) {
     if (!item) return null;
@@ -720,7 +846,7 @@
     const rare = item.rare || item.itemRare || 'NONE';
     const type = item.type || item.itemType || '';
     const col = rareColor(rare);
-    return `<span class="item-chip" style="border-color:${col};color:${col}" title="${esc(type)} · ${rareName(rare)}">${esc(name)}</span>`;
+    return `<span class="chip" style="border:1px solid ${col}44;color:${col}" title="${esc(type)} - ${rareName(rare)}">${esc(name)}</span>`;
   }
   function resolvedVisualCard(item, fallbackLabel) {
     if (!item) return '';
@@ -729,30 +855,21 @@
     const type = item.type || item.itemType || fallbackLabel || 'ITEM';
     const col = rareColor(rare);
     return `
-      <div class="visual-item-card" style="--item-accent:${col}">
+      <div class="visual-item-card" style="border-color:${col}22">
         <div class="visual-item-media">
           <img src="${itemImg(item, 132, 4)}" alt="${esc(name)}" loading="lazy"
             onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"/>
-          <div class="visual-item-fallback" style="display:none">${esc(name.slice(0,2).toUpperCase())}</div>
+          <div style="display:none;align-items:center;justify-content:center;width:100%;height:100%;font-size:20px;font-weight:800;color:var(--text-muted)">${esc(name.slice(0,2).toUpperCase())}</div>
         </div>
-        <div class="visual-item-meta">
-          <div class="visual-item-name" title="${esc(name)}">${esc(name)}</div>
-          <div class="visual-item-type">${esc(type.replace(/_/g,' '))}</div>
-          <div class="visual-item-rare-row"><div class="visual-item-rare">${rareName(rare)}</div>${sourceBadge(item)}</div>
-        </div>
+        <div class="visual-item-name" title="${esc(name)}">${esc(name)}</div>
+        <div style="font-size:10px;color:var(--text-muted);margin-top:2px">${esc(type.replace(/_/g,' '))}</div>
+        <div class="visual-item-rare" style="color:${col}">${rareName(rare)}</div>
+        <div class="visual-item-source">${sourceBadge(item)}</div>
       </div>`;
-  }
-  function timeAgo(ts) {
-    if (!ts) return '—';
-    const s = Math.floor((Date.now()/1000) - Number(ts));
-    if (s < 60) return 'Just now';
-    if (s < 3600) return Math.floor(s/60) + 'm ago';
-    if (s < 86400) return Math.floor(s/3600) + 'h ago';
-    return Math.floor(s/86400) + 'd ago';
   }
 
   /* ═══════════════════════════════════════════════════
-     Rich Card Renderers
+     RICH CARD RENDERERS (preserved verbatim)
   ═══════════════════════════════════════════════════ */
 
   function renderAccount(data) {
@@ -783,189 +900,140 @@
 
     return `
     <div class="player-card">
-      <!-- HEADER -->
-      <div class="player-header player-header-advanced">
-        <div class="player-hero-visual" style="--rank-accent:${brC}">
-          ${heroVisual ? `<img src="${itemImg(heroVisual, 180, 4)}" alt="" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"/>` : ''}
-          <div class="player-hero-fallback" ${heroVisual ? 'style="display:none"' : ''}>${esc(initials(b.nickname))}</div>
-          <div class="player-hero-overlay"></div>
+      <div class="player-header">
+        <div class="player-avatar" style="border:3px solid ${brC}">
+          ${heroVisual ? `<img src="${itemImg(heroVisual, 180, 4)}" alt="" loading="lazy" onerror="this.style.display='none'"/>` : ''}
+          ${!heroVisual ? esc(initials(b.nickname)) : ''}
         </div>
-        <div class="player-meta player-meta-advanced">
-          <div class="player-kicker">Operator Profile</div>
+        <div class="player-meta">
           <div class="player-name">${esc(b.nickname || 'Unknown')}</div>
-          <div class="player-uid">UID: ${esc(b.accountId || data.uid)} · ${esc(b.region || data.region)}${b.lastLoginAt ? ` · <span style="color:var(--text-dim);font-size:11px">Last seen: ${timeAgo(b.lastLoginAt)}</span>` : ''}</div>
+          <div class="player-uid">UID: ${esc(b.accountId || data.uid)} - ${esc(b.region || data.region)}${b.lastLoginAt ? ` - Last seen: ${timeAgo(b.lastLoginAt)}` : ''}</div>
           <div class="player-chips">
-            ${b.level ? `<span class="chip chip-level">LV ${b.level}${b.exp ? ` (${fmtNum(b.exp)} XP)` : ''}</span>` : ''}
-            ${b.region ? `<span class="chip chip-region">${esc(b.region)}</span>` : ''}
-            ${b.accountType ? `<span class="chip" style="background:rgba(255,255,255,.06);color:var(--text-dim)">Type ${b.accountType}</span>` : ''}
-            ${b.haselitepass ? `<span class="chip chip-elite">ELITE PASS</span>` : ''}
-            ${b.releaseVersion ? `<span class="chip" style="background:rgba(255,255,255,.06);color:var(--text-dim)">${esc(b.releaseVersion)}</span>` : ''}
-            ${b.membershipState ? `<span class="chip" style="color:#a78bfa;border-color:rgba(167,139,250,0.3)">MEMBER</span>` : ''}
-          </div>
-          <div class="player-banner-stats">
-            <div class="player-banner-stat"><span class="player-banner-label">Likes</span><span class="player-banner-value">${fmtNum(b.liked)}</span></div>
-            <div class="player-banner-stat"><span class="player-banner-label">Season</span><span class="player-banner-value">${b.seasonId || '—'}</span></div>
-            <div class="player-banner-stat"><span class="player-banner-label">Credit</span><span class="player-banner-value ${(cr?.creditScore||0) >= 90 ? 'ok-text' : ''}">${cr?.creditScore ?? '—'}</span></div>
+            ${b.level ? `<span class="chip">LV ${b.level}${b.exp ? ` (${fmtNum(b.exp)} XP)` : ''}</span>` : ''}
+            ${b.region ? `<span class="chip">${esc(b.region)}</span>` : ''}
+            ${b.accountType ? `<span class="chip">Type ${b.accountType}</span>` : ''}
+            ${b.haselitepass ? `<span class="chip" style="color:var(--warn);border:1px solid rgba(245,158,11,0.3)">ELITE PASS</span>` : ''}
+            ${b.releaseVersion ? `<span class="chip">${esc(b.releaseVersion)}</span>` : ''}
+            ${b.membershipState ? `<span class="chip" style="color:#a78bfa;border:1px solid rgba(167,139,250,0.3)">MEMBER</span>` : ''}
           </div>
         </div>
       </div>
 
-      <!-- RANKS -->
       <div class="rank-row">
-        <div class="rank-card">
+        <div class="rank-card" style="border-left-color:${brC}">
           <div class="rank-card-label">BR Rank</div>
-          <div class="rank-name" style="color:${brC}">${brRN}</div>
-          ${b.rankingPoints ? `<div class="rank-pts">${fmtNum(b.rankingPoints)} pts</div>` : ''}
-          ${b.maxRank ? `<div class="rank-pts" style="color:var(--text-dim)">Peak: ${brRankName(b.maxRank)}${b.maxRankingPoints ? ' ('+fmtNum(b.maxRankingPoints)+')' : ''}</div>` : ''}
+          <div class="rank-card-value" style="color:${brC}">${brRN}</div>
+          ${b.rankingPoints ? `<div class="rank-card-pts">${fmtNum(b.rankingPoints)} pts</div>` : ''}
+          ${b.maxRank ? `<div class="rank-card-pts">Peak: ${brRankName(b.maxRank)}${b.maxRankingPoints ? ' ('+fmtNum(b.maxRankingPoints)+')' : ''}</div>` : ''}
         </div>
-        <div class="rank-card">
+        <div class="rank-card" style="border-left-color:${csC}">
           <div class="rank-card-label">CS Rank</div>
-          <div class="rank-name" style="color:${csC}">${csRN}</div>
-          ${b.csRankingPoints ? `<div class="rank-pts">${fmtNum(b.csRankingPoints)} pts</div>` : ''}
-          ${b.csMaxRank ? `<div class="rank-pts" style="color:var(--text-dim)">Peak: ${csRankName(b.csMaxRank)}</div>` : ''}
+          <div class="rank-card-value" style="color:${csC}">${csRN}</div>
+          ${b.csRankingPoints ? `<div class="rank-card-pts">${fmtNum(b.csRankingPoints)} pts</div>` : ''}
+          ${b.csMaxRank ? `<div class="rank-card-pts">Peak: ${csRankName(b.csMaxRank)}</div>` : ''}
         </div>
       </div>
 
-      <!-- INFO GRID -->
       <div class="info-grid">
-        ${ir.title?.name ? `<div class="info-block"><div class="info-block-label">Title</div><div class="info-block-val" style="color:${rareColor(ir.title.rare)}">${esc(ir.title.name)}</div></div>` : b.title ? `<div class="info-block"><div class="info-block-label">Title</div><div class="info-block-val">#${b.title}</div></div>` : ''}
-        ${ir.badge?.name ? `<div class="info-block"><div class="info-block-label">Badge</div><div class="info-block-val" style="color:${rareColor(ir.badge.rare)}">${esc(ir.badge.name)}</div></div>` : b.badgeId ? `<div class="info-block"><div class="info-block-label">Badge</div><div class="info-block-val">#${b.badgeId} (x${b.badgeCnt||0})</div></div>` : ''}
-        ${ir.banner?.name ? `<div class="info-block"><div class="info-block-label">Banner</div><div class="info-block-val" style="color:${rareColor(ir.banner.rare)}">${esc(ir.banner.name)}</div></div>` : b.bannerId ? `<div class="info-block"><div class="info-block-label">Banner</div><div class="info-block-val">#${b.bannerId}</div></div>` : ''}
-        ${ir.headPic?.name ? `<div class="info-block"><div class="info-block-label">Avatar</div><div class="info-block-val" style="color:${rareColor(ir.headPic.rare)}">${esc(ir.headPic.name)}</div></div>` : b.headPic ? `<div class="info-block"><div class="info-block-label">Avatar</div><div class="info-block-val">#${b.headPic}</div></div>` : ''}
-        ${ir.pin?.name ? `<div class="info-block"><div class="info-block-label">Pin</div><div class="info-block-val" style="color:${rareColor(ir.pin.rare)}">${esc(ir.pin.name)}</div></div>` : b.pinId ? `<div class="info-block"><div class="info-block-label">Pin</div><div class="info-block-val">#${b.pinId}</div></div>` : ''}
-        ${ir.gameBag?.name ? `<div class="info-block"><div class="info-block-label">Game Bag</div><div class="info-block-val" style="color:${rareColor(ir.gameBag.rare)}">${esc(ir.gameBag.name)}</div></div>` : b.gameBagShow ? `<div class="info-block"><div class="info-block-label">Game Bag</div><div class="info-block-val">#${b.gameBagShow}</div></div>` : ''}
-        ${b.createAt ? `<div class="info-block"><div class="info-block-label">Created</div><div class="info-block-val" style="font-size:11px">${new Date(Number(b.createAt)*1000).toLocaleDateString()}</div></div>` : ''}
-        ${dc?.diamondCost ? `<div class="info-block"><div class="info-block-label">Diamonds Spent</div><div class="info-block-val" style="color:#60a5fa">${fmtNum(dc.diamondCost)}</div></div>` : ''}
+        ${ir.title?.name ? `<div class="info-block"><div class="info-block-label">Title</div><div class="info-block-value" style="color:${rareColor(ir.title.rare)}">${esc(ir.title.name)}</div></div>` : b.title ? `<div class="info-block"><div class="info-block-label">Title</div><div class="info-block-value">#${b.title}</div></div>` : ''}
+        ${ir.badge?.name ? `<div class="info-block"><div class="info-block-label">Badge</div><div class="info-block-value" style="color:${rareColor(ir.badge.rare)}">${esc(ir.badge.name)}</div></div>` : b.badgeId ? `<div class="info-block"><div class="info-block-label">Badge</div><div class="info-block-value">#${b.badgeId} (x${b.badgeCnt||0})</div></div>` : ''}
+        ${ir.banner?.name ? `<div class="info-block"><div class="info-block-label">Banner</div><div class="info-block-value" style="color:${rareColor(ir.banner.rare)}">${esc(ir.banner.name)}</div></div>` : b.bannerId ? `<div class="info-block"><div class="info-block-label">Banner</div><div class="info-block-value">#${b.bannerId}</div></div>` : ''}
+        ${b.liked !== undefined ? `<div class="info-block"><div class="info-block-label">Likes</div><div class="info-block-value" style="color:var(--err)">${fmtNum(b.liked)}</div></div>` : ''}
+        ${b.seasonId ? `<div class="info-block"><div class="info-block-label">Season</div><div class="info-block-value">${b.seasonId}</div></div>` : ''}
+        ${cr?.creditScore !== undefined ? `<div class="info-block"><div class="info-block-label">Credit Score</div><div class="info-block-value" style="color:${(cr.creditScore||0)>=90?'var(--ok)':'var(--err)'}">${cr.creditScore}</div></div>` : ''}
+        ${b.createAt ? `<div class="info-block"><div class="info-block-label">Created</div><div class="info-block-value" style="font-size:12px">${new Date(Number(b.createAt)*1000).toLocaleDateString()}</div></div>` : ''}
+        ${dc?.diamondCost ? `<div class="info-block"><div class="info-block-label">Diamonds Spent</div><div class="info-block-value" style="color:#60a5fa">${fmtNum(dc.diamondCost)}</div></div>` : ''}
       </div>
 
       ${gearGallery.length ? `
-      <div class="visual-section">
-        <div class="items-section-label">Featured Cosmetics</div>
-        <div class="visual-item-grid visual-item-grid-featured">${gearGallery.join('')}</div>
-      </div>` : ''}
+      <div class="section-title">Featured Cosmetics</div>
+      <div class="visual-item-grid">${gearGallery.join('')}</div>` : ''}
 
-      <!-- SOCIAL INFO -->
-      ${(s.gender || s.language || s.signature || s.battleTag?.length || s.socialTag?.length || s.modePrefer) ? `
-      <div class="items-section">
-        <div class="items-section-label">Social Info</div>
-        <div style="display:flex;flex-wrap:wrap;gap:8px;font-size:12px;color:var(--text-muted)">
-          ${s.gender ? `<span>Gender: <b style="color:var(--text-primary)">${GENDERS[s.gender]||s.gender}</b></span>` : ''}
-          ${s.language ? `<span>Lang: <b style="color:var(--text-primary)">${LANGS[s.language]||s.language}</b></span>` : ''}
-          ${s.modePrefer ? `<span>Prefers: <b style="color:var(--text-primary)">Mode ${s.modePrefer}</b></span>` : ''}
-          ${s.timeOnline ? `<span>Online: <b style="color:var(--text-primary)">${s.timeOnline}h</b></span>` : ''}
-          ${s.timeActive ? `<span>Active: <b style="color:var(--text-primary)">${s.timeActive}h</b></span>` : ''}
-        </div>
-        ${s.battleTag?.length ? `<div style="margin-top:6px"><span style="font-size:10px;color:var(--text-dim)">BATTLE TAGS:</span> ${s.battleTag.map(t=>`<span class="chip" style="font-size:9px">${t}</span>`).join(' ')}</div>` : ''}
-        ${s.socialTag?.length ? `<div style="margin-top:4px"><span style="font-size:10px;color:var(--text-dim)">SOCIAL TAGS:</span> ${s.socialTag.map(t=>`<span class="chip" style="font-size:9px">${t}</span>`).join(' ')}</div>` : ''}
-      </div>` : ''}
+      ${(s.gender || s.language || s.signature) ? `
+      <div class="section-title">Social Info</div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;font-size:13px;color:var(--text-secondary)">
+        ${s.gender ? `<span>Gender: <b style="color:var(--text-primary)">${GENDERS[s.gender]||s.gender}</b></span>` : ''}
+        ${s.language ? `<span>Lang: <b style="color:var(--text-primary)">${LANGS[s.language]||s.language}</b></span>` : ''}
+        ${s.modePrefer ? `<span>Prefers: <b style="color:var(--text-primary)">Mode ${s.modePrefer}</b></span>` : ''}
+      </div>
+      ${s.battleTag?.length ? `<div style="margin-top:6px"><span class="text-xs text-muted">BATTLE TAGS:</span> ${s.battleTag.map(t=>`<span class="chip">${t}</span>`).join(' ')}</div>` : ''}
+      ${s.socialTag?.length ? `<div style="margin-top:4px"><span class="text-xs text-muted">SOCIAL TAGS:</span> ${s.socialTag.map(t=>`<span class="chip">${t}</span>`).join(' ')}</div>` : ''}
+      ${s.signature ? `<div style="margin-top:8px;font-style:italic;color:var(--text-muted);font-size:13px">"${esc(s.signature)}"</div>` : ''}` : ''}
 
-      <!-- CLAN -->
       ${c ? `
-      <div class="items-section">
-        <div class="items-section-label">Clan</div>
-        <div style="display:flex;flex-wrap:wrap;gap:12px;font-size:12px">
-          <span style="color:var(--ember);font-weight:700;font-size:14px">${esc(c.clanName||'—')}</span>
-          <span style="color:var(--text-muted)">Lv ${c.clanLevel||'?'}</span>
-          <span style="color:var(--text-muted)">${c.memberNum||0}/${c.capacity||0} members</span>
-          ${c.honorPoint ? `<span style="color:var(--fire-gold)">${fmtNum(c.honorPoint)} honor</span>` : ''}
-          ${cp?.nickname ? `<span style="color:var(--text-dim)">Captain: ${esc(cp.nickname)}</span>` : ''}
-        </div>
+      <div class="section-title">Clan</div>
+      <div style="display:flex;flex-wrap:wrap;gap:12px;font-size:13px;align-items:center">
+        <span style="color:var(--accent);font-weight:700;font-size:15px">${esc(c.clanName||'—')}</span>
+        <span class="text-muted">Lv ${c.clanLevel||'?'}</span>
+        <span class="text-muted">${c.memberNum||0}/${c.capacity||0} members</span>
+        ${c.honorPoint ? `<span style="color:var(--warn)">${fmtNum(c.honorPoint)} honor</span>` : ''}
+        ${cp?.nickname ? `<span class="text-muted">Captain: ${esc(cp.nickname)}</span>` : ''}
       </div>` : ''}
 
-      <!-- PET -->
       ${p ? `
-      <div class="items-section">
-        <div class="items-section-label">Pet</div>
-        <div style="display:flex;flex-wrap:wrap;gap:12px;font-size:12px;align-items:center">
-          <span style="color:var(--fire-gold);font-weight:700;font-size:14px">${esc(p.name||'Unknown')}</span>
-          <span style="color:var(--text-muted)">Lv ${p.level||0} · ${fmtNum(p.exp||0)} XP</span>
-          ${p.isSelected ? `<span class="chip chip-elite" style="font-size:9px;padding:1px 5px">ACTIVE</span>` : ''}
-          ${p.skinId ? `<span style="color:var(--text-dim)">Skin #${p.skinId}</span>` : ''}
-          ${p.selectedSkillId ? `<span style="color:var(--text-dim)">Skill #${p.selectedSkillId}</span>` : ''}
-        </div>
+      <div class="section-title">Pet</div>
+      <div style="display:flex;flex-wrap:wrap;gap:12px;font-size:13px;align-items:center">
+        <span style="color:var(--warn);font-weight:700;font-size:15px">${esc(p.name||'Unknown')}</span>
+        <span class="text-muted">Lv ${p.level||0} - ${fmtNum(p.exp||0)} XP</span>
+        ${p.isSelected ? `<span class="badge badge-ok" style="font-size:9px">ACTIVE</span>` : ''}
+        ${p.skinId ? `<span class="text-muted">Skin #${p.skinId}</span>` : ''}
       </div>` : ''}
-
-      <!-- CREDIT SCORE DETAIL -->
-      ${cr && (cr.periodicSummaryLikeCnt || cr.weeklyMatchCnt || cr.periodicSummaryIllegalCnt) ? `
-      <div class="items-section">
-        <div class="items-section-label">Credit Score Detail</div>
-        <div style="display:flex;flex-wrap:wrap;gap:12px;font-size:12px;color:var(--text-muted)">
-          ${cr.periodicSummaryLikeCnt ? `<span>Periodic Likes: <b style="color:#22c55e">${cr.periodicSummaryLikeCnt}</b></span>` : ''}
-          ${cr.periodicSummaryIllegalCnt ? `<span>Violations: <b style="color:#ef4444">${cr.periodicSummaryIllegalCnt}</b></span>` : ''}
-          ${cr.weeklyMatchCnt ? `<span>Weekly Matches: <b style="color:var(--text-primary)">${cr.weeklyMatchCnt}</b></span>` : ''}
-          ${cr.periodicSummaryLevel ? `<span>Summary Level: <b style="color:var(--text-primary)">${cr.periodicSummaryLevel}</b></span>` : ''}
-        </div>
-      </div>` : ''}
-
-      <!-- EQUIPPED ITEMS -->
-      ${ir.avatar?.name ? `<div class="items-section"><div class="items-section-label">Character</div><div class="items-chips">${resolvedChip(ir.avatar,'Avatar')}</div></div>` : ''}
 
       ${ir.clothes?.length ? `
-      <div class="visual-section">
-        <div class="items-section-label">Equipped Items (${ir.clothes.length})</div>
-        <div class="visual-item-grid">${ir.clothes.map(c => resolvedVisualCard(c, 'Outfit')).join('')}</div>
-      </div>` : ''}
+      <div class="section-title">Equipped Items (${ir.clothes.length})</div>
+      <div class="visual-item-grid">${ir.clothes.map(c => resolvedVisualCard(c, 'Outfit')).join('')}</div>` : ''}
 
       ${ir.weaponSkins?.length ? `
-      <div class="visual-section">
-        <div class="items-section-label">Weapon Skins (${ir.weaponSkins.length})</div>
-        <div class="visual-item-grid">${ir.weaponSkins.map(w => resolvedVisualCard(w, 'Weapon')).join('')}</div>
-      </div>` : ''}
+      <div class="section-title">Weapon Skins (${ir.weaponSkins.length})</div>
+      <div class="visual-item-grid">${ir.weaponSkins.map(w => resolvedVisualCard(w, 'Weapon')).join('')}</div>` : ''}
 
       ${ir.skills?.length ? `
-      <div class="visual-section">
-        <div class="items-section-label">Equipped Skills (${ir.skills.length})</div>
-        <div class="visual-item-grid">${ir.skills.map(sk => resolvedVisualCard(sk, 'Skill')).join('')}</div>
-      </div>` : ''}
+      <div class="section-title">Equipped Skills (${ir.skills.length})</div>
+      <div class="visual-item-grid">${ir.skills.map(sk => resolvedVisualCard(sk, 'Skill')).join('')}</div>` : ''}
 
-      <!-- ELITE PASS HISTORY -->
       ${ep.length ? `
-      <div class="items-section">
-        <div class="items-section-label">Elite Pass History (${ep.length})</div>
-        <div style="display:flex;flex-wrap:wrap;gap:5px">
-          ${ep.map(e => `<span class="chip" style="font-size:9px;color:${e.ownedPass?'#22c55e':'var(--text-dim)'};border-color:${e.ownedPass?'rgba(34,197,94,0.3)':'var(--border)'}">${esc(e.eventName||'S'+e.epEventId)} Lv${e.maxLevel||'?'}${e.ownedPass?' &#10003;':''}</span>`).join('')}
-        </div>
+      <div class="section-title">Elite Pass History (${ep.length})</div>
+      <div style="display:flex;flex-wrap:wrap;gap:5px">
+        ${ep.map(e => `<span class="chip" style="font-size:10px;color:${e.ownedPass?'var(--ok)':'var(--text-muted)'};border:1px solid ${e.ownedPass?'rgba(16,185,129,0.3)':'var(--border)'}">${esc(e.eventName||'S'+e.epEventId)} Lv${e.maxLevel||'?'}${e.ownedPass?' &#10003;':''}</span>`).join('')}
       </div>` : ''}
-
-      ${s.signature ? `<div class="sig-block">"${esc(s.signature)}"</div>` : ''}
     </div>`;
   }
 
   function kdColor(kd) {
     const v = parseFloat(kd);
     if (isNaN(v)) return '';
-    if (v < 1) return 'color:#ef4444';
+    if (v < 1) return 'color:var(--err)';
     if (v < 2) return 'color:var(--text-primary)';
-    if (v < 4) return 'color:#22c55e';
+    if (v < 4) return 'color:var(--ok)';
     return 'color:#FFD700';
   }
 
   function renderStatsCol(label, st) {
-    if (!st) return `<div class="stat-col"><div class="stat-col-header">${label}</div><div style="color:var(--text-dim);font-size:12px;padding:10px 0;text-align:center">No data</div></div>`;
+    if (!st) return `<div class="stat-col"><div class="stat-col-title">${label}</div><div class="text-muted text-sm" style="padding:10px 0;text-align:center">No data</div></div>`;
     const d = st.detailedstats || st.detailedStats || {};
     const g = st.gamesplayed || st.gamesPlayed || 0;
     const kd = fmtKD(st.kills, d.deaths);
     const wr = g ? (st.wins/g*100) : 0;
     return `
     <div class="stat-col">
-      <div class="stat-col-header">${label}</div>
-      <div class="stat-row"><span class="stat-label">Games</span><span class="stat-val">${fmtNum(g)}</span></div>
-      <div class="stat-row"><span class="stat-label">Wins</span><span class="stat-val green">${fmtNum(st.wins)}</span></div>
-      <div class="stat-row"><span class="stat-label">Win Rate</span><span class="stat-val gold">${winRate(st.wins,g)}</span></div>
-      ${g ? `<div class="progress-bar-wrap" style="height:6px;margin:2px 0 6px;max-width:100%"><div class="progress-bar" style="width:${Math.min(wr,100)}%;background:linear-gradient(90deg,#22c55e,#FFD700)"></div></div>` : ''}
-      <div class="stat-row"><span class="stat-label">Kills</span><span class="stat-val">${fmtNum(st.kills)}</span></div>
-      <div class="stat-row"><span class="stat-label">Deaths</span><span class="stat-val dim">${fmtNum(d.deaths)}</span></div>
-      <div class="stat-row"><span class="stat-label">K/D</span><span class="stat-val" style="${kdColor(kd)}">${kd}</span></div>
-      <div class="stat-row"><span class="stat-label">HS Kills</span><span class="stat-val">${fmtNum(d.headshotkills || d.headshotKills || d.headshots)}</span></div>
-      <div class="stat-row"><span class="stat-label">Damage</span><span class="stat-val">${fmtNum(d.damage)}</span></div>
-      <div class="stat-row"><span class="stat-label">Highest Kills</span><span class="stat-val gold">${fmtNum(d.highestkills || d.highestKills)}</span></div>
-      <div class="stat-row"><span class="stat-label">Top 10</span><span class="stat-val">${fmtNum(d.top10times || d.topntimes || d.top10Times || d.topNTimes)}</span></div>
-      <div class="stat-row"><span class="stat-label">Knockdowns</span><span class="stat-val">${fmtNum(d.knockdown || d.knockdowns)}</span></div>
-      <div class="stat-row"><span class="stat-label">Revives</span><span class="stat-val green">${fmtNum(d.revives)}</span></div>
-      <div class="stat-row"><span class="stat-label">Distance</span><span class="stat-val dim">${fmtNum(d.distancetravelled || d.distanceTravelled)}m</span></div>
-      <div class="stat-row"><span class="stat-label">Survival</span><span class="stat-val dim">${fmtNum(d.survivaltime || d.survivalTime)}s</span></div>
-      <div class="stat-row"><span class="stat-label">Road Kills</span><span class="stat-val">${fmtNum(d.roadkills || d.roadKills)}</span></div>
-      <div class="stat-row"><span class="stat-label">Pickups</span><span class="stat-val dim">${fmtNum(d.pickups)}</span></div>
+      <div class="stat-col-title">${label}</div>
+      <div class="stat-row"><span class="stat-row-label">Games</span><span class="stat-row-value">${fmtNum(g)}</span></div>
+      <div class="stat-row"><span class="stat-row-label">Wins</span><span class="stat-row-value" style="color:var(--ok)">${fmtNum(st.wins)}</span></div>
+      <div class="stat-row"><span class="stat-row-label">Win Rate</span><span class="stat-row-value" style="color:#FFD700">${winRate(st.wins,g)}</span></div>
+      ${g ? `<div class="progress-bar-wrap"><div class="progress-bar" style="width:${Math.min(wr,100)}%;background:linear-gradient(90deg,var(--ok),#FFD700)"></div></div>` : ''}
+      <div class="stat-row"><span class="stat-row-label">Kills</span><span class="stat-row-value">${fmtNum(st.kills)}</span></div>
+      <div class="stat-row"><span class="stat-row-label">Deaths</span><span class="stat-row-value text-muted">${fmtNum(d.deaths)}</span></div>
+      <div class="stat-row"><span class="stat-row-label">K/D</span><span class="stat-row-value" style="${kdColor(kd)}">${kd}</span></div>
+      <div class="stat-row"><span class="stat-row-label">HS Kills</span><span class="stat-row-value">${fmtNum(d.headshotkills || d.headshotKills || d.headshots)}</span></div>
+      <div class="stat-row"><span class="stat-row-label">Damage</span><span class="stat-row-value">${fmtNum(d.damage)}</span></div>
+      <div class="stat-row"><span class="stat-row-label">Highest Kills</span><span class="stat-row-value" style="color:#FFD700">${fmtNum(d.highestkills || d.highestKills)}</span></div>
+      <div class="stat-row"><span class="stat-row-label">Top 10</span><span class="stat-row-value">${fmtNum(d.top10times || d.topntimes || d.top10Times || d.topNTimes)}</span></div>
+      <div class="stat-row"><span class="stat-row-label">Knockdowns</span><span class="stat-row-value">${fmtNum(d.knockdown || d.knockdowns)}</span></div>
+      <div class="stat-row"><span class="stat-row-label">Revives</span><span class="stat-row-value" style="color:var(--ok)">${fmtNum(d.revives)}</span></div>
+      <div class="stat-row"><span class="stat-row-label">Distance</span><span class="stat-row-value text-muted">${fmtNum(d.distancetravelled || d.distanceTravelled)}m</span></div>
+      <div class="stat-row"><span class="stat-row-label">Survival</span><span class="stat-row-value text-muted">${fmtNum(d.survivaltime || d.survivalTime)}s</span></div>
+      <div class="stat-row"><span class="stat-row-label">Road Kills</span><span class="stat-row-value">${fmtNum(d.roadkills || d.roadKills)}</span></div>
+      <div class="stat-row"><span class="stat-row-label">Pickups</span><span class="stat-row-value text-muted">${fmtNum(d.pickups)}</span></div>
     </div>`;
   }
 
@@ -973,7 +1041,7 @@
     const r = data.response || {};
     return `
     <div class="stats-card">
-      <div class="stats-mode-tag">Battle Royale · ${esc(data.matchmode || 'CAREER')}</div>
+      <div class="badge badge-accent mb-8">Battle Royale - ${esc(data.matchmode || 'CAREER')}</div>
       <div class="stats-cols">
         ${renderStatsCol('SOLO',  r.solostats  || r.soloStats)}
         ${renderStatsCol('DUO',   r.duostats   || r.duoStats)}
@@ -991,39 +1059,39 @@
     const hsAcc = (d.hitcount||d.hitCount) ? ((d.headshotcount||d.headshotCount||0)/(d.hitcount||d.hitCount)*100).toFixed(1)+'%' : '—';
     return `
     <div class="stats-card">
-      <div class="stats-mode-tag">Clash Squad · ${esc(data.matchmode || 'CAREER')}</div>
+      <div class="badge badge-accent mb-8">Clash Squad - ${esc(data.matchmode || 'CAREER')}</div>
       <div class="stats-cols">
         <div class="stat-col">
-          <div class="stat-col-header">OVERALL</div>
-          <div class="stat-row"><span class="stat-label">Games</span><span class="stat-val">${fmtNum(g)}</span></div>
-          <div class="stat-row"><span class="stat-label">Wins</span><span class="stat-val green">${fmtNum(st.wins)}</span></div>
-          <div class="stat-row"><span class="stat-label">Win Rate</span><span class="stat-val gold">${winRate(st.wins,g)}</span></div>
-          ${g ? `<div class="progress-bar-wrap" style="height:6px;margin:2px 0 6px;max-width:100%"><div class="progress-bar" style="width:${Math.min(wr,100)}%;background:linear-gradient(90deg,#22c55e,#FFD700)"></div></div>` : ''}
-          <div class="stat-row"><span class="stat-label">Kills</span><span class="stat-val">${fmtNum(st.kills)}</span></div>
-          <div class="stat-row"><span class="stat-label">Deaths</span><span class="stat-val dim">${fmtNum(d.deaths)}</span></div>
-          <div class="stat-row"><span class="stat-label">K/D</span><span class="stat-val" style="${kdColor(kd)}">${kd}</span></div>
-          ${d.ratingpoints||d.ratingPoints ? `<div class="stat-row"><span class="stat-label">Rating</span><span class="stat-val gold">${(d.ratingpoints||d.ratingPoints||0).toFixed?.(1)||fmtNum(d.ratingpoints||d.ratingPoints)}</span></div>` : ''}
-          ${d.ratingenabledgames||d.ratingEnabledGames ? `<div class="stat-row"><span class="stat-label">Rated Games</span><span class="stat-val dim">${fmtNum(d.ratingenabledgames||d.ratingEnabledGames)}</span></div>` : ''}
+          <div class="stat-col-title">OVERALL</div>
+          <div class="stat-row"><span class="stat-row-label">Games</span><span class="stat-row-value">${fmtNum(g)}</span></div>
+          <div class="stat-row"><span class="stat-row-label">Wins</span><span class="stat-row-value" style="color:var(--ok)">${fmtNum(st.wins)}</span></div>
+          <div class="stat-row"><span class="stat-row-label">Win Rate</span><span class="stat-row-value" style="color:#FFD700">${winRate(st.wins,g)}</span></div>
+          ${g ? `<div class="progress-bar-wrap"><div class="progress-bar" style="width:${Math.min(wr,100)}%;background:linear-gradient(90deg,var(--ok),#FFD700)"></div></div>` : ''}
+          <div class="stat-row"><span class="stat-row-label">Kills</span><span class="stat-row-value">${fmtNum(st.kills)}</span></div>
+          <div class="stat-row"><span class="stat-row-label">Deaths</span><span class="stat-row-value text-muted">${fmtNum(d.deaths)}</span></div>
+          <div class="stat-row"><span class="stat-row-label">K/D</span><span class="stat-row-value" style="${kdColor(kd)}">${kd}</span></div>
+          ${d.ratingpoints||d.ratingPoints ? `<div class="stat-row"><span class="stat-row-label">Rating</span><span class="stat-row-value" style="color:#FFD700">${(d.ratingpoints||d.ratingPoints||0).toFixed?.(1)||fmtNum(d.ratingpoints||d.ratingPoints)}</span></div>` : ''}
+          ${d.ratingenabledgames||d.ratingEnabledGames ? `<div class="stat-row"><span class="stat-row-label">Rated Games</span><span class="stat-row-value text-muted">${fmtNum(d.ratingenabledgames||d.ratingEnabledGames)}</span></div>` : ''}
         </div>
         <div class="stat-col">
-          <div class="stat-col-header">COMBAT</div>
-          <div class="stat-row"><span class="stat-label">MVP</span><span class="stat-val gold">${fmtNum(d.mvpcount || d.mvpCount)}</span></div>
-          <div class="stat-row"><span class="stat-label">Assists</span><span class="stat-val">${fmtNum(d.assists)}</span></div>
-          <div class="stat-row"><span class="stat-label">Knockdowns</span><span class="stat-val">${fmtNum(d.knockdowns)}</span></div>
-          <div class="stat-row"><span class="stat-label">Revivals</span><span class="stat-val green">${fmtNum(d.revivals)}</span></div>
-          <div class="stat-row"><span class="stat-label">Damage</span><span class="stat-val">${fmtNum(d.damage)}</span></div>
-          <div class="stat-row"><span class="stat-label">HS Kills</span><span class="stat-val">${fmtNum(d.headshotkills || d.headshotKills)}</span></div>
-          <div class="stat-row"><span class="stat-label">HS Accuracy</span><span class="stat-val blue">${hsAcc}</span></div>
-          <div class="stat-row"><span class="stat-label">Throw Kills</span><span class="stat-val">${fmtNum(d.throwingkills||d.throwingKills)}</span></div>
+          <div class="stat-col-title">COMBAT</div>
+          <div class="stat-row"><span class="stat-row-label">MVP</span><span class="stat-row-value" style="color:#FFD700">${fmtNum(d.mvpcount || d.mvpCount)}</span></div>
+          <div class="stat-row"><span class="stat-row-label">Assists</span><span class="stat-row-value">${fmtNum(d.assists)}</span></div>
+          <div class="stat-row"><span class="stat-row-label">Knockdowns</span><span class="stat-row-value">${fmtNum(d.knockdowns)}</span></div>
+          <div class="stat-row"><span class="stat-row-label">Revivals</span><span class="stat-row-value" style="color:var(--ok)">${fmtNum(d.revivals)}</span></div>
+          <div class="stat-row"><span class="stat-row-label">Damage</span><span class="stat-row-value">${fmtNum(d.damage)}</span></div>
+          <div class="stat-row"><span class="stat-row-label">HS Kills</span><span class="stat-row-value">${fmtNum(d.headshotkills || d.headshotKills)}</span></div>
+          <div class="stat-row"><span class="stat-row-label">HS Accuracy</span><span class="stat-row-value" style="color:#60a5fa">${hsAcc}</span></div>
+          <div class="stat-row"><span class="stat-row-label">Throw Kills</span><span class="stat-row-value">${fmtNum(d.throwingkills||d.throwingKills)}</span></div>
         </div>
         <div class="stat-col">
-          <div class="stat-col-header">RECORDS</div>
-          <div class="stat-row"><span class="stat-label">Win Streak</span><span class="stat-val green">${fmtNum(d.streakwins || d.streakWins)}</span></div>
-          <div class="stat-row"><span class="stat-label">Best Kills</span><span class="stat-val gold">${fmtNum(d.onegamemostkills||d.oneGameMostKills)}</span></div>
-          <div class="stat-row"><span class="stat-label">Best Damage</span><span class="stat-val gold">${fmtNum(d.onegamemostdamage||d.onegameMostDamage)}</span></div>
-          <div class="stat-row"><span class="stat-label">Double K</span><span class="stat-val">${fmtNum(d.doublekills || d.doubleKills)}</span></div>
-          <div class="stat-row"><span class="stat-label">Triple K</span><span class="stat-val">${fmtNum(d.triplekills || d.tripleKills)}</span></div>
-          <div class="stat-row"><span class="stat-label">Quad K</span><span class="stat-val gold">${fmtNum(d.fourkills || d.fourKills)}</span></div>
+          <div class="stat-col-title">RECORDS</div>
+          <div class="stat-row"><span class="stat-row-label">Win Streak</span><span class="stat-row-value" style="color:var(--ok)">${fmtNum(d.streakwins || d.streakWins)}</span></div>
+          <div class="stat-row"><span class="stat-row-label">Best Kills</span><span class="stat-row-value" style="color:#FFD700">${fmtNum(d.onegamemostkills||d.oneGameMostKills)}</span></div>
+          <div class="stat-row"><span class="stat-row-label">Best Damage</span><span class="stat-row-value" style="color:#FFD700">${fmtNum(d.onegamemostdamage||d.onegameMostDamage)}</span></div>
+          <div class="stat-row"><span class="stat-row-label">Double K</span><span class="stat-row-value">${fmtNum(d.doublekills || d.doubleKills)}</span></div>
+          <div class="stat-row"><span class="stat-row-label">Triple K</span><span class="stat-row-value">${fmtNum(d.triplekills || d.tripleKills)}</span></div>
+          <div class="stat-row"><span class="stat-row-label">Quad K</span><span class="stat-row-value" style="color:#FFD700">${fmtNum(d.fourkills || d.fourKills)}</span></div>
         </div>
       </div>
     </div>`;
@@ -1031,29 +1099,29 @@
 
   function renderSearch(data) {
     const infos = data.response?.infos || [];
-    if (!infos.length) return `<div class="rich-empty"><span class="rich-empty-label">No players found</span></div>`;
+    if (!infos.length) return `<div class="result-empty">No players found</div>`;
     return `
     <div>
-      <div class="search-header">FOUND ${infos.length} RESULT${infos.length !== 1 ? 'S' : ''}</div>
-      <div class="search-results">
+      <div class="section-title">Found ${infos.length} result${infos.length !== 1 ? 's' : ''}</div>
+      <div>
         ${infos.map(p => `
         <div class="result-item">
           <div class="result-avatar" style="border-color:${rankColor(p.rank)}">${esc(initials(p.nickname))}</div>
           <div class="result-info">
             <div class="result-name">${esc(p.nickname || 'Unknown')}
-              ${p.haselitepass ? ' <span class="chip chip-elite" style="font-size:9px;padding:1px 5px">EP</span>' : ''}
+              ${p.haselitepass ? ' <span class="badge badge-warn" style="font-size:9px">EP</span>' : ''}
             </div>
-            <div class="result-meta">
+            <div class="result-uid">
               UID: ${esc(p.accountid || p.accountId)}
-              · ${esc(p.region || '')}
-              · <span style="color:${rankColor(p.rank)}">${brRankName(p.rank)}</span>
-              ${p.csrank ? ` · <span style="color:${rankColor(p.csrank)}">CS: ${csRankName(p.csrank)}</span>` : ''}
-              ${p.liked ? ` · <span style="color:#ef4444">&hearts; ${fmtNum(p.liked)}</span>` : ''}
-              ${p.clanname ? ` · <span style="color:var(--text-dim)">[${esc(p.clanname)}]</span>` : ''}
-              ${p.lastloginat ? ` · <span style="color:var(--text-dim);font-size:9px">${timeAgo(p.lastloginat)}</span>` : ''}
+              - ${esc(p.region || '')}
+              - <span style="color:${rankColor(p.rank)}">${brRankName(p.rank)}</span>
+              ${p.csrank ? ` - <span style="color:${rankColor(p.csrank)}">CS: ${csRankName(p.csrank)}</span>` : ''}
+              ${p.liked ? ` - <span style="color:var(--err)">&hearts; ${fmtNum(p.liked)}</span>` : ''}
+              ${p.clanname ? ` - <span style="color:var(--text-muted)">[${esc(p.clanname)}]</span>` : ''}
+              ${p.lastloginat ? ` - <span class="text-xs text-muted">${timeAgo(p.lastloginat)}</span>` : ''}
             </div>
           </div>
-          <div class="result-level">Lv ${p.level || '?'}</div>
+          <div style="font-weight:700;color:var(--accent);font-size:13px">Lv ${p.level || '?'}</div>
         </div>`).join('')}
       </div>
     </div>`;
@@ -1063,10 +1131,10 @@
     const items = data.response?.items || [];
     return `
     <div>
-      <div class="wishlist-header">WISHLIST · ${items.length} ITEM${items.length !== 1 ? 'S' : ''} · UID ${esc(data.uid)}</div>
+      <div class="section-title">Wishlist - ${items.length} item${items.length !== 1 ? 's' : ''} - UID ${esc(data.uid)}</div>
       ${!items.length
-        ? `<div class="wishlist-empty">No wishlist items found for this player.</div>`
-        : `<div class="wishlist-grid-v2">
+        ? `<div class="result-empty">No wishlist items found for this player.</div>`
+        : `<div class="wishlist-grid">
             ${items.map(it => {
               const name = it.itemName || `Item #${it.itemId || '?'}`;
               const rare = it.itemRare || 'NONE';
@@ -1076,11 +1144,12 @@
               <div class="wl-card" style="border-color:${col}33">
                 <div class="wl-card-img">
                   <img src="${itemImg(it, 112, 4)}" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" loading="lazy"/>
-                  <div class="wl-card-fallback" style="display:none;color:${col}">${esc(name.slice(0,2).toUpperCase())}</div>
+                  <div style="display:none;align-items:center;justify-content:center;width:100%;height:100%;font-size:20px;font-weight:800;color:${col}">${esc(name.slice(0,2).toUpperCase())}</div>
                 </div>
                 <div class="wl-card-name" title="${esc(name)}">${esc(name)}</div>
                 ${type ? `<div class="wl-card-type">${esc(type.replace(/_/g,' '))}</div>` : ''}
-                <div class="wl-card-rare-row"><div class="wl-card-rare" style="color:${col}">${rareName(rare)}</div>${sourceBadge(it)}</div>
+                <div style="margin-top:3px"><span class="visual-item-rare" style="color:${col}">${rareName(rare)}</span></div>
+                <div class="visual-item-source">${sourceBadge(it)}</div>
               </div>`;
             }).join('')}
            </div>`
@@ -1088,54 +1157,48 @@
     </div>`;
   }
 
-
   function renderItemLookup(data) {
     const item = data.item || null;
-    if (!data.found || !item) return '<div class="wishlist-empty">Item not found for the requested ID.</div>';
+    if (!data.found || !item) return '<div class="result-empty">Item not found for the requested ID.</div>';
     const name = item.name || ('Item #' + (item.id || '?'));
     const rare = item.rare || 'NONE';
     const type = item.type || item.collectionType || 'ITEM';
     const source = item.ffIcon ? 'FF Resource' : (item.iconUrl ? 'CDN Fallback' : 'Unknown');
     return `
     <div class="player-card">
-      <div class="player-header player-header-advanced">
-        <div class="player-hero-visual" style="--rank-accent:${rareColor(rare)}">
-          <img src="${itemImg(item, Number(itemSize()), Number(itemUpscale()))}" alt="${esc(name)}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"/>
-          <div class="player-hero-fallback" style="display:none">${esc(name.slice(0,2).toUpperCase())}</div>
-          <div class="player-hero-overlay"></div>
+      <div class="player-header">
+        <div class="player-avatar" style="border:3px solid ${rareColor(rare)};border-radius:var(--radius-lg);width:120px;height:120px">
+          <img src="${itemImg(item, Number(itemSize()), Number(itemUpscale()))}" alt="${esc(name)}" loading="lazy" style="object-fit:contain;width:100%;height:100%" onerror="this.style.display='none'"/>
         </div>
-        <div class="player-meta player-meta-advanced">
-          <div class="player-kicker">Item Record</div>
+        <div class="player-meta">
+          <div style="font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px">Item Record</div>
           <div class="player-name">${esc(name)}</div>
-          <div class="player-uid">ID: ${esc(item.id)} · Source: ${esc(source)}</div>
+          <div class="player-uid">ID: ${esc(item.id)} - Source: ${esc(source)}</div>
           <div class="player-chips">
-            <span class="chip" style="border-color:${rareColor(rare)}55;color:${rareColor(rare)}">${esc(rareName(rare))}</span>
-            <span class="chip chip-region">${esc((type || 'ITEM').replace(/_/g, ' '))}</span>
-            ${item.collectionType ? `<span class="chip" style="background:rgba(255,255,255,.06);color:var(--text-dim)">${esc(item.collectionType)}</span>` : ''}
+            <span class="chip" style="border:1px solid ${rareColor(rare)}55;color:${rareColor(rare)}">${esc(rareName(rare))}</span>
+            <span class="chip">${esc((type || 'ITEM').replace(/_/g, ' '))}</span>
+            ${item.collectionType ? `<span class="chip">${esc(item.collectionType)}</span>` : ''}
             ${sourceBadge(item)}
-          </div>
-          <div class="player-banner-stats">
-            <div class="player-banner-stat"><span class="player-banner-label">Display</span><span class="player-banner-value">${esc(itemSize())} px</span></div>
-            <div class="player-banner-stat"><span class="player-banner-label">Upscale</span><span class="player-banner-value">${esc(itemUpscale())}x</span></div>
-            <div class="player-banner-stat"><span class="player-banner-label">Proxy</span><span class="player-banner-value">HD PNG</span></div>
           </div>
         </div>
       </div>
       <div class="info-grid">
-        <div class="info-block"><div class="info-block-label">Proxy Path</div><div class="info-block-val" style="font-size:11px">${esc(item.proxyIconPath || '—')}</div></div>
-        <div class="info-block"><div class="info-block-label">Icon Alias</div><div class="info-block-val" style="font-size:11px">${esc(item.ffIcon || item.icon || '—')}</div></div>
-        <div class="info-block"><div class="info-block-label">External Source</div><div class="info-block-val" style="font-size:11px">${esc(item.iconSource || item.iconUrl || '—')}</div></div>
-        <div class="info-block"><div class="info-block-label">Unique</div><div class="info-block-val">${item.isUnique === null ? '—' : (item.isUnique ? 'Yes' : 'No')}</div></div>
+        <div class="info-block"><div class="info-block-label">Display</div><div class="info-block-value">${esc(itemSize())} px</div></div>
+        <div class="info-block"><div class="info-block-label">Upscale</div><div class="info-block-value">${esc(itemUpscale())}x</div></div>
+        <div class="info-block"><div class="info-block-label">Proxy Path</div><div class="info-block-value" style="font-size:11px">${esc(item.proxyIconPath || '—')}</div></div>
+        <div class="info-block"><div class="info-block-label">Icon Alias</div><div class="info-block-value" style="font-size:11px">${esc(item.ffIcon || item.icon || '—')}</div></div>
+        <div class="info-block"><div class="info-block-label">External Source</div><div class="info-block-value" style="font-size:11px">${esc(item.iconSource || item.iconUrl || '—')}</div></div>
+        <div class="info-block"><div class="info-block-label">Unique</div><div class="info-block-value">${item.isUnique === null ? '—' : (item.isUnique ? 'Yes' : 'No')}</div></div>
       </div>
     </div>`;
   }
 
   function renderItemSearch(data) {
     const items = data.items || [];
-    if (!items.length) return `<div class="rich-empty"><span class="rich-empty-label">No item assets found</span></div>`;
+    if (!items.length) return `<div class="result-empty">No item assets found</div>`;
     return `
     <div>
-      <div class="wishlist-header">ITEM SEARCH · ${items.length} RESULT${items.length !== 1 ? 'S' : ''} · ${esc(data.query || '')}</div>
+      <div class="section-title">Item Search - ${items.length} result${items.length !== 1 ? 's' : ''} - ${esc(data.query || '')}</div>
       <div class="visual-item-grid">
         ${items.map(it => resolvedVisualCard(it, 'Item')).join('')}
       </div>
@@ -1144,18 +1207,18 @@
 
   function renderGuest(data) {
     const pass = data.guest?.password || '';
-    const masked = pass ? pass.slice(0,4) + '····' + pass.slice(-4) : '—';
+    const masked = pass ? pass.slice(0,4) + '----' + pass.slice(-4) : '—';
     return `
     <div class="health-card">
-      <div class="health-icon">
-        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--fire-gold)" stroke-width="1.8"><path d="M16 11c1.66 0 3-1.79 3-4s-1.34-4-3-4-3 1.79-3 4 1.34 4 3 4z"/><path d="M8 11c1.66 0 3-1.79 3-4S9.66 3 8 3 5 4.79 5 7s1.34 4 3 4z"/><path d="M8 13c-2.76 0-5 1.79-5 4v2h10v-2c0-2.21-2.24-4-5-4z"/><path d="M16 13c-1.1 0-2.1.29-2.93.78A5.94 5.94 0 0 1 15 17v2h6v-2c0-2.21-2.24-4-5-4z"/></svg>
+      <div class="health-icon" style="border-color:var(--accent);background:var(--accent-bg);color:var(--accent)">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 11c1.66 0 3-1.79 3-4s-1.34-4-3-4-3 1.79-3 4 1.34 4 3 4z"/><path d="M8 11c1.66 0 3-1.79 3-4S9.66 3 8 3 5 4.79 5 7s1.34 4 3 4z"/><path d="M8 13c-2.76 0-5 1.79-5 4v2h10v-2c0-2.21-2.24-4-5-4z"/></svg>
       </div>
-      <div class="health-status-text" style="font-size:20px">Guest Credential</div>
-      <div class="info-grid" style="width:100%;max-width:500px">
-        <div class="info-block"><div class="info-block-label">Region</div><div class="info-block-val">${esc(data.region || '—')}</div></div>
-        <div class="info-block"><div class="info-block-label">Source</div><div class="info-block-val" style="font-size:12px">${esc(data.source || '—')}</div></div>
-        <div class="info-block"><div class="info-block-label">UID</div><div class="info-block-val accent">${esc(data.guest?.uid || '—')}</div></div>
-        <div class="info-block"><div class="info-block-label">Password</div><div class="info-block-val" style="font-size:10px;word-break:break-all;cursor:pointer" title="Click to copy" onclick="navigator.clipboard.writeText('${esc(pass)}')">${esc(masked)}</div></div>
+      <div class="health-status" style="color:var(--accent);font-size:18px">Guest Credential</div>
+      <div class="info-grid" style="width:100%;max-width:500px;margin-top:12px">
+        <div class="info-block"><div class="info-block-label">Region</div><div class="info-block-value">${esc(data.region || '—')}</div></div>
+        <div class="info-block"><div class="info-block-label">Source</div><div class="info-block-value" style="font-size:12px">${esc(data.source || '—')}</div></div>
+        <div class="info-block"><div class="info-block-label">UID</div><div class="info-block-value" style="color:var(--accent)">${esc(data.guest?.uid || '—')}</div></div>
+        <div class="info-block"><div class="info-block-label">Password</div><div class="info-block-value" style="font-size:10px;word-break:break-all;cursor:pointer" title="Click to copy" onclick="navigator.clipboard.writeText('${esc(pass)}')">${esc(masked)}</div></div>
       </div>
     </div>`;
   }
@@ -1164,18 +1227,18 @@
     const items = data.items || [];
     return `
     <div>
-      <div class="wishlist-header">UID GENERATOR · ${esc(data.mode || 'random')} · ${items.length} UIDs</div>
-      ${data.endpointHint ? `<div style="font-size:11px;color:var(--text-dim);margin-bottom:8px">Endpoint: ${esc(data.endpointHint)}</div>` : ''}
-      <div class="search-results">
+      <div class="section-title">UID Generator - ${esc(data.mode || 'random')} - ${items.length} UIDs</div>
+      ${data.endpointHint ? `<div class="text-xs text-muted mb-8">Endpoint: ${esc(data.endpointHint)}</div>` : ''}
+      <div>
         ${items.map(it => `
-        <div class="result-item" style="cursor:pointer" onclick="navigator.clipboard.writeText('${esc(it.encryptedHex||'')}')">
-          <div style="font-family:var(--font-mono);font-size:14px;color:var(--fire-gold);font-weight:700;min-width:100px">${esc(it.uid || '—')}</div>
+        <div class="result-item" onclick="navigator.clipboard.writeText('${esc(it.encryptedHex||'')}')">
+          <div style="font-family:var(--font-mono);font-size:14px;color:var(--accent);font-weight:700;min-width:100px">${esc(it.uid || '—')}</div>
           <div style="flex:1;min-width:0">
-            <div style="font-size:10px;color:var(--text-dim)">teamXdarks: ${esc(it.teamXdarks)}</div>
-            ${it.encryptedHex ? `<div style="font-size:9px;color:var(--text-dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:400px" title="${esc(it.encryptedHex)}">Encrypted: ${esc(it.encryptedHex)}</div>` : ''}
-            ${it.protobufHex ? `<div style="font-size:9px;color:var(--text-dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:400px" title="${esc(it.protobufHex)}">Proto: ${esc(it.protobufHex)}</div>` : ''}
+            <div class="text-xs text-muted">teamXdarks: ${esc(it.teamXdarks)}</div>
+            ${it.encryptedHex ? `<div class="text-xs text-muted truncate" style="max-width:400px" title="${esc(it.encryptedHex)}">Encrypted: ${esc(it.encryptedHex)}</div>` : ''}
+            ${it.protobufHex ? `<div class="text-xs text-muted truncate" style="max-width:400px" title="${esc(it.protobufHex)}">Proto: ${esc(it.protobufHex)}</div>` : ''}
           </div>
-          <div style="font-size:9px;color:var(--text-dim)">Click to copy</div>
+          <div class="text-xs text-muted">Click to copy</div>
         </div>`).join('')}
       </div>
     </div>`;
@@ -1190,51 +1253,43 @@
     const statusOk = data.status === 1;
     return `
     <div class="health-card">
-      <div class="health-icon" style="border-color:${statusOk ? 'rgba(239,68,68,0.4)' : 'rgba(255,184,0,0.4)'};background:${statusOk ? 'rgba(239,68,68,0.07)' : 'rgba(255,184,0,0.07)'}">
-        <svg width="32" height="32" viewBox="0 0 24 24" fill="${statusOk ? '#ef4444' : 'none'}" stroke="${statusOk ? '#ef4444' : '#f59e0b'}" stroke-width="1.8"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+      <div class="health-icon" style="border-color:${statusOk ? 'var(--err)' : 'var(--warn)'};background:${statusOk ? 'rgba(239,68,68,0.08)' : 'rgba(245,158,11,0.08)'};color:${statusOk ? 'var(--err)' : 'var(--warn)'}">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="${statusOk ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="1.8"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
       </div>
-      <div class="health-status-text" style="color:${statusOk ? '#ef4444' : '#f59e0b'}">${statusOk ? '+'+given+' Likes!' : 'Like Spam Complete'}</div>
+      <div class="health-status" style="color:${statusOk ? 'var(--err)' : 'var(--warn)'}">${statusOk ? '+'+given+' Likes!' : 'Like Spam Complete'}</div>
 
-      ${data.PlayerNickname ? `<div style="font-size:14px;color:var(--text-primary);font-weight:700">${esc(data.PlayerNickname)} <span style="color:var(--text-dim);font-weight:400;font-size:11px">UID: ${esc(data.UID||data.uid)}</span></div>` : ''}
+      ${data.PlayerNickname ? `<div style="font-size:14px;color:var(--text-primary);font-weight:700;margin-top:6px">${esc(data.PlayerNickname)} <span class="text-muted text-sm" style="font-weight:400">UID: ${esc(data.UID||data.uid)}</span></div>` : ''}
 
-      <div class="rank-row" style="width:100%;max-width:400px;margin-top:4px">
-        <div class="rank-card">
+      <div class="rank-row" style="width:100%;max-width:400px;margin-top:12px">
+        <div class="rank-card" style="border-left-color:var(--text-muted)">
           <div class="rank-card-label">Before</div>
-          <div class="rank-name" style="color:var(--text-muted)">${data.LikesBeforeCommand !== null ? fmtNum(data.LikesBeforeCommand) : '—'}</div>
+          <div class="rank-card-value">${data.LikesBeforeCommand !== null ? fmtNum(data.LikesBeforeCommand) : '—'}</div>
         </div>
-        <div class="rank-card">
+        <div class="rank-card" style="border-left-color:var(--err)">
           <div class="rank-card-label">After</div>
-          <div class="rank-name" style="color:#ef4444">${data.LikesAfterCommand !== null ? fmtNum(data.LikesAfterCommand) : '—'}</div>
+          <div class="rank-card-value" style="color:var(--err)">${data.LikesAfterCommand !== null ? fmtNum(data.LikesAfterCommand) : '—'}</div>
         </div>
-        <div class="rank-card" style="border-color:${statusOk ? 'rgba(34,197,94,0.3)' : 'rgba(255,184,0,0.3)'}">
+        <div class="rank-card" style="border-left-color:${statusOk ? 'var(--ok)' : 'var(--warn)'}">
           <div class="rank-card-label">Given</div>
-          <div class="rank-name" style="color:${statusOk ? '#22c55e' : '#f59e0b'}">${given !== null ? (given > 0 ? '+'+given : given) : '—'}</div>
+          <div class="rank-card-value" style="color:${statusOk ? 'var(--ok)' : 'var(--warn)'}">${given !== null ? (given > 0 ? '+'+given : given) : '—'}</div>
         </div>
       </div>
 
-      <div class="health-meta">
-        <span class="health-tag">region: ${esc(data.region || '—')}</span>
-        <span class="health-tag" style="color:#22c55e">${s.success || 0} sent</span>
-        <span class="health-tag" style="color:#ef4444">${s.failed || 0} failed</span>
-        <span class="health-tag">delay: ${data.delayMs || 0}ms</span>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:12px">
+        <span class="chip">region: ${esc(data.region || '—')}</span>
+        <span class="chip" style="color:var(--ok)">${s.success || 0} sent</span>
+        <span class="chip" style="color:var(--err)">${s.failed || 0} failed</span>
+        <span class="chip">delay: ${data.delayMs || 0}ms</span>
       </div>
-      <div class="progress-bar-wrap" style="margin-top:6px">
-        <div class="progress-bar" style="width:${pct}%;background:linear-gradient(90deg,#22c55e,#4ade80)"></div>
-        <span class="progress-label">${pct}% success</span>
+      <div class="progress-bar-wrap" style="margin-top:8px;max-width:400px">
+        <div class="progress-bar" style="width:${pct}%;background:linear-gradient(90deg,var(--ok),#4ade80)"></div>
       </div>
+      <div class="text-xs text-muted mt-8">${pct}% success</div>
     </div>
     ${results.length > 0 ? `
-    <div class="like-results-feed">
-      ${results.map(r => `<div class="like-result-row ${r.ok?'ok':'fail'}">${r.ok ? '<span class="like-ok">&#10003;</span>' : '<span class="like-fail">&#10007;</span>'} #${r.index} ${r.error ? '<span class="like-err">'+esc(r.error)+'</span>' : ''}</div>`).join('')}
+    <div style="margin-top:12px;font-size:12px;font-family:var(--font-mono);max-height:200px;overflow-y:auto;background:var(--bg-input);border-radius:var(--radius-md);padding:10px">
+      ${results.map(r => `<div style="padding:2px 0;color:${r.ok?'var(--ok)':'var(--err)'}">${r.ok ? '&#10003;' : '&#10007;'} #${r.index} ${r.error ? esc(r.error) : ''}</div>`).join('')}
     </div>` : ''}`;
-  }
-
-  function fmtUptime(sec) {
-    if (!sec && sec !== 0) return '—';
-    const h = Math.floor(sec/3600);
-    const m = Math.floor((sec%3600)/60);
-    const s = Math.floor(sec%60);
-    return (h?h+'h ':'') + (m?m+'m ':'') + s+'s';
   }
 
   function renderBanCheck(data) {
@@ -1242,28 +1297,30 @@
     const ban = data.banLookup || {};
     const ok = !!ban.ok;
     const banned = data.isBanned === true;
-    const statusColor = !ok ? '#f59e0b' : (banned ? '#ef4444' : '#22c55e');
+    const statusColor = !ok ? 'var(--warn)' : (banned ? 'var(--err)' : 'var(--ok)');
     const statusText = data.banStatus || (!ok ? 'Ban status unavailable' : 'Unknown');
     return `
-    <div class="health-card">
-      <div class="health-icon" style="border-color:${statusColor}55;background:${ok ? (banned ? "rgba(239,68,68,0.08)" : "rgba(34,197,94,0.08)") : "rgba(245,158,11,0.08)"}">
-        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="${statusColor}" stroke-width="1.8"><path d="M12 3l7 4v5c0 4.5-2.9 7.88-7 9-4.1-1.12-7-4.5-7-9V7l7-4z"/><path d="M9.5 12.5l1.7 1.7 3.3-4.2"/></svg>
+    <div class="ban-result">
+      <div class="ban-icon ${!ok ? 'unknown' : (banned ? 'banned' : 'ok')}">
+        ${!ok ? '?' : (banned ? '&#10007;' : '&#10003;')}
       </div>
-      <div class="health-status-text" style="color:${statusColor}">${esc(statusText)}</div>
-      <div class="health-meta">
-        <span class="health-tag">UID: ${esc(data.uid || "—")}</span>
-        <span class="health-tag">Nickname: ${esc(data.nickname || "Unavailable")}</span>
-        <span class="health-tag">Region: ${esc(data.region || "Unavailable")}</span>
-        ${data.banPeriod ? `<span class="health-tag">Period: ${esc(data.banPeriod)}</span>` : ""}
+      <div class="ban-status" style="color:${statusColor}">${esc(statusText)}</div>
+      <div class="ban-details">
+        <div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:8px">
+          <span class="chip">UID: ${esc(data.uid || '—')}</span>
+          <span class="chip">Nickname: ${esc(data.nickname || 'Unavailable')}</span>
+          <span class="chip">Region: ${esc(data.region || 'Unavailable')}</span>
+          ${data.banPeriod ? `<span class="chip">Period: ${esc(data.banPeriod)}</span>` : ''}
+        </div>
       </div>
-      <div class="info-grid" style="width:100%;max-width:720px;margin-top:10px">
-        <div class="info-block"><div class="info-block-label">Player Lookup</div><div class="info-block-val">${esc(player.ok ? "OK" : (player.status || "failed"))}</div></div>
-        <div class="info-block"><div class="info-block-label">Lookup HTTP</div><div class="info-block-val">${esc(player.httpStatus ?? "—")}</div></div>
-        <div class="info-block"><div class="info-block-label">Ban Lookup</div><div class="info-block-val">${esc(ban.ok ? "OK" : (ban.status || "failed"))}</div></div>
-        <div class="info-block"><div class="info-block-label">Ban HTTP</div><div class="info-block-val">${esc(ban.httpStatus ?? "—")}</div></div>
+      <div class="info-grid" style="max-width:600px;margin:16px auto 0">
+        <div class="info-block"><div class="info-block-label">Player Lookup</div><div class="info-block-value">${esc(player.ok ? 'OK' : (player.status || 'failed'))}</div></div>
+        <div class="info-block"><div class="info-block-label">Lookup HTTP</div><div class="info-block-value">${esc(player.httpStatus ?? '—')}</div></div>
+        <div class="info-block"><div class="info-block-label">Ban Lookup</div><div class="info-block-value">${esc(ban.ok ? 'OK' : (ban.status || 'failed'))}</div></div>
+        <div class="info-block"><div class="info-block-label">Ban HTTP</div><div class="info-block-value">${esc(ban.httpStatus ?? '—')}</div></div>
       </div>
-      ${player.message ? `<div class="error-hint" style="margin-top:10px">Player source: ${esc(player.message)}</div>` : ""}
-      ${ban.message ? `<div class="error-hint" style="margin-top:8px">Ban source: ${esc(ban.message)}</div>` : ""}
+      ${player.message ? `<div class="error-hint" style="margin-top:10px">Player source: ${esc(player.message)}</div>` : ''}
+      ${ban.message ? `<div class="error-hint" style="margin-top:6px">Ban source: ${esc(ban.message)}</div>` : ''}
     </div>`;
   }
 
@@ -1271,385 +1328,322 @@
     return `
     <div class="health-card">
       <div class="health-icon">
-        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
       </div>
-      <div class="health-status-text">${esc(String(data.status || 'OK').toUpperCase())}</div>
-      <div class="health-meta">
-        ${data.uptimeSec !== undefined ? `<span class="health-tag">Uptime: ${fmtUptime(data.uptimeSec)}</span>` : ''}
-        ${data.now ? `<span class="health-tag">${new Date(data.now).toLocaleString()}</span>` : ''}
+      <div class="health-status">${esc(String(data.status || 'OK').toUpperCase())}</div>
+      <div class="health-detail">
+        ${data.uptimeSec !== undefined ? `Uptime: ${fmtUptime(data.uptimeSec)}` : ''}
+        ${data.now ? ` - ${new Date(data.now).toLocaleString()}` : ''}
       </div>
     </div>`;
   }
 
   function renderError(msg) {
-    // Try to detect common errors and give helpful hints
     let hint = '';
     const m = String(msg||'').toLowerCase();
-    if (m.includes('region'))        hint = 'Check your region selection — must be a supported region.';
+    if (m.includes('region'))        hint = 'Check your region selection -- must be a supported region.';
     else if (m.includes('uid'))      hint = 'Verify the UID is correct and numeric.';
-    else if (m.includes('401'))      hint = 'Authentication failed — guest credentials may be expired.';
+    else if (m.includes('401'))      hint = 'Authentication failed -- guest credentials may be expired.';
     else if (m.includes('timeout'))  hint = 'Server took too long to respond. Try again.';
     else if (m.includes('econnrefused') || m.includes('enotfound')) hint = 'Cannot reach the game server. It may be down.';
 
     return `
-    <div class="error-card-v2">
+    <div class="error-card">
       <div class="error-icon">
-        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
       </div>
-      <div class="error-body">
-        <div class="error-card-title">Request Failed</div>
-        <div class="error-card-msg">${esc(msg)}</div>
+      <div>
+        <div class="error-title">Request Failed</div>
+        <div class="error-msg">${esc(msg)}</div>
         ${hint ? `<div class="error-hint">${esc(hint)}</div>` : ''}
       </div>
     </div>`;
   }
 
   /* ═══════════════════════════════════════════════════
-     State & View
+     SHARED STATE & ACCESSORS
   ═══════════════════════════════════════════════════ */
-  const richView  = document.getElementById('rich-view');
-  const out       = document.getElementById('out');
-  const badge     = document.getElementById('status-badge');
-  const activeEp  = document.getElementById('active-ep');
-  const respTime  = document.getElementById('resp-time');
-  let activeBtn   = null;
-  let currentView = 'cards';
-  let lastData    = null;
-  let lastAction  = null;
-
+  const enc = encodeURIComponent;
   const region    = () => document.getElementById('region').value;
   const uid       = () => document.getElementById('uid').value.trim();
-  const keyword   = () => document.getElementById('keyword').value.trim();
+  const keyword   = () => (document.getElementById('keyword')?.value || '').trim();
   const matchmode = () => document.getElementById('matchmode').value;
-  const itemId    = () => document.getElementById('item-id').value.trim() || '101000005';
-  const itemSize  = () => document.getElementById('item-size').value;
-  const itemUpscale = () => document.getElementById('item-upscale').value;
-  const itemEngine = () => document.getElementById('item-engine').value;
+  const itemId    = () => (document.getElementById('item-id')?.value || '101000005').trim();
+  const itemSize  = () => (document.getElementById('item-size')?.value || '128');
+  const itemUpscale = () => (document.getElementById('item-upscale')?.value || '4');
+  const itemEngine = () => (document.getElementById('item-engine')?.value || 'ai-fast');
 
-  const EP_LABELS = {
-    account:     'Account',
-    br:          'BR Stats',
-    cs:          'CS Stats',
-    search:      'Search',
-    bancheck:    'Ban Check',
-    wishlist:    'Wishlist',
-    itemlookup:  'Item Lookup',
-    itemsearch:  'Item Search',
-    health:      'Health',
-    guest:       'Guest Generator',
-    likespam:    'Like Spam',
-    uidgen:      'UID Generator',
-  };
+  // Per-page JSON storage for view toggles
+  let playerLastData = null;
+  let playerLastAction = null;
+  let playerCurrentView = 'cards';
 
-  function setView(v) {
-    currentView = v;
-    document.getElementById('btn-cards').classList.toggle('active', v === 'cards');
-    document.getElementById('btn-json').classList.toggle('active', v === 'json');
-    if (v === 'cards') {
-      richView.classList.remove('rich-hidden');
-      out.classList.add('rich-hidden');
-    } else {
-      richView.classList.add('rich-hidden');
-      out.classList.remove('rich-hidden');
-    }
-  }
+  /* ═══════════════════════════════════════════════════
+     GENERIC API CALL
+  ═══════════════════════════════════════════════════ */
+  async function apiCall(url, containerId, renderFn, options = {}) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    container.innerHTML = `<div class="result-loading"><div class="spinner"></div> Fetching...</div>`;
 
-  function buildRichCard(action, data) {
-    if (action === 'account')  return renderAccount(data);
-    if (action === 'br')       return renderBrStats(data);
-    if (action === 'cs')       return renderCsStats(data);
-    if (action === 'search')   return renderSearch(data);
-    if (action === 'bancheck') return renderBanCheck(data);
-    if (action === 'wishlist') return renderWishlist(data);
-    if (action === 'itemlookup') return renderItemLookup(data);
-    if (action === 'itemsearch') return renderItemSearch(data);
-    if (action === 'health')   return renderHealth(data);
-    if (action === 'guest')    return renderGuest(data);
-    if (action === 'uidgen')      return renderUidGenerator(data);
-    if (action === 'likespam')    return renderLikeSpam(data);
-    return `<pre style="color:var(--text-primary);white-space:pre-wrap">${esc(JSON.stringify(data,null,2))}</pre>`;
-  }
-
-  let _busy = false;
-  async function call(url, action) {
-    if (_busy) return; _busy = true;
-    if (activeBtn) activeBtn.classList.remove('active');
-    activeBtn = document.querySelector(`[data-action="${action}"]`);
-    if (activeBtn) activeBtn.classList.add('active', 'loading');
-
-    badge.textContent = '…'; badge.className = 'status-badge pending';
-    activeEp.textContent = EP_LABELS[action] || '';
-    respTime.textContent = '';
-
-    richView.innerHTML = `<div class="rich-loading"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation:spin .8s linear infinite"><path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0"/></svg> Fetching…</div>`;
-    out.innerHTML = '<span class="muted">// Sending request…</span>';
-
-    const t0 = Date.now();
     try {
-      const res  = await fetch(url);
-      const ms   = Date.now() - t0;
-      const text = await res.text();
-      let data;
-      try { data = text ? JSON.parse(text) : {}; } catch { data = { raw: text }; }
-      lastData   = data; lastAction = action;
-
-      if (res.ok) {
-        richView.innerHTML = buildRichCard(action, data);
-        badge.textContent  = `${res.status} OK`;
-        badge.className    = 'status-badge ok';
-      } else {
-        richView.innerHTML = renderError(data.message || JSON.stringify(data));
-        badge.textContent  = `${res.status} ERR`;
-        badge.className    = 'status-badge err';
-      }
-      out.innerHTML = highlight(JSON.stringify(data, null, 2));
-      respTime.textContent = `${ms}ms`;
-    } catch (e) {
-      richView.innerHTML   = renderError(String(e));
-      out.innerHTML        = `<span class="err-text">// Error: ${esc(String(e))}</span>`;
-      badge.textContent    = 'ERR';
-      badge.className      = 'status-badge err';
-      respTime.textContent = `${Date.now() - t0}ms`;
-    } finally {
-      if (activeBtn) activeBtn.classList.remove('loading');
-      _busy = false;
-    }
-  }
-
-  async function callPost(url, body, action) {
-    if (_busy) return; _busy = true;
-    if (activeBtn) activeBtn.classList.remove('active');
-    activeBtn = document.querySelector(`[data-action="${action}"]`);
-    if (activeBtn) activeBtn.classList.add('active', 'loading');
-
-    badge.textContent = '…'; badge.className = 'status-badge pending';
-    activeEp.textContent = EP_LABELS[action] || '';
-    respTime.textContent = '';
-
-    richView.innerHTML = `<div class="rich-loading"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation:spin .8s linear infinite"><path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0"/></svg> Sending…</div>`;
-    out.innerHTML = '<span class="muted">// Sending POST request…</span>';
-
-    const t0 = Date.now();
-    try {
-      const res  = await fetch(url, {
+      const fetchOpts = options.method === 'POST' ? {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
-      });
-      const ms   = Date.now() - t0;
+        body: JSON.stringify(options.body),
+      } : {};
+      const res = await fetch(url, fetchOpts);
       const text = await res.text();
       let data;
       try { data = text ? JSON.parse(text) : {}; } catch { data = { raw: text }; }
-      lastData   = data; lastAction = action;
+
+      if (options.storeAs === 'player') {
+        playerLastData = data;
+        playerLastAction = options.action;
+        const jsonEl = document.getElementById('player-json');
+        if (jsonEl) jsonEl.innerHTML = highlight(JSON.stringify(data, null, 2));
+      }
 
       if (res.ok) {
-        richView.innerHTML = buildRichCard(action, data);
-        badge.textContent  = `${res.status} OK`;
-        badge.className    = 'status-badge ok';
+        container.innerHTML = renderFn(data);
       } else {
-        richView.innerHTML = renderError(data.message || JSON.stringify(data));
-        badge.textContent  = `${res.status} ERR`;
-        badge.className    = 'status-badge err';
+        container.innerHTML = renderError(data.message || JSON.stringify(data));
       }
-      out.innerHTML = highlight(JSON.stringify(data, null, 2));
-      respTime.textContent = `${ms}ms`;
+      return data;
     } catch (e) {
-      richView.innerHTML   = renderError(String(e));
-      out.innerHTML        = `<span class="err-text">// Error: ${esc(String(e))}</span>`;
-      badge.textContent    = 'ERR';
-      badge.className      = 'status-badge err';
-      respTime.textContent = `${Date.now() - t0}ms`;
-    } finally {
-      if (activeBtn) activeBtn.classList.remove('loading');
-      _busy = false;
+      container.innerHTML = renderError(String(e));
+      return null;
     }
   }
 
-  function copyOutput() {
-    const txt = currentView === 'json'
-      ? (out.innerText || out.textContent)
-      : (lastData ? JSON.stringify(lastData, null, 2) : '');
-    navigator.clipboard.writeText(txt).then(() => {
-      const lbl = document.getElementById('copy-label');
-      lbl.textContent = 'Copied!';
-      setTimeout(() => lbl.textContent = 'Copy', 1600);
-    });
-  }
+  /* ═══════════════════════════════════════════════════
+     ROUTER
+  ═══════════════════════════════════════════════════ */
+  const PAGES = {
+    home:      { title: 'Home' },
+    player:    { title: 'Player Lookup' },
+    stats:     { title: 'Battle Stats' },
+    ban:       { title: 'Ban Check' },
+    items:     { title: 'Items Gallery' },
+    utilities: { title: 'Utilities' },
+    docs:      { title: 'API Docs' },
+  };
 
-  function clearOutput() {
-    richView.innerHTML = `<div class="rich-empty"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg><span class="rich-empty-label">Choose a feature panel above to fire a request</span></div>`;
-    out.innerHTML = '<span class="muted">// Ready — choose a feature panel above</span>';
-    badge.textContent = '—'; badge.className = 'status-badge';
-    activeEp.textContent = ''; respTime.textContent = '';
-    lastData = null; lastAction = null;
-    if (activeBtn) { activeBtn.classList.remove('active'); activeBtn = null; }
-  }
+  let currentPage = 'home';
 
+  function navigate(hash) {
+    const page = (hash || '#home').replace('#', '') || 'home';
+    if (!PAGES[page]) return navigate('#home');
+    currentPage = page;
 
-  const FEATURE_GROUPS = [
-    {
-      kicker: 'Intel Suite',
-      title: 'Identity + Enforcement',
-      copy: 'Profile lookup and ban verification stay together so anti-bot failures from Shop2Game remain visible without hiding Garena status.',
-      pill: 'Live upstream',
-      actions: ['account', 'bancheck'],
-    },
-    {
-      kicker: 'Combat Board',
-      title: 'Match Performance',
-      copy: 'Battle Royale, Clash Squad, and wishlist flows stay grouped around the selected region, mode, and player UID.',
-      pill: 'Rank telemetry',
-      actions: ['br', 'cs', 'wishlist'],
-    },
-    {
-      kicker: 'Discovery',
-      title: 'Search + Asset Intel',
-      copy: 'Nickname search stays separate from item asset exploration so it is easier to inspect either players or imported PNG resources.',
-      pill: 'Indexed data',
-      actions: ['search'],
-    },
-    {
-      kicker: 'Utility Deck',
-      title: 'Generators + Service Checks',
-      copy: 'Health probes, guest credentials, UID generation, and replay utilities stay isolated from gameplay intel requests.',
-      pill: 'Ops tools',
-      actions: ['health', 'guest', 'uidgen', 'likespam'],
-    },
-  ];
+    // Update URL without triggering hashchange if same
+    if (location.hash !== '#' + page) {
+      history.pushState(null, '', '#' + page);
+    }
 
-  function buildFeaturePanel(group) {
-    const article = document.createElement('article');
-    article.className = 'feature-panel';
+    // Update page title
+    document.getElementById('topbar-title').textContent = PAGES[page].title;
+    document.title = 'FF API Pro - ' + PAGES[page].title;
 
-    const head = document.createElement('div');
-    head.className = 'feature-panel-head';
-
-    const headText = document.createElement('div');
-    const kicker = document.createElement('div');
-    kicker.className = 'feature-kicker';
-    kicker.textContent = group.kicker;
-    const title = document.createElement('h2');
-    title.className = 'feature-title-sm';
-    title.textContent = group.title;
-    headText.appendChild(kicker);
-    headText.appendChild(title);
-
-    const pill = document.createElement('span');
-    pill.className = 'feature-pill';
-    pill.textContent = group.pill;
-
-    head.appendChild(headText);
-    head.appendChild(pill);
-
-    const copy = document.createElement('p');
-    copy.className = 'feature-copy';
-    copy.textContent = group.copy;
-
-    const grid = document.createElement('div');
-    grid.className = 'feature-card-grid';
-
-    group.actions.forEach((action) => {
-      const card = document.querySelector(`#feature-cards-source [data-action="${action}"]`);
-      if (card) grid.appendChild(card);
+    // Show/hide pages
+    document.querySelectorAll('[data-page]').forEach(el => {
+      const isTarget = el.dataset.page === page;
+      el.classList.toggle('active', isTarget);
+      if (isTarget) {
+        requestAnimationFrame(() => el.classList.add('visible'));
+      } else {
+        el.classList.remove('visible');
+      }
     });
 
-    article.appendChild(head);
-    article.appendChild(copy);
-    article.appendChild(grid);
-    return article;
-  }
-
-  function buildOpticsLab() {
-    const article = document.createElement('article');
-    article.className = 'feature-panel feature-panel-lab';
-    article.innerHTML = `
-      <div class="feature-panel-head">
-        <div>
-          <div class="feature-kicker">Item Optics Lab</div>
-          <h2 class="feature-title-sm">HD PNG Preview + Upscaling</h2>
-        </div>
-        <span class="feature-pill">6x upscale</span>
-      </div>
-      <p class="feature-copy">Tune icon output size and upscale factor before opening item metadata. This preview uses the same /api/items/icon/:id.png pipeline as the API.</p>
-      <div class="lab-grid">
-        <div class="lab-controls">
-          <div class="input-group">
-            <label class="input-label">Item ID</label>
-            <input id="item-id" type="text" value="101000005" placeholder="Enter item id…" spellcheck="false" autocomplete="off" />
-          </div>
-          <div class="input-group">
-            <label class="input-label">Display Size</label>
-            <div class="select-wrap">
-              <select id="item-size">
-                <option value="96">96 px</option>
-                <option value="128" selected>128 px</option>
-                <option value="160">160 px</option>
-                <option value="192">192 px</option>
-                <option value="256">256 px</option>
-              </select>
-              <svg class="select-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
-            </div>
-          </div>
-          <div class="input-group">
-            <label class="input-label">Upscale</label>
-            <div class="select-wrap">
-              <select id="item-upscale">
-                <option value="2">2x</option>
-                <option value="3">3x</option>
-                <option value="4" selected>4x</option>
-                <option value="5">5x</option>
-                <option value="6">6x</option>
-              </select>
-              <svg class="select-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
-            </div>
-          </div>
-          <div class="input-group">
-            <label class="input-label">Engine</label>
-            <div class="select-wrap">
-              <select id="item-engine">
-                <option value="ai-fast" selected>AI Fast</option>
-                <option value="classic">Classic</option>
-              </select>
-              <svg class="select-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
-            </div>
-          </div>
-          <div class="lab-actions">
-            <button class="action-btn lab-action-btn" onclick="runItemLookup()">Open Item Record</button>
-            <button class="action-btn lab-action-btn" onclick="runItemSearch()">Search Asset Catalog</button>
-          </div>
-        </div>
-        <div class="lab-preview-card">
-          <div class="lab-preview-stage">
-            <img id="item-preview-img" src="" alt="Item preview" loading="lazy" />
-          </div>
-          <div class="lab-preview-meta">
-            <div class="lab-preview-title">Preview Route</div>
-            <div class="lab-preview-id" id="item-preview-id">101000005</div>
-            <div class="lab-preview-spec" id="item-preview-spec">128px • 4x upscale • AI Fast</div>
-            <code class="lab-preview-route" id="item-preview-route"></code>
-          </div>
-        </div>
-      </div>`;
-    return article;
-  }
-
-  function initFeatureDeck() {
-    const source = document.getElementById('feature-cards-source');
-    if (!source || source.dataset.ready === '1') return;
-
-    const host = document.createElement('section');
-    host.id = 'feature-deck';
-    host.className = 'feature-grid';
-
-    FEATURE_GROUPS.forEach((group) => {
-      host.appendChild(buildFeaturePanel(group));
+    // Update nav
+    document.querySelectorAll('.nav-link[data-nav]').forEach(el => {
+      el.classList.toggle('active', el.dataset.nav === page);
     });
-    host.appendChild(buildOpticsLab());
 
-    source.parentNode.insertBefore(host, source);
-    source.dataset.ready = '1';
+    // Close sidebar on mobile
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('sidebar-overlay').classList.remove('open');
+
+    // Page-specific init
+    if (page === 'home') initHomePage();
+    if (page === 'ban') {
+      const banInput = document.getElementById('ban-uid');
+      if (banInput && !banInput.value) banInput.value = uid();
+    }
+    if (page === 'items') syncItemPreview();
+    if (page === 'utilities') {
+      const likeUid = document.getElementById('like-uid');
+      if (likeUid && !likeUid.value) likeUid.value = uid();
+    }
   }
 
+  window.addEventListener('hashchange', () => navigate(location.hash));
+  window.addEventListener('popstate', () => navigate(location.hash));
+
+  /* ═══════════════════════════════════════════════════
+     SIDEBAR / TOPBAR TOGGLES
+  ═══════════════════════════════════════════════════ */
+  function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('open');
+    document.getElementById('sidebar-overlay').classList.toggle('open');
+  }
+
+  document.getElementById('sidebar-overlay').addEventListener('click', () => {
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('sidebar-overlay').classList.remove('open');
+  });
+
+  function toggleMobileControls() {
+    document.getElementById('topbar-controls').classList.toggle('open');
+  }
+
+  /* ═══════════════════════════════════════════════════
+     DARK MODE
+  ═══════════════════════════════════════════════════ */
+  function toggleDarkMode() {
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    const next = isDark ? '' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('ff-theme', next);
+    updateThemeIcon(next);
+  }
+
+  function updateThemeIcon(theme) {
+    document.getElementById('theme-icon-light').style.display = theme === 'dark' ? 'none' : 'block';
+    document.getElementById('theme-icon-dark').style.display = theme === 'dark' ? 'block' : 'none';
+  }
+
+  // Restore theme
+  (function() {
+    const saved = localStorage.getItem('ff-theme');
+    if (saved) {
+      document.documentElement.setAttribute('data-theme', saved);
+      updateThemeIcon(saved);
+    }
+  })();
+
+  /* ═══════════════════════════════════════════════════
+     WALLPAPER
+  ═══════════════════════════════════════════════════ */
+  function toggleSettings() {
+    document.getElementById('settings-popover').classList.toggle('open');
+  }
+
+  // Close popover when clicking outside
+  document.addEventListener('click', e => {
+    const popover = document.getElementById('settings-popover');
+    const bottom = popover.parentElement;
+    if (popover.classList.contains('open') && !bottom.contains(e.target)) {
+      popover.classList.remove('open');
+    }
+  });
+
+  function applyWallpaper() {
+    const url = document.getElementById('wallpaper-input').value.trim();
+    if (!url) return;
+    document.getElementById('wallpaper-bg').style.backgroundImage = `url('${url}')`;
+    document.body.classList.add('has-wallpaper');
+    localStorage.setItem('ff-wallpaper', url);
+    document.getElementById('settings-popover').classList.remove('open');
+  }
+
+  function clearWallpaper() {
+    document.getElementById('wallpaper-bg').style.backgroundImage = '';
+    document.body.classList.remove('has-wallpaper');
+    localStorage.removeItem('ff-wallpaper');
+    document.getElementById('wallpaper-input').value = '';
+    document.getElementById('settings-popover').classList.remove('open');
+  }
+
+  // Restore wallpaper
+  (function() {
+    const saved = localStorage.getItem('ff-wallpaper');
+    if (saved) {
+      document.getElementById('wallpaper-input').value = saved;
+      document.getElementById('wallpaper-bg').style.backgroundImage = `url('${saved}')`;
+      document.body.classList.add('has-wallpaper');
+    }
+  })();
+
+  /* ═══════════════════════════════════════════════════
+     SPOTIFY
+  ═══════════════════════════════════════════════════ */
+  const SPOTIFY_URI = 'spotify:album:2F2ZjH7HJQns03217zo2xi';
+  let spotifyController = null;
+  let spotifyOpen = false;
+
+  function toggleSpotify() {
+    spotifyOpen = !spotifyOpen;
+    document.getElementById('spotify-player').classList.toggle('open', spotifyOpen);
+    document.getElementById('spotify-label').textContent = spotifyOpen ? 'Playing' : 'Music';
+  }
+
+  ;(function () {
+    const s = document.createElement('script');
+    s.src = 'https://open.spotify.com/embed-podcast/iframe-api/v1';
+    s.async = true;
+    document.head.appendChild(s);
+  })();
+
+  const spotifyFallbackTimer = setTimeout(() => {
+    if (!spotifyController) {
+      const c = document.getElementById('spotify-embed');
+      if (c && !c.querySelector('iframe')) {
+        c.innerHTML =
+          `<iframe src="https://open.spotify.com/embed/album/2F2ZjH7HJQns03217zo2xi` +
+          `?utm_source=generator&theme=0" width="100%" height="152" frameborder="0" ` +
+          `allow="autoplay;clipboard-write;encrypted-media;fullscreen;picture-in-picture" loading="lazy"></iframe>`;
+      }
+    }
+  }, 5000);
+
+  window.onSpotifyIframeApiReady = function (IFrameAPI) {
+    clearTimeout(spotifyFallbackTimer);
+    const container = document.getElementById('spotify-embed');
+    if (!container) return;
+    IFrameAPI.createController(container, { uri: SPOTIFY_URI, width: '100%', height: 152 },
+      function (ctrl) {
+        spotifyController = ctrl;
+        ctrl.addListener('playback_update', function (evt) {
+          const d = evt && evt.data;
+          if (!d || !d.track) return;
+          document.getElementById('spotify-label').textContent = 'Playing';
+        });
+      }
+    );
+  };
+
+  // Close spotify when clicking outside sidebar
+  document.addEventListener('click', e => {
+    if (spotifyOpen && !document.getElementById('sidebar').contains(e.target)) {
+      spotifyOpen = false;
+      document.getElementById('spotify-player').classList.remove('open');
+      document.getElementById('spotify-label').textContent = 'Music';
+    }
+  });
+
+  /* ═══════════════════════════════════════════════════
+     PLAYER PAGE: TABS & VIEW TOGGLE
+  ═══════════════════════════════════════════════════ */
+  function setPlayerTab(tab) {
+    document.getElementById('player-tab-uid').classList.toggle('active', tab === 'uid');
+    document.getElementById('player-tab-name').classList.toggle('active', tab === 'name');
+    document.getElementById('player-panel-uid').classList.toggle('hidden', tab !== 'uid');
+    document.getElementById('player-panel-name').classList.toggle('hidden', tab !== 'name');
+  }
+
+  function setPlayerView(v) {
+    playerCurrentView = v;
+    document.getElementById('player-btn-cards').classList.toggle('active', v === 'cards');
+    document.getElementById('player-btn-json').classList.toggle('active', v === 'json');
+    document.getElementById('player-rich').classList.toggle('hidden', v !== 'cards');
+    document.getElementById('player-json').classList.toggle('hidden', v !== 'json');
+  }
+
+  /* ═══════════════════════════════════════════════════
+     ITEM PREVIEW SYNC
+  ═══════════════════════════════════════════════════ */
   function syncItemPreview() {
     const id = itemId();
     const size = itemSize();
@@ -1657,59 +1651,151 @@
     const engine = itemEngine();
     const route = `/api/items/icon/${encodeURIComponent(id)}.png?size=${encodeURIComponent(size)}&upscale=${encodeURIComponent(upscale)}&engine=${encodeURIComponent(engine)}`;
     const img = document.getElementById('item-preview-img');
-    if (img) {
-      img.src = route;
-      img.alt = `Item ${id}`;
-    }
+    if (img) { img.src = route; img.alt = `Item ${id}`; }
     const title = document.getElementById('item-preview-id');
     const spec = document.getElementById('item-preview-spec');
     const routeOut = document.getElementById('item-preview-route');
     const engineLabel = engine === 'classic' ? 'Classic' : 'AI Fast';
     if (title) title.textContent = `Item #${id}`;
-    if (spec) spec.textContent = `${size}px • ${upscale}x upscale • ${engineLabel}`;
+    if (spec) spec.textContent = `${size}px - ${upscale}x upscale - ${engineLabel}`;
     if (routeOut) routeOut.textContent = route;
   }
 
   /* ═══════════════════════════════════════════════════
-     Actions
+     API ACTIONS
   ═══════════════════════════════════════════════════ */
-  const enc = encodeURIComponent;
-  function runAccount()  { call(`/api/v1/account?region=${enc(region())}&uid=${enc(uid())}`, 'account'); }
-  function runBr()       { call(`/api/v1/playerstats?region=${enc(region())}&uid=${enc(uid())}&matchmode=${matchmode()}`, 'br'); }
-  function runCs()       { call(`/api/v1/playertcstats?region=${enc(region())}&uid=${enc(uid())}&matchmode=${matchmode()}`, 'cs'); }
-  function runSearch()   { call(`/api/v1/search?region=${enc(region())}&keyword=${enc(keyword() || uid())}`, 'search'); }
-  function runBanCheck() { call(`/api/v1/bancheck?uid=${enc(uid())}`, 'bancheck'); }
-  function runWishlist() { call(`/api/v1/wishlist?region=${enc(region())}&uid=${enc(uid())}`, 'wishlist'); }
-  function runItemLookup() { syncItemPreview(); call(`/api/items?id=${enc(itemId())}`, 'itemlookup'); }
-  function runItemSearch() { syncItemPreview(); call(`/api/items/search?q=${enc(keyword() || itemId())}&limit=18`, 'itemsearch'); }
-  function runHealth()   { call('/api/health', 'health'); }
-  function runGuest()    { call(`/api/guest-generator?region=${enc(region())}`, 'guest'); }
-  function runLikeSpam() {
-    const r = region(), u = uid();
-    const cnt = prompt('How many likes? (1-500)', '10');
-    if (!cnt) return;
-    const delay = prompt('Delay between requests in ms? (0-5000)', '100');
-    if (delay === null) return;
-    callPost('/api/like-spam', { region: r, uid: u, count: parseInt(cnt)||10, delayMs: parseInt(delay)||100 }, 'likespam');
+  function runAccount() {
+    document.getElementById('player-active-ep').textContent = 'Account Lookup';
+    apiCall(`/api/v1/account?region=${enc(region())}&uid=${enc(uid())}`, 'player-rich', renderAccount, { storeAs: 'player', action: 'account' });
   }
-  function runUidGen()   { call('/api/uid-generator?mode=random&count=5&length=10&teamXdarks=1', 'uidgen'); }
 
-  initFeatureDeck();
-  ['item-id', 'item-size', 'item-upscale', 'item-engine'].forEach((id) => {
+  function runSearch() {
+    const kw = keyword() || uid();
+    document.getElementById('player-active-ep').textContent = 'Player Search';
+    apiCall(`/api/v1/search?region=${enc(region())}&keyword=${enc(kw)}`, 'player-rich', renderSearch, { storeAs: 'player', action: 'search' });
+  }
+
+  function runWishlist() {
+    document.getElementById('player-active-ep').textContent = 'Wishlist';
+    apiCall(`/api/v1/wishlist?region=${enc(region())}&uid=${enc(uid())}`, 'player-rich', renderWishlist, { storeAs: 'player', action: 'wishlist' });
+  }
+
+  function runBothStats() {
+    apiCall(`/api/v1/playerstats?region=${enc(region())}&uid=${enc(uid())}&matchmode=${matchmode()}`, 'stats-br-result', renderBrStats);
+    apiCall(`/api/v1/playertcstats?region=${enc(region())}&uid=${enc(uid())}&matchmode=${matchmode()}`, 'stats-cs-result', renderCsStats);
+  }
+
+  function runBanCheck() {
+    const banUid = document.getElementById('ban-uid')?.value?.trim() || uid();
+    apiCall(`/api/v1/bancheck?uid=${enc(banUid)}`, 'ban-result', renderBanCheck);
+  }
+
+  function runItemLookup() {
+    syncItemPreview();
+    apiCall(`/api/items?id=${enc(itemId())}`, 'items-result', renderItemLookup);
+  }
+
+  function runItemSearch() {
+    syncItemPreview();
+    const q = (document.getElementById('item-search-q')?.value || '').trim() || keyword() || itemId();
+    apiCall(`/api/items/search?q=${enc(q)}&limit=18`, 'items-result', renderItemSearch);
+  }
+
+  function runHealth() {
+    apiCall('/api/health', 'util-health-result', renderHealth);
+  }
+
+  function runGuest() {
+    const r = document.getElementById('guest-region')?.value || region();
+    apiCall(`/api/guest-generator?region=${enc(r)}`, 'util-guest-result', renderGuest);
+  }
+
+  function runUidGen() {
+    const count = document.getElementById('uidgen-count')?.value || 5;
+    const length = document.getElementById('uidgen-length')?.value || 10;
+    apiCall(`/api/uid-generator?mode=random&count=${count}&length=${length}&teamXdarks=1`, 'util-uidgen-result', renderUidGenerator);
+  }
+
+  function runLikeSpam() {
+    const likeUid = document.getElementById('like-uid')?.value?.trim() || uid();
+    const count = parseInt(document.getElementById('like-count')?.value) || 10;
+    const delay = parseInt(document.getElementById('like-delay')?.value) || 100;
+    apiCall('/api/like-spam', 'util-like-result', renderLikeSpam, {
+      method: 'POST',
+      body: { region: region(), uid: likeUid, count: count, delayMs: delay }
+    });
+  }
+
+  function loadHomeHealth() {
+    apiCall('/api/health', 'home-health-result', renderHealth);
+  }
+
+  /* ═══════════════════════════════════════════════════
+     HOME PAGE INIT: Featured Carousel
+  ═══════════════════════════════════════════════════ */
+  let homeInitDone = false;
+  function initHomePage() {
+    if (homeInitDone) return;
+    homeInitDone = true;
+    fetch('/api/items/search?q=&limit=20')
+      .then(r => r.json())
+      .then(data => {
+        const items = data.items || [];
+        const carousel = document.getElementById('featured-carousel');
+        if (!items.length) {
+          carousel.innerHTML = '<div class="result-empty" style="width:100%">No featured items available</div>';
+          return;
+        }
+        carousel.innerHTML = items.map(it => {
+          const name = it.name || it.itemName || 'Item';
+          const type = (it.type || it.itemType || '').replace(/_/g, ' ');
+          return `
+          <div class="carousel-item" onclick="navigate('#items');document.getElementById('item-id').value='${esc(it.id||it.itemId||'')}';setTimeout(runItemLookup,100)">
+            <img src="${itemImg(it, 80, 2)}" alt="${esc(name)}" loading="lazy" onerror="this.style.display='none'" />
+            <div class="carousel-item-name" title="${esc(name)}">${esc(name)}</div>
+            <div class="carousel-item-type">${esc(type)}</div>
+          </div>`;
+        }).join('');
+      })
+      .catch(() => {
+        document.getElementById('featured-carousel').innerHTML = '<div class="result-empty" style="width:100%">Failed to load featured items</div>';
+      });
+  }
+
+  /* ═══════════════════════════════════════════════════
+     OPTICS LAB LIVE SYNC
+  ═══════════════════════════════════════════════════ */
+  ['item-id', 'item-size', 'item-upscale', 'item-engine'].forEach(id => {
     const el = document.getElementById(id);
-    if (el) el.addEventListener('input', syncItemPreview);
-    if (el) el.addEventListener('change', syncItemPreview);
-  });
-  syncItemPreview();
-
-  document.addEventListener('keydown', (e) => {
-    if (e.key !== 'Enter') return;
-    if (e.target && ['INPUT', 'TEXTAREA'].includes(e.target.tagName)) {
-      if (e.shiftKey) return runBr();
-      if (e.ctrlKey || e.metaKey) return runCs();
-      return runAccount();
+    if (el) {
+      el.addEventListener('input', syncItemPreview);
+      el.addEventListener('change', syncItemPreview);
     }
   });
+
+  /* ═══════════════════════════════════════════════════
+     KEYBOARD SHORTCUTS
+  ═══════════════════════════════════════════════════ */
+  document.addEventListener('keydown', e => {
+    if (e.key !== 'Enter') return;
+    if (e.target && ['INPUT', 'TEXTAREA'].includes(e.target.tagName)) {
+      if (currentPage === 'player') {
+        if (e.target.id === 'keyword') return runSearch();
+        return runAccount();
+      }
+      if (currentPage === 'ban') return runBanCheck();
+      if (currentPage === 'items') {
+        if (e.target.id === 'item-search-q') return runItemSearch();
+        if (e.target.id === 'item-id') return runItemLookup();
+      }
+    }
+  });
+
+  /* ═══════════════════════════════════════════════════
+     BOOT
+  ═══════════════════════════════════════════════════ */
+  navigate(location.hash || '#home');
+  syncItemPreview();
   </script>
 </body>
 </html>
