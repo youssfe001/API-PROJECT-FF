@@ -1570,6 +1570,14 @@
     }
   });
 
+  function applyPresetWallpaper(url) {
+    document.getElementById('wallpaper-input').value = url;
+    document.getElementById('wallpaper-bg').style.backgroundImage = `url('${url}')`;
+    document.body.classList.add('has-wallpaper');
+    localStorage.setItem('ff-wallpaper', url);
+    document.getElementById('settings-popover').classList.remove('open');
+  }
+
   function applyWallpaper() {
     const url = document.getElementById('wallpaper-input').value.trim();
     if (!url) return;
