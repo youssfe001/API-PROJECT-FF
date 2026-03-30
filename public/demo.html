@@ -1979,6 +1979,27 @@
   function initHomePage() {
     if (homeInitDone) return;
     homeInitDone = true;
+
+    // Load item icons strip (top of home page)
+    fetch('/api/items/random?count=24').then(r => r.json()).then(data => {
+      const strip = document.getElementById('home-item-strip');
+      if (!strip) return;
+      const items = data.items || [];
+      if (!items.length) { strip.innerHTML = ''; return; }
+      strip.innerHTML = items.map(it => {
+        const nm = it.name || 'Item';
+        const col = rareColor(it.rare || 'NONE');
+        return `<div class="item-strip-icon" title="${esc(nm)}" onclick="navigate('#items');document.getElementById('item-id').value='${esc(it.id||'')}';setTimeout(runItemLookup,100)" style="border-color:${col}33">
+          <img src="${itemImg(it, 56, 2)}" alt="${esc(nm)}" loading="lazy" onerror="this.style.display='none'"/>
+          <div class="item-strip-name" style="color:${col}">${esc(nm.length>8?nm.slice(0,7)+'…':nm)}</div>
+        </div>`;
+      }).join('');
+    }).catch(() => {
+      const strip = document.getElementById('home-item-strip');
+      if (strip) strip.innerHTML = '';
+    });
+
+    // Load featured carousel
     fetch('/api/items/random?count=20')
       .then(r => r.json())
       .then(data => {
