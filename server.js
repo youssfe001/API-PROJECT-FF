@@ -20,8 +20,8 @@ app.use(
       directives: {
         defaultSrc: ["'self'"],
         scriptSrc: ["'self'", "'unsafe-inline'", "https://open.spotify.com"],
-        styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
-        fontSrc: ["'self'", "https://fonts.gstatic.com"],
+        styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com", "https://fonts.bunny.net"],
+        fontSrc: ["'self'", "https://fonts.gstatic.com", "https://fonts.bunny.net"],
         imgSrc: ["'self'", "data:", "https://raw.githubusercontent.com", "https://*.scdn.co", "https://i.scdn.co"],
         frameSrc: ["https://open.spotify.com"],
         connectSrc: ["'self'"],
