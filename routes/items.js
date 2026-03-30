@@ -92,7 +92,16 @@ async function fetchRemoteBuffer(url) {
 
 function iconCandidates(item) {
   const urls = [];
+  const id = item?.id;
 
+  // 1. paulafredo/Auto-update-Items — direct ID-based lookup across 5 folders
+  if (id && /^\d+$/.test(String(id))) {
+    for (const folder of PA_FOLDERS) {
+      urls.push(`${PA_ITEMS_BASE}/${folder}/${id}.png`);
+    }
+  }
+
+  // 2. 0xMe/ff-resources — name-based lookup
   if (item?.ffIcon) {
     urls.push(`${FF_RESOURCES_BASE}/${encodePathSegment(item.ffIcon)}.png`);
   }
@@ -101,10 +110,12 @@ function iconCandidates(item) {
     urls.push(`${FF_RESOURCES_BASE}/${encodePathSegment(item.icon)}.png`);
   }
 
+  // 3. CDN URL from enriched data
   if (item?.iconUrl) {
     urls.push(item.iconUrl);
   }
 
+  // 4. Fallback — unknown icon placeholder
   urls.push(`${FF_RESOURCES_BASE}/${UNKNOWN_ICON_NAME}`);
   return [...new Set(urls.filter(Boolean))];
 }
