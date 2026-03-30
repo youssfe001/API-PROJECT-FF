@@ -1624,7 +1624,141 @@
   })();
 
   /* ═══════════════════════════════════════════════════
-     WALLPAPER
+     BACKGROUND SLIDESHOW (auto-rotating FF wallpapers)
+  ═══════════════════════════════════════════════════ */
+  const FF_WALLPAPERS = [
+    '/assets/ff_folder/free-fire-desktop-heroes-pointing-guns-r115t8uj2gis0rf8.jpg',
+    '/assets/ff_folder/free-fire-season-1-vxesowl5h3j4oc1r.jpg',
+    '/assets/ff_folder/Halloween-Free-Fire-Wallpaper-1024x576.jpeg',
+    '/assets/ff_folder/Winter-FF-1024x576.jpeg',
+  ];
+
+  let bgCurrent = 0;
+  let bgActiveLayer = 0; // 0 = layer-a is on top, 1 = layer-b is on top
+  const bgLayers = [document.getElementById('bg-slide-a'), document.getElementById('bg-slide-b')];
+
+  function initSlideshow() {
+    // Preload first image and show it
+    bgLayers[0].style.backgroundImage = `url('${FF_WALLPAPERS[0]}')`;
+    bgLayers[0].classList.add('active');
+    // Start cycling
+    setInterval(advanceSlide, 7000);
+  }
+
+  function advanceSlide() {
+    const next = (bgCurrent + 1) % FF_WALLPAPERS.length;
+    const nextLayer = 1 - bgActiveLayer;
+    bgLayers[nextLayer].style.backgroundImage = `url('${FF_WALLPAPERS[next]}')`;
+    bgLayers[nextLayer].classList.add('active');
+    // After transition starts, remove old
+    setTimeout(() => bgLayers[bgActiveLayer].classList.remove('active'), 100);
+    bgCurrent = next;
+    bgActiveLayer = nextLayer;
+  }
+
+  initSlideshow();
+
+  /* ═══════════════════════════════════════════════════
+     LOGIN
+  ═══════════════════════════════════════════════════ */
+  (function checkApiStatus() {
+    fetch('/api/health').then(r => r.json()).then(d => {
+      const el = document.getElementById('login-api-status');
+      if (el) el.textContent = 'API ' + (d.status || 'operational') + ' · ' + (d.now ? new Date(d.now).toLocaleTimeString() : '');
+    }).catch(() => {
+      const el = document.getElementById('login-api-status');
+      if (el) { el.textContent = 'API unreachable'; el.style.color = 'var(--err)'; }
+    });
+  })();
+
+  function doLogin() {
+    const user = (document.getElementById('login-user')?.value || '').trim();
+    const key  = (document.getElementById('login-key')?.value  || '').trim();
+    const btn  = document.getElementById('login-btn');
+    const err  = document.getElementById('login-error');
+
+    if (!user) {
+      err.textContent = 'Please enter a username.';
+      err.classList.remove('hidden');
+      document.getElementById('login-user').focus();
+      return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = 'Signing in…';
+
+    // Verify API is reachable
+    fetch('/api/health').then(r => r.json()).then(() => {
+      // Store creds
+      localStorage.setItem('ff-user', user);
+      if (key) localStorage.setItem('ff-api-key', key);
+      else localStorage.removeItem('ff-api-key');
+      localStorage.setItem('ff-logged-in', '1');
+
+      // Animate out
+      const card = document.getElementById('login-card');
+      card.style.transform = 'scale(0.96) translateY(8px)';
+      card.style.opacity = '0';
+      setTimeout(() => {
+        document.getElementById('login-screen').style.opacity = '0';
+        document.getElementById('login-screen').style.pointerEvents = 'none';
+        setTimeout(() => {
+          document.getElementById('login-screen').style.display = 'none';
+          document.body.classList.add('app-ready');
+        }, 500);
+      }, 300);
+    }).catch(() => {
+      btn.disabled = false;
+      btn.textContent = 'Enter Dashboard';
+      err.textContent = 'Could not reach the API server. Make sure the server is running.';
+      err.classList.remove('hidden');
+    });
+  }
+
+  // Enter key on login inputs
+  ['login-user','login-key'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+  });
+
+  // Check if already logged in
+  (function() {
+    if (localStorage.getItem('ff-logged-in')) {
+      document.getElementById('login-screen').style.display = 'none';
+      document.body.classList.add('app-ready');
+      // Restore username
+      const u = localStorage.getItem('ff-user');
+      if (u) {
+        const el = document.getElementById('login-user');
+        if (el) el.value = u;
+      }
+    }
+  })();
+
+  // Load floating item icons on login screen
+  fetch('/api/items/random?count=12').then(r => r.json()).then(data => {
+    const container = document.getElementById('floating-icons');
+    if (!container) return;
+    (data.items || []).slice(0, 10).forEach((item, i) => {
+      const div = document.createElement('div');
+      div.className = 'float-icon';
+      div.style.cssText = `
+        left:${5 + Math.random()*85}%;
+        top:${5 + Math.random()*85}%;
+        animation-delay:${(i * 0.8).toFixed(1)}s;
+        animation-duration:${(6 + Math.random()*6).toFixed(1)}s;
+      `;
+      const img = document.createElement('img');
+      img.src = itemImg(item, 64, 2);
+      img.alt = item.name || '';
+      img.onerror = function() { this.parentElement.style.display='none'; };
+      div.appendChild(img);
+      container.appendChild(div);
+    });
+  }).catch(() => {});
+
+  /* ═══════════════════════════════════════════════════
+     WALLPAPER / SETTINGS
   ═══════════════════════════════════════════════════ */
   function toggleSettings() {
     document.getElementById('settings-popover').classList.toggle('open');
@@ -1641,36 +1775,36 @@
 
   function applyPresetWallpaper(url) {
     document.getElementById('wallpaper-input').value = url;
-    document.getElementById('wallpaper-bg').style.backgroundImage = `url('${url}')`;
-    document.body.classList.add('has-wallpaper');
-    localStorage.setItem('ff-wallpaper', url);
+    // Stop slideshow and lock to chosen image
+    bgLayers[bgActiveLayer].style.backgroundImage = `url('${url}')`;
+    bgLayers[1-bgActiveLayer].classList.remove('active');
+    localStorage.setItem('ff-wallpaper-lock', url);
     document.getElementById('settings-popover').classList.remove('open');
   }
 
   function applyWallpaper() {
     const url = document.getElementById('wallpaper-input').value.trim();
     if (!url) return;
-    document.getElementById('wallpaper-bg').style.backgroundImage = `url('${url}')`;
-    document.body.classList.add('has-wallpaper');
-    localStorage.setItem('ff-wallpaper', url);
-    document.getElementById('settings-popover').classList.remove('open');
+    applyPresetWallpaper(url);
   }
 
   function clearWallpaper() {
-    document.getElementById('wallpaper-bg').style.backgroundImage = '';
-    document.body.classList.remove('has-wallpaper');
-    localStorage.removeItem('ff-wallpaper');
+    localStorage.removeItem('ff-wallpaper-lock');
     document.getElementById('wallpaper-input').value = '';
     document.getElementById('settings-popover').classList.remove('open');
+    // Resume slideshow
+    bgCurrent = 0; bgActiveLayer = 0;
+    bgLayers[0].style.backgroundImage = `url('${FF_WALLPAPERS[0]}')`;
+    bgLayers[0].classList.add('active');
+    bgLayers[1].classList.remove('active');
   }
 
-  // Restore wallpaper
+  // Restore locked wallpaper
   (function() {
-    const saved = localStorage.getItem('ff-wallpaper');
-    if (saved) {
-      document.getElementById('wallpaper-input').value = saved;
-      document.getElementById('wallpaper-bg').style.backgroundImage = `url('${saved}')`;
-      document.body.classList.add('has-wallpaper');
+    const locked = localStorage.getItem('ff-wallpaper-lock');
+    if (locked) {
+      document.getElementById('wallpaper-input').value = locked;
+      bgLayers[0].style.backgroundImage = `url('${locked}')`;
     }
   })();
 
