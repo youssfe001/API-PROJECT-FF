@@ -1792,99 +1792,159 @@
   initSlideshow();
 
   /* ═══════════════════════════════════════════════════
-     LOGIN
+     LOGIN — helpers
   ═══════════════════════════════════════════════════ */
-  (function checkApiStatus() {
-    fetch('/api/health').then(r => r.json()).then(d => {
-      const el = document.getElementById('login-api-status');
-      if (el) el.textContent = 'API ' + (d.status || 'operational') + ' · ' + (d.now ? new Date(d.now).toLocaleTimeString() : '');
-    }).catch(() => {
-      const el = document.getElementById('login-api-status');
-      if (el) { el.textContent = 'API unreachable'; el.style.color = 'var(--err)'; }
-    });
-  })();
+  function switchPanel(to) {
+    document.getElementById('lc-signin').classList.toggle('hidden', to !== 'signin');
+    document.getElementById('lc-register').classList.toggle('hidden', to !== 'register');
+  }
 
+  function togglePass(inputId, btn) {
+    const inp = document.getElementById(inputId);
+    if (!inp) return;
+    inp.type = inp.type === 'password' ? 'text' : 'password';
+    btn.style.opacity = inp.type === 'text' ? '1' : '0.5';
+  }
+
+  function showToast(msg, color) {
+    const t = document.getElementById('lc-toast');
+    if (!t) return;
+    t.textContent = msg;
+    t.style.borderColor = color ? color + '44' : '';
+    t.style.color = color || '';
+    t.classList.remove('hidden');
+    t.classList.add('show');
+    clearTimeout(t._timer);
+    t._timer = setTimeout(() => { t.classList.remove('show'); setTimeout(() => t.classList.add('hidden'), 300); }, 3000);
+  }
+
+  function enterDashboard(user) {
+    const card = document.getElementById('login-card');
+    card.style.transition = 'all 0.4s ease';
+    card.style.transform = 'scale(0.97) translateY(-6px)';
+    card.style.opacity   = '0';
+    setTimeout(() => {
+      document.getElementById('login-screen').style.opacity = '0';
+      document.getElementById('login-screen').style.pointerEvents = 'none';
+      setTimeout(() => {
+        document.getElementById('login-screen').style.display = 'none';
+        document.body.classList.add('app-ready');
+      }, 450);
+    }, 280);
+    const wb = document.getElementById('topbar-title');
+    if (wb && user) { /* optional */ }
+  }
+
+  /* API status */
+  fetch('/api/health').then(r => r.json()).then(d => {
+    const el = document.getElementById('login-api-status');
+    if (el) el.textContent = 'API ' + (d.status || 'online') + ' · ' + (d.now ? new Date(d.now).toLocaleTimeString() : '');
+  }).catch(() => {
+    const el = document.getElementById('login-api-status');
+    if (el) { el.textContent = 'API offline'; el.style.color = 'var(--err)'; }
+  });
+
+  /* Sign In */
   function doLogin() {
     const user = (document.getElementById('login-user')?.value || '').trim();
-    const key  = (document.getElementById('login-key')?.value  || '').trim();
+    const pass = (document.getElementById('login-key')?.value  || '').trim();
     const btn  = document.getElementById('login-btn');
     const err  = document.getElementById('login-error');
+    err.classList.add('hidden');
 
-    if (!user) {
-      err.textContent = 'Please enter a username.';
-      err.classList.remove('hidden');
-      document.getElementById('login-user').focus();
-      return;
-    }
+    if (!user) { err.textContent = 'Please enter your username.'; err.classList.remove('hidden'); document.getElementById('login-user').focus(); return; }
 
     btn.disabled = true;
     btn.textContent = 'Signing in…';
 
-    // Verify API is reachable
-    fetch('/api/health').then(r => r.json()).then(() => {
-      // Store creds
+    fetch('/api/health').then(r => { if (!r.ok) throw new Error(); return r.json(); }).then(() => {
       localStorage.setItem('ff-user', user);
-      if (key) localStorage.setItem('ff-api-key', key);
-      else localStorage.removeItem('ff-api-key');
       localStorage.setItem('ff-logged-in', '1');
-
-      // Animate out
-      const card = document.getElementById('login-card');
-      card.style.transform = 'scale(0.96) translateY(8px)';
-      card.style.opacity = '0';
-      setTimeout(() => {
-        document.getElementById('login-screen').style.opacity = '0';
-        document.getElementById('login-screen').style.pointerEvents = 'none';
-        setTimeout(() => {
-          document.getElementById('login-screen').style.display = 'none';
-          document.body.classList.add('app-ready');
-        }, 500);
-      }, 300);
+      if (pass) localStorage.setItem('ff-api-key', pass);
+      else localStorage.removeItem('ff-api-key');
+      enterDashboard(user);
     }).catch(() => {
-      btn.disabled = false;
-      btn.textContent = 'Enter Dashboard';
-      err.textContent = 'Could not reach the API server. Make sure the server is running.';
+      btn.disabled = false; btn.textContent = 'Sign In';
+      err.textContent = 'Could not reach the server. Is it running?';
       err.classList.remove('hidden');
     });
   }
 
-  // Enter key on login inputs
+  /* Create Account */
+  function doRegister() {
+    const user    = (document.getElementById('reg-user')?.value    || '').trim();
+    const email   = (document.getElementById('reg-email')?.value   || '').trim();
+    const pass    = (document.getElementById('reg-pass')?.value    || '');
+    const confirm = (document.getElementById('reg-confirm')?.value || '');
+    const btn     = document.getElementById('reg-btn');
+    const err     = document.getElementById('reg-error');
+    err.classList.add('hidden');
+
+    if (!user)  { err.textContent = 'Username is required.'; err.classList.remove('hidden'); return; }
+    if (!email) { err.textContent = 'Email is required.'; err.classList.remove('hidden'); return; }
+    if (!pass)  { err.textContent = 'Password is required.'; err.classList.remove('hidden'); return; }
+    if (pass !== confirm) { err.textContent = 'Passwords do not match.'; err.classList.remove('hidden'); return; }
+    if (pass.length < 6) { err.textContent = 'Password must be at least 6 characters.'; err.classList.remove('hidden'); return; }
+
+    btn.disabled = true; btn.textContent = 'Creating account…';
+
+    // Store account in localStorage (client-side auth)
+    const accounts = JSON.parse(localStorage.getItem('ff-accounts') || '{}');
+    if (accounts[user]) { err.textContent = 'Username already taken.'; err.classList.remove('hidden'); btn.disabled = false; btn.textContent = 'Create Account'; return; }
+    accounts[user] = { email, passHash: btoa(pass) };
+    localStorage.setItem('ff-accounts', JSON.stringify(accounts));
+    localStorage.setItem('ff-user', user);
+    localStorage.setItem('ff-logged-in', '1');
+    showToast('Account created! Welcome, ' + user + ' 🎮', '#4ade80');
+    setTimeout(() => enterDashboard(user), 800);
+  }
+
+  /* Social login */
+  function socialLogin(provider) {
+    const icons = { google:'🔵', github:'⚫', discord:'🟣' };
+    const names = { google:'Google', github:'GitHub', discord:'Discord' };
+    // Simulate OAuth — in production these would redirect to /api/auth/<provider>
+    const user = names[provider] + '_user';
+    localStorage.setItem('ff-user', user);
+    localStorage.setItem('ff-logged-in', '1');
+    localStorage.setItem('ff-provider', provider);
+    showToast(icons[provider] + ' Continuing with ' + names[provider] + '…', null);
+    setTimeout(() => enterDashboard(user), 1000);
+  }
+
+  /* Enter key shortcuts */
   ['login-user','login-key'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
   });
+  ['reg-user','reg-email','reg-pass','reg-confirm'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('keydown', e => { if (e.key === 'Enter') doRegister(); });
+  });
 
-  // Check if already logged in
+  /* Auto login if returning */
   (function() {
     if (localStorage.getItem('ff-logged-in')) {
       document.getElementById('login-screen').style.display = 'none';
       document.body.classList.add('app-ready');
-      // Restore username
-      const u = localStorage.getItem('ff-user');
-      if (u) {
-        const el = document.getElementById('login-user');
-        if (el) el.value = u;
-      }
     }
+    // Pre-fill username
+    const u = localStorage.getItem('ff-user');
+    if (u) { const el = document.getElementById('login-user'); if (el) el.value = u; }
   })();
 
-  // Load floating item icons on login screen
-  fetch('/api/items/random?count=12').then(r => r.json()).then(data => {
+  /* Floating item icons on login bg */
+  fetch('/api/items/random?count=14').then(r => r.json()).then(data => {
     const container = document.getElementById('floating-icons');
     if (!container) return;
-    (data.items || []).slice(0, 10).forEach((item, i) => {
+    (data.items || []).slice(0, 12).forEach((item, i) => {
       const div = document.createElement('div');
       div.className = 'float-icon';
-      div.style.cssText = `
-        left:${5 + Math.random()*85}%;
-        top:${5 + Math.random()*85}%;
-        animation-delay:${(i * 0.8).toFixed(1)}s;
-        animation-duration:${(6 + Math.random()*6).toFixed(1)}s;
-      `;
+      div.style.cssText = `left:${4+Math.random()*88}%;top:${4+Math.random()*88}%;animation-delay:${(i*0.7).toFixed(1)}s;animation-duration:${(7+Math.random()*7).toFixed(1)}s;`;
       const img = document.createElement('img');
       img.src = itemImg(item, 64, 2);
       img.alt = item.name || '';
-      img.onerror = function() { this.parentElement.style.display='none'; };
+      img.onerror = function(){ this.parentElement.style.display='none'; };
       div.appendChild(img);
       container.appendChild(div);
     });
