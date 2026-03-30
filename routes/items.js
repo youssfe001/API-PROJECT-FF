@@ -241,6 +241,7 @@ router.get("/items/search", (req, res, next) => {
     const limit = Math.min(parseInt(req.query.limit) || 50, 100);
     const results = searchItems(q, limit);
 
+    res.set("Cache-Control", "public, s-maxage=300, max-age=300");
     res.json({ query: q, count: results.length, items: results });
   } catch (err) {
     next(err);
