@@ -9,7 +9,7 @@ const { MATCH_MODES } = require("../config/constants");
 function normalizeHex(value, name = "bodyHex") {
   const hex = requireParam(value, name).replace(/\s+/g, "").toLowerCase();
   if (!/^[0-9a-f]+$/.test(hex) || hex.length % 2 !== 0) {
-    throw new Error(`Invalid '${name}'. Must be valid even-length hex.`);
+    throw new ApiError(`Invalid '${name}'. Must be valid even-length hex.`);
   }
   return hex;
 }
