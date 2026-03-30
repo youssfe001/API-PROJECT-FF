@@ -75,7 +75,26 @@
           <span>Settings</span>
         </button>
         <div class="settings-popover" id="settings-popover">
-          <div style="font-size:12px;font-weight:700;color:var(--text-secondary);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.3px">Wallpaper URL</div>
+          <div style="font-size:12px;font-weight:700;color:var(--text-secondary);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.3px">Wallpaper Presets</div>
+          <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:6px;margin-bottom:10px">
+            <div class="wp-preset" onclick="applyPresetWallpaper('/assets/ff_folder/free-fire-desktop-heroes-pointing-guns-r115t8uj2gis0rf8.jpg')" title="Heroes">
+              <img src="/assets/ff_folder/free-fire-desktop-heroes-pointing-guns-r115t8uj2gis0rf8.jpg" alt="Heroes"/>
+              <span>Heroes</span>
+            </div>
+            <div class="wp-preset" onclick="applyPresetWallpaper('/assets/ff_folder/free-fire-season-1-vxesowl5h3j4oc1r.jpg')" title="Season 1">
+              <img src="/assets/ff_folder/free-fire-season-1-vxesowl5h3j4oc1r.jpg" alt="Season 1"/>
+              <span>Season 1</span>
+            </div>
+            <div class="wp-preset" onclick="applyPresetWallpaper('/assets/ff_folder/Halloween-Free-Fire-Wallpaper-1024x576.jpeg')" title="Halloween">
+              <img src="/assets/ff_folder/Halloween-Free-Fire-Wallpaper-1024x576.jpeg" alt="Halloween"/>
+              <span>Halloween</span>
+            </div>
+            <div class="wp-preset" onclick="applyPresetWallpaper('/assets/ff_folder/Winter-FF-1024x576.jpeg')" title="Winter">
+              <img src="/assets/ff_folder/Winter-FF-1024x576.jpeg" alt="Winter"/>
+              <span>Winter</span>
+            </div>
+          </div>
+          <div style="font-size:12px;font-weight:700;color:var(--text-secondary);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.3px">Custom URL</div>
           <input type="text" id="wallpaper-input" class="form-input" placeholder="https://example.com/image.jpg" style="font-size:13px;margin-bottom:8px"/>
           <div style="display:flex;gap:6px">
             <button class="btn btn-primary btn-sm" onclick="applyWallpaper()">Apply</button>
