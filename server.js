@@ -22,7 +22,7 @@ app.use(
         scriptSrc: ["'self'", "'unsafe-inline'", "https://open.spotify.com"],
         styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com", "https://fonts.bunny.net"],
         fontSrc: ["'self'", "https://fonts.gstatic.com", "https://fonts.bunny.net"],
-        imgSrc: ["'self'", "data:", "https://raw.githubusercontent.com", "https://*.scdn.co", "https://i.scdn.co"],
+        imgSrc: ["'self'", "data:", "blob:", "https://raw.githubusercontent.com", "https://*.scdn.co", "https://i.scdn.co", "https://cdn-sc-g.sharechat.com", "https://*.sharechat.com", "https://*.garena.com", "https://kg.freefireglobal.com"],
         frameSrc: ["https://open.spotify.com"],
         connectSrc: ["'self'"],
         mediaSrc: ["https://open.spotify.com"],
