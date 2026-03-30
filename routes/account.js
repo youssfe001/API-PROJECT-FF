@@ -9,7 +9,7 @@ const { lookupItem, resolveItems } = require("../lib/items");
 function normalizeHex(value) {
   const hex = requireParam(value, "bodyHex").replace(/\s+/g, "").toLowerCase();
   if (!/^[0-9a-f]+$/.test(hex) || hex.length % 2 !== 0) {
-    throw new Error("Invalid 'bodyHex'. Must be valid even-length hex.");
+    throw new ApiError("Invalid 'bodyHex'. Must be valid even-length hex.");
   }
   return hex;
 }
