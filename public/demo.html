@@ -1801,160 +1801,233 @@
      LOGIN — helpers
   ═══════════════════════════════════════════════════ */
   function switchPanel(to) {
-    document.getElementById('lc-signin').classList.toggle('hidden', to !== 'signin');
-    document.getElementById('lc-register').classList.toggle('hidden', to !== 'register');
+    const signin = document.getElementById('lc-signin');
+    const register = document.getElementById('lc-register');
+    const tabSignin = document.getElementById('tab-signin');
+    const tabRegister = document.getElementById('tab-register');
+    signin.classList.toggle('hidden', to !== 'signin');
+    register.classList.toggle('hidden', to !== 'register');
+    tabSignin.classList.toggle('active', to === 'signin');
+    tabRegister.classList.toggle('active', to === 'register');
   }
 
   function togglePass(inputId, btn) {
     const inp = document.getElementById(inputId);
     if (!inp) return;
     inp.type = inp.type === 'password' ? 'text' : 'password';
-    btn.style.opacity = inp.type === 'text' ? '1' : '0.5';
+    btn.style.opacity = inp.type === 'text' ? '1' : '0.45';
   }
 
   function showToast(msg, color) {
     const t = document.getElementById('lc-toast');
     if (!t) return;
     t.textContent = msg;
-    t.style.borderColor = color ? color + '44' : '';
+    t.style.borderColor = color ? color + '55' : '';
     t.style.color = color || '';
     t.classList.remove('hidden');
     t.classList.add('show');
     clearTimeout(t._timer);
-    t._timer = setTimeout(() => { t.classList.remove('show'); setTimeout(() => t.classList.add('hidden'), 300); }, 3000);
+    t._timer = setTimeout(() => { t.classList.remove('show'); setTimeout(() => t.classList.add('hidden'), 300); }, 3200);
   }
 
   function enterDashboard(user) {
     const card = document.getElementById('login-card');
-    card.style.transition = 'all 0.4s ease';
-    card.style.transform = 'scale(0.97) translateY(-6px)';
-    card.style.opacity   = '0';
+    card.style.transition = 'all 0.4s cubic-bezier(0.4,0,0.2,1)';
+    card.style.transform = 'scale(0.96) translateY(-8px)';
+    card.style.opacity = '0';
     setTimeout(() => {
-      document.getElementById('login-screen').style.opacity = '0';
-      document.getElementById('login-screen').style.pointerEvents = 'none';
-      setTimeout(() => {
-        document.getElementById('login-screen').style.display = 'none';
-        document.body.classList.add('app-ready');
-      }, 450);
-    }, 280);
-    const wb = document.getElementById('topbar-title');
-    if (wb && user) { /* optional */ }
+      const ls = document.getElementById('login-screen');
+      ls.style.opacity = '0';
+      ls.style.pointerEvents = 'none';
+      setTimeout(() => { ls.style.display = 'none'; document.body.classList.add('app-ready'); }, 420);
+    }, 260);
   }
 
-  /* API status */
-  fetch('/api/health').then(r => r.json()).then(d => {
-    const el = document.getElementById('login-api-status');
-    if (el) el.textContent = 'API ' + (d.status || 'online') + ' · ' + (d.now ? new Date(d.now).toLocaleTimeString() : '');
-  }).catch(() => {
-    const el = document.getElementById('login-api-status');
-    if (el) { el.textContent = 'API offline'; el.style.color = 'var(--err)'; }
-  });
+  /* ── Toggle login music ── */
+  let loginMusicOpen = false;
+  function toggleLoginMusic() {
+    loginMusicOpen = !loginMusicOpen;
+    const wrap = document.getElementById('lc-spotify-wrap');
+    const btn  = document.getElementById('lc-music-toggle');
+    wrap.classList.toggle('hidden', !loginMusicOpen);
+    btn.classList.toggle('playing', loginMusicOpen);
+  }
 
-  /* Sign In */
+  /* ── Canvas firing particles ── */
+  function initFireCanvas() {
+    const canvas = document.getElementById('fire-canvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const particles = [];
+
+    function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+    resize();
+    window.addEventListener('resize', resize);
+
+    function spawnBurst(cx, cy, count) {
+      for (let i = 0; i < count; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const speed = 1.5 + Math.random() * 5;
+        const colors = ['#f97316','#fbbf24','#fff7ed','#fed7aa','#fb923c'];
+        particles.push({
+          x: cx, y: cy,
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed - Math.random() * 1.5,
+          life: 0.8 + Math.random() * 0.5,
+          decay: 0.018 + Math.random() * 0.025,
+          size: 1.2 + Math.random() * 2.8,
+          color: colors[Math.floor(Math.random() * colors.length)]
+        });
+      }
+    }
+
+    // Spray horizontal bullets from one side
+    function spawnBulletTrail() {
+      const y = Math.random() * canvas.height;
+      for (let i = 0; i < 6; i++) {
+        particles.push({
+          x: 0, y: y + (Math.random()-0.5)*20,
+          vx: 18 + Math.random()*12,
+          vy: (Math.random()-0.5)*1.5,
+          life: 1, decay: 0.08,
+          size: 1.5 + Math.random()*1.5,
+          color: Math.random()>0.5 ? '#fde68a' : '#ffffff',
+          trail: true
+        });
+      }
+    }
+
+    // Spawn random bursts
+    setInterval(() => spawnBurst(Math.random()*canvas.width, Math.random()*canvas.height, 6+Math.floor(Math.random()*10)), 900);
+    setInterval(spawnBulletTrail, 1800);
+
+    function animate() {
+      ctx.clearRect(0,0,canvas.width,canvas.height);
+      for (let i = particles.length-1; i>=0; i--) {
+        const p = particles[i];
+        p.x += p.vx; p.y += p.vy;
+        if (!p.trail) p.vy += 0.06;  // gravity for sparks only
+        p.life -= p.decay;
+        if (p.life <= 0) { particles.splice(i,1); continue; }
+        ctx.globalAlpha = Math.min(p.life, 0.8);
+        ctx.shadowBlur = p.trail ? 4 : 10;
+        ctx.shadowColor = p.color;
+        ctx.fillStyle = p.color;
+        ctx.beginPath();
+        if (p.trail) {
+          ctx.fillRect(p.x - p.size*3, p.y - p.size*0.4, p.size*3, p.size*0.8);
+        } else {
+          ctx.arc(p.x, p.y, p.size, 0, Math.PI*2);
+          ctx.fill();
+        }
+      }
+      ctx.globalAlpha = 1; ctx.shadowBlur = 0;
+      requestAnimationFrame(animate);
+    }
+    animate();
+  }
+  initFireCanvas();
+
+  /* ── API status ── */
+  fetch('/api/health').then(r=>r.json()).then(d=>{
+    const el = document.getElementById('login-api-status');
+    if (el) el.textContent = 'API ' + (d.status||'online') + ' · ' + (d.now ? new Date(d.now).toLocaleTimeString():'');
+  }).catch(()=>{ const el=document.getElementById('login-api-status'); if(el){el.textContent='API offline';el.style.color='var(--err)';} });
+
+  /* ── Sign In ── */
   function doLogin() {
-    const user = (document.getElementById('login-user')?.value || '').trim();
-    const pass = (document.getElementById('login-key')?.value  || '').trim();
+    const user = (document.getElementById('login-user')?.value||'').trim();
+    const pass = (document.getElementById('login-key')?.value||'').trim();
     const btn  = document.getElementById('login-btn');
     const err  = document.getElementById('login-error');
     err.classList.add('hidden');
-
-    if (!user) { err.textContent = 'Please enter your username.'; err.classList.remove('hidden'); document.getElementById('login-user').focus(); return; }
-
-    btn.disabled = true;
-    btn.textContent = 'Signing in…';
-
-    fetch('/api/health').then(r => { if (!r.ok) throw new Error(); return r.json(); }).then(() => {
+    if (!user) { err.textContent='Please enter your username.'; err.classList.remove('hidden'); document.getElementById('login-user').focus(); return; }
+    btn.disabled=true; btn.textContent='Signing in…';
+    fetch('/api/health').then(r=>{ if(!r.ok) throw new Error(); return r.json(); }).then(()=>{
       localStorage.setItem('ff-user', user);
-      localStorage.setItem('ff-logged-in', '1');
-      if (pass) localStorage.setItem('ff-api-key', pass);
-      else localStorage.removeItem('ff-api-key');
+      localStorage.setItem('ff-logged-in','1');
+      if (pass) localStorage.setItem('ff-api-key', pass); else localStorage.removeItem('ff-api-key');
       enterDashboard(user);
-    }).catch(() => {
-      btn.disabled = false; btn.textContent = 'Sign In';
-      err.textContent = 'Could not reach the server. Is it running?';
-      err.classList.remove('hidden');
-    });
+    }).catch(()=>{ btn.disabled=false; btn.textContent='Sign In'; err.textContent='Could not reach the server.'; err.classList.remove('hidden'); });
   }
 
-  /* Create Account */
+  /* ── Create Account ── */
   function doRegister() {
-    const user    = (document.getElementById('reg-user')?.value    || '').trim();
-    const email   = (document.getElementById('reg-email')?.value   || '').trim();
-    const pass    = (document.getElementById('reg-pass')?.value    || '');
-    const confirm = (document.getElementById('reg-confirm')?.value || '');
+    const user    = (document.getElementById('reg-user')?.value||'').trim();
+    const email   = (document.getElementById('reg-email')?.value||'').trim();
+    const pass    = (document.getElementById('reg-pass')?.value||'');
+    const confirm = (document.getElementById('reg-confirm')?.value||'');
     const btn     = document.getElementById('reg-btn');
     const err     = document.getElementById('reg-error');
     err.classList.add('hidden');
-
-    if (!user)  { err.textContent = 'Username is required.'; err.classList.remove('hidden'); return; }
-    if (!email) { err.textContent = 'Email is required.'; err.classList.remove('hidden'); return; }
-    if (!pass)  { err.textContent = 'Password is required.'; err.classList.remove('hidden'); return; }
-    if (pass !== confirm) { err.textContent = 'Passwords do not match.'; err.classList.remove('hidden'); return; }
-    if (pass.length < 6) { err.textContent = 'Password must be at least 6 characters.'; err.classList.remove('hidden'); return; }
-
-    btn.disabled = true; btn.textContent = 'Creating account…';
-
-    // Store account in localStorage (client-side auth)
-    const accounts = JSON.parse(localStorage.getItem('ff-accounts') || '{}');
-    if (accounts[user]) { err.textContent = 'Username already taken.'; err.classList.remove('hidden'); btn.disabled = false; btn.textContent = 'Create Account'; return; }
+    if (!user)              { err.textContent='Username is required.'; err.classList.remove('hidden'); return; }
+    if (!email)             { err.textContent='Email is required.'; err.classList.remove('hidden'); return; }
+    if (!pass)              { err.textContent='Password is required.'; err.classList.remove('hidden'); return; }
+    if (pass.length < 6)    { err.textContent='Password must be at least 6 characters.'; err.classList.remove('hidden'); return; }
+    if (pass !== confirm)   { err.textContent='Passwords do not match.'; err.classList.remove('hidden'); return; }
+    btn.disabled=true; btn.textContent='Creating account…';
+    const accounts = JSON.parse(localStorage.getItem('ff-accounts')||'{}');
+    if (accounts[user]) { err.textContent='Username already taken.'; err.classList.remove('hidden'); btn.disabled=false; btn.textContent='Create Account'; return; }
     accounts[user] = { email, passHash: btoa(pass) };
     localStorage.setItem('ff-accounts', JSON.stringify(accounts));
     localStorage.setItem('ff-user', user);
-    localStorage.setItem('ff-logged-in', '1');
-    showToast('Account created! Welcome, ' + user + ' 🎮', '#4ade80');
-    setTimeout(() => enterDashboard(user), 800);
+    localStorage.setItem('ff-logged-in','1');
+    showToast('🎮 Account created! Welcome, ' + user, '#4ade80');
+    setTimeout(()=>enterDashboard(user), 900);
   }
 
-  /* Social login */
-  function socialLogin(provider) {
-    const icons = { google:'🔵', github:'⚫', discord:'🟣' };
-    const names = { google:'Google', github:'GitHub', discord:'Discord' };
-    // Simulate OAuth — in production these would redirect to /api/auth/<provider>
-    const user = names[provider] + '_user';
-    localStorage.setItem('ff-user', user);
-    localStorage.setItem('ff-logged-in', '1');
-    localStorage.setItem('ff-provider', provider);
-    showToast(icons[provider] + ' Continuing with ' + names[provider] + '…', null);
-    setTimeout(() => enterDashboard(user), 1000);
+  /* ── OAuth (real server-side flow) ── */
+  function oauthLogin(provider) {
+    showToast('Redirecting to ' + provider.charAt(0).toUpperCase()+provider.slice(1) + '…', null);
+    setTimeout(()=>{ window.location.href = '/api/auth/' + provider; }, 600);
   }
 
-  /* Enter key shortcuts */
-  ['login-user','login-key'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
-  });
-  ['reg-user','reg-email','reg-pass','reg-confirm'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.addEventListener('keydown', e => { if (e.key === 'Enter') doRegister(); });
-  });
-
-  /* Auto login if returning */
-  (function() {
-    if (localStorage.getItem('ff-logged-in')) {
-      document.getElementById('login-screen').style.display = 'none';
-      document.body.classList.add('app-ready');
+  /* ── Handle OAuth callback redirect ── */
+  (function handleOAuthCallback() {
+    const params = new URLSearchParams(window.location.search);
+    const session = params.get('oauth_session');
+    const oauthErr = params.get('oauth_error');
+    if (oauthErr) {
+      const msgs = {
+        not_configured: 'OAuth not configured. Add client credentials to .env',
+        no_code: 'OAuth cancelled or failed.',
+        exchange_failed: 'OAuth token exchange failed. Check credentials.',
+        github_failed: 'GitHub OAuth failed.',
+        discord_failed: 'Discord OAuth failed.',
+        google_failed:  'Google OAuth failed.',
+      };
+      showToast('⚠️ ' + (msgs[oauthErr] || oauthErr), '#f87171');
+      history.replaceState(null,'',window.location.pathname);
     }
-    // Pre-fill username
-    const u = localStorage.getItem('ff-user');
-    if (u) { const el = document.getElementById('login-user'); if (el) el.value = u; }
+    if (session) {
+      fetch('/api/auth/session/' + session).then(r=>r.json()).then(data=>{
+        if (data.user) {
+          localStorage.setItem('ff-user', data.user);
+          localStorage.setItem('ff-logged-in','1');
+          localStorage.setItem('ff-provider', data.provider||'');
+          history.replaceState(null,'',window.location.pathname);
+          showToast('✅ Signed in as ' + data.user, '#4ade80');
+          setTimeout(()=>enterDashboard(data.user), 600);
+        }
+      }).catch(()=>{ showToast('Session expired. Please try again.','#f87171'); history.replaceState(null,'',window.location.pathname); });
+    }
   })();
 
-  /* Floating item icons on login bg */
-  fetch('/api/items/random?count=14').then(r => r.json()).then(data => {
-    const container = document.getElementById('floating-icons');
-    if (!container) return;
-    (data.items || []).slice(0, 12).forEach((item, i) => {
-      const div = document.createElement('div');
-      div.className = 'float-icon';
-      div.style.cssText = `left:${4+Math.random()*88}%;top:${4+Math.random()*88}%;animation-delay:${(i*0.7).toFixed(1)}s;animation-duration:${(7+Math.random()*7).toFixed(1)}s;`;
-      const img = document.createElement('img');
-      img.src = itemImg(item, 64, 2);
-      img.alt = item.name || '';
-      img.onerror = function(){ this.parentElement.style.display='none'; };
-      div.appendChild(img);
-      container.appendChild(div);
-    });
-  }).catch(() => {});
+  /* ── Enter key shortcuts ── */
+  ['login-user','login-key'].forEach(id=>{ const el=document.getElementById(id); if(el) el.addEventListener('keydown',e=>{ if(e.key==='Enter') doLogin(); }); });
+  ['reg-user','reg-email','reg-pass','reg-confirm'].forEach(id=>{ const el=document.getElementById(id); if(el) el.addEventListener('keydown',e=>{ if(e.key==='Enter') doRegister(); }); });
+
+  /* ── Auto-login if returning ── */
+  (function(){
+    if (localStorage.getItem('ff-logged-in')) { document.getElementById('login-screen').style.display='none'; document.body.classList.add('app-ready'); }
+    const u=localStorage.getItem('ff-user'); if(u){ const el=document.getElementById('login-user'); if(el) el.value=u; }
+  })();
+
+  /* ── Floating item icons on login bg ── */
+  fetch('/api/items/random?count=14').then(r=>r.json()).then(data=>{
+    // No floating icons now — bg is the wallpaper image
+    // (kept for backward compat, no-op)
+  }).catch(()=>{});
 
   /* ═══════════════════════════════════════════════════
      WALLPAPER / SETTINGS
