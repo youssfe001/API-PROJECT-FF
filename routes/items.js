@@ -14,6 +14,8 @@ const { lookupItem, resolveItems, searchItems } = require("../lib/items");
 const { ApiError } = require("../lib/validate");
 
 const FF_RESOURCES_BASE = "https://raw.githubusercontent.com/0xme/ff-resources/main/pngs/300x300";
+const PA_ITEMS_BASE = "https://raw.githubusercontent.com/paulafredo/Auto-update-Items/main";
+const PA_FOLDERS = ["items", "items1", "items2", "items3", "items4"];
 const UNKNOWN_ICON_NAME = "UI_EPFP_unknown.png";
 const DEFAULT_ICON_ENGINE = "ai-fast";
 const REMOTE_ICON_CACHE = new Map();
