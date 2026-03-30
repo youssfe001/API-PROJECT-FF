@@ -90,18 +90,33 @@ async function fetchRemoteBuffer(url) {
   }
 }
 
-function iconCandidates(item) {
-  const urls = [];
-  const id = item?.id;
+/**
+ * Race paulafredo folders in parallel — return first successful fetch.
+ * Much faster than trying 5 folders sequentially.
+ */
+async function fetchFromPaulafredo(id) {
+  const urls = PA_FOLDERS.map((f) => `${PA_ITEMS_BASE}/${f}/${id}.png`);
 
-  // 1. paulafredo/Auto-update-Items — direct ID-based lookup across 5 folders
-  if (id && /^\d+$/.test(String(id))) {
-    for (const folder of PA_FOLDERS) {
-      urls.push(`${PA_ITEMS_BASE}/${folder}/${id}.png`);
-    }
+  // Check cache first
+  for (const url of urls) {
+    const cached = REMOTE_ICON_CACHE.get(url);
+    if (cached && !(cached instanceof Promise)) return { buffer: cached, sourceUrl: url };
   }
 
-  // 2. 0xMe/ff-resources — name-based lookup
+  // Race all 5 folders in parallel
+  const results = await Promise.allSettled(
+    urls.map((url) => fetchRemoteBuffer(url).then((buffer) => ({ buffer, sourceUrl: url })))
+  );
+
+  const winner = results.find((r) => r.status === "fulfilled");
+  if (winner) return winner.value;
+  return null;
+}
+
+function iconCandidatesFallback(item) {
+  const urls = [];
+
+  // 0xMe/ff-resources — name-based lookup
   if (item?.ffIcon) {
     urls.push(`${FF_RESOURCES_BASE}/${encodePathSegment(item.ffIcon)}.png`);
   }
@@ -110,20 +125,28 @@ function iconCandidates(item) {
     urls.push(`${FF_RESOURCES_BASE}/${encodePathSegment(item.icon)}.png`);
   }
 
-  // 3. CDN URL from enriched data
+  // CDN URL from enriched data
   if (item?.iconUrl) {
     urls.push(item.iconUrl);
   }
 
-  // 4. Fallback — unknown icon placeholder
+  // Fallback — unknown icon placeholder
   urls.push(`${FF_RESOURCES_BASE}/${UNKNOWN_ICON_NAME}`);
   return [...new Set(urls.filter(Boolean))];
 }
 
 async function resolveIconSource(item) {
-  let lastError = null;
+  const id = item?.id;
 
-  for (const sourceUrl of iconCandidates(item)) {
+  // 1. Try paulafredo/Auto-update-Items first (parallel race across 5 folders)
+  if (id && /^\d+$/.test(String(id))) {
+    const paResult = await fetchFromPaulafredo(id);
+    if (paResult) return paResult;
+  }
+
+  // 2. Fallback to 0xMe/ff-resources and other sources
+  let lastError = null;
+  for (const sourceUrl of iconCandidatesFallback(item)) {
     try {
       const buffer = await fetchRemoteBuffer(sourceUrl);
       return { buffer, sourceUrl };
