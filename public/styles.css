@@ -1233,6 +1233,9 @@ body.has-wallpaper #topbar { background: rgba(255,255,255,0.75); backdrop-filter
 }
 
 @media (max-width: 767px) {
+  .ff-hero-banner { height: 220px; }
+  .ff-hero-overlay { padding: 20px; }
+  .ff-gallery-grid { grid-template-columns: repeat(2, 1fr); }
   #sidebar {
     width: var(--sidebar-w);
     transform: translateX(-100%);
