@@ -284,4 +284,30 @@ router.get("/items/search", (req, res, next) => {
   }
 });
 
+router.get("/items/random", (req, res, next) => {
+  try {
+    const count = Math.min(parseInt(req.query.count) || 8, 24);
+
+    // Popular item IDs known to have good icons
+    const POPULAR_IDS = [
+      "203043", "203044", "203042", "203041", "203040",
+      "203033014", "203033013", "203033012", "203033011",
+      "203000000", "203000001", "203000002", "203000003",
+      "101000005", "101000009", "101000010", "101000011",
+      "102000004", "102000005", "102000006", "102000007",
+      "912000006", "925052001", "203001052", "203001051",
+    ];
+
+    // Shuffle and pick
+    const shuffled = [...POPULAR_IDS].sort(() => Math.random() - 0.5);
+    const picked = shuffled.slice(0, count);
+    const items = resolveItems(picked).filter((i) => i.name);
+
+    res.set("Cache-Control", "public, s-maxage=120, max-age=120");
+    res.json({ count: items.length, items });
+  } catch (err) {
+    next(err);
+  }
+});
+
 module.exports = router;
