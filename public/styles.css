@@ -333,6 +333,9 @@ pre { overflow-x: auto; }
   min-height: 100vh;
 }
 
+/* Hide app shell until logged in */
+body:not(.app-ready) #app-shell { visibility: hidden; }
+
 /* ── Sidebar ────────────────────────────────────── */
 #sidebar {
   position: fixed;
