@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 
 const { ffRequestEncrypted } = require("../lib/request");
-const { requireRegion, requireParam } = require("../lib/validate");
+const { requireRegion, requireParam, ApiError } = require("../lib/validate");
 const { decodeVarint } = require("../lib/protobuf/varint");
 
 function normalizeHex(value, name = "bodyHex") {
