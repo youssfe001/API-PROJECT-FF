@@ -20,6 +20,7 @@ router.get("/guest-generator", (req, res, next) => {
     const region = requireRegion(req.query.region);
     const selected = getCredentialForRegion(region);
 
+    res.set("Cache-Control", "no-store");
     res.json({
       region,
       source: selected.source,
