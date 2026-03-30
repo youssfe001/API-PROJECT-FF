@@ -1282,6 +1282,8 @@ body.has-wallpaper #topbar { background: rgba(255,255,255,0.75); backdrop-filter
 @media (max-width: 480px) {
   .visual-item-grid { grid-template-columns: repeat(2, 1fr); }
   .wishlist-grid { grid-template-columns: repeat(2, 1fr); }
+  .ff-gallery-grid { grid-template-columns: repeat(2, 1fr); }
+  .ff-hero-banner { height: 180px; }
 }
 
 /* ── Scrollbar ──────────────────────────────────── */
