@@ -244,6 +244,7 @@ router.get("/v1/account", async (req, res, next) => {
 
     const decoded = decodePersonalShow(responseBuffer);
 
+    res.set("Cache-Control", "public, s-maxage=30, max-age=30");
     res.json({
       endpoint: "/GetPlayerPersonalShow",
       region,
