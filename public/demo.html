@@ -10,8 +10,52 @@
 </head>
 <body>
 
-  <!-- Wallpaper background (blurred, behind everything) -->
-  <div id="wallpaper-bg"></div>
+  <!-- Auto-rotating background slideshow (two layers for crossfade) -->
+  <div class="bg-slide" id="bg-slide-a"></div>
+  <div class="bg-slide" id="bg-slide-b"></div>
+
+  <!-- ════════════ LOGIN SCREEN ════════════ -->
+  <div id="login-screen">
+    <div id="floating-icons"></div>
+    <div class="login-card" id="login-card">
+      <div class="login-brand">
+        <div class="login-logo">FF</div>
+        <div>
+          <div class="login-brand-name">Free Fire <span>API Pro</span></div>
+          <div class="login-brand-sub">Battlefield Intelligence Dashboard</div>
+        </div>
+      </div>
+
+      <div class="login-divider"></div>
+
+      <div class="login-welcome">
+        <h2>Welcome Back</h2>
+        <p>Sign in to access the dashboard</p>
+      </div>
+
+      <div class="form-group" style="margin-bottom:14px">
+        <label class="form-label">Username</label>
+        <input id="login-user" type="text" class="form-input login-input" placeholder="e.g. admin" autocomplete="username" />
+      </div>
+      <div class="form-group" style="margin-bottom:14px">
+        <label class="form-label">Password / API Key <span style="color:var(--text-muted);font-weight:400;text-transform:none">(optional)</span></label>
+        <input id="login-key" type="password" class="form-input login-input" placeholder="Enter API key or leave blank" autocomplete="current-password" />
+      </div>
+
+      <button class="btn btn-primary login-btn" id="login-btn" onclick="doLogin()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+        Enter Dashboard
+      </button>
+
+      <div id="login-error" class="hidden" style="color:var(--err);font-size:13px;text-align:center;margin-top:10px;padding:8px 12px;background:rgba(239,68,68,0.08);border-radius:var(--radius-sm)"></div>
+
+      <div class="login-footer">
+        <span class="pulse-dot" style="width:6px;height:6px"></span>
+        <span id="login-api-status">Checking API status…</span>
+      </div>
+    </div>
+  </div>
+  <!-- ════════════ /LOGIN SCREEN ════════════ -->
 
   <!-- Sidebar overlay for mobile -->
   <div class="sidebar-overlay" id="sidebar-overlay"></div>
@@ -166,10 +210,6 @@
           </div>
         </div>
         <div class="page-content">
-          <div class="home-hero">
-            <h1>Free Fire API Pro</h1>
-            <p>Battlefield-grade dashboard for player intel, item collections, ban diagnostics, and live utility calls. Full REST API with HD icon proxy and enriched item data.</p>
-          </div>
 
           <!-- Stat Cards -->
           <div class="grid-4 mb-24">
