@@ -25,6 +25,7 @@ router.get("/v1/search", async (req, res, next) => {
       hexBody:  reqBuf.toString("hex"),
     });
     const data = decodeProto(resBuf, "SearchAccountByName.response");
+    res.set("Cache-Control", "public, s-maxage=60, max-age=60");
     res.json(data);
 
   } catch (err) {
