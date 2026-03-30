@@ -220,6 +220,7 @@ router.get("/items", (req, res, next) => {
     const ids = String(raw).split(",").map(s => s.trim()).filter(Boolean);
     if (ids.length === 0) throw new ApiError("No valid IDs provided.");
 
+    res.set("Cache-Control", "public, s-maxage=300, max-age=300");
     if (ids.length === 1) {
       const item = lookupItem(ids[0]);
       res.json({ id: ids[0], found: !!item, item: item || null });
