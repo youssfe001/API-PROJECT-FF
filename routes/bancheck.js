@@ -221,6 +221,7 @@ async function handleBanCheck(req, res, next) {
       });
     }
 
+    res.set("Cache-Control", "public, s-maxage=60, max-age=60");
     return res.json(payload);
   } catch (error) {
     next(error);
