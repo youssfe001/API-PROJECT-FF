@@ -93,6 +93,7 @@ router.get("/v1/wishlist", async (req, res, next) => {
 
     const parsed = parseWishList(responseBuffer);
 
+    res.set("Cache-Control", "public, s-maxage=30, max-age=30");
     res.json({
       endpoint: "/GetWishListItems",
       region,
