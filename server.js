@@ -96,6 +96,96 @@ app.get("/api/demo", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "demo.html"));
 });
 
+/* ── OAuth Sessions (in-memory, short-lived) ─────── */
+const oauthSessions = new Map();
+function mkSession(data) {
+  const id = Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2) + Date.now().toString(36);
+  oauthSessions.set(id, data);
+  setTimeout(() => oauthSessions.delete(id), 5 * 60 * 1000); // 5 min TTL
+  return id;
+}
+const BASE_URL = () => process.env.BASE_URL || `http://localhost:${process.env.PORT || 3000}`;
+
+/* ── GitHub OAuth ─────────────────────────────────── */
+app.get("/api/auth/github", (req, res) => {
+  const cid = process.env.GITHUB_CLIENT_ID;
+  if (!cid) return res.redirect("/api/demo?oauth_error=not_configured");
+  const cb = encodeURIComponent(BASE_URL() + "/api/auth/github/callback");
+  res.redirect(`https://github.com/login/oauth/authorize?client_id=${cid}&redirect_uri=${cb}&scope=read:user`);
+});
+
+app.get("/api/auth/github/callback", async (req, res) => {
+  const { code } = req.query;
+  if (!code) return res.redirect("/api/demo?oauth_error=no_code");
+  try {
+    const tr = await fetch("https://github.com/login/oauth/access_token", {
+      method: "POST",
+      headers: { Accept: "application/json", "Content-Type": "application/json" },
+      body: JSON.stringify({ client_id: process.env.GITHUB_CLIENT_ID, client_secret: process.env.GITHUB_CLIENT_SECRET, code }),
+    });
+    const td = await tr.json();
+    if (!td.access_token) throw new Error("no_token");
+    const ur = await fetch("https://api.github.com/user", { headers: { Authorization: `Bearer ${td.access_token}`, Accept: "application/vnd.github+json" } });
+    const ud = await ur.json();
+    const sid = mkSession({ user: ud.login || ud.name || "github_user", provider: "github", avatar: ud.avatar_url });
+    res.redirect(`/api/demo?oauth_session=${sid}&provider=github`);
+  } catch { res.redirect("/api/demo?oauth_error=github_failed"); }
+});
+
+/* ── Discord OAuth ────────────────────────────────── */
+app.get("/api/auth/discord", (req, res) => {
+  const cid = process.env.DISCORD_CLIENT_ID;
+  if (!cid) return res.redirect("/api/demo?oauth_error=not_configured");
+  const cb = encodeURIComponent(BASE_URL() + "/api/auth/discord/callback");
+  res.redirect(`https://discord.com/api/oauth2/authorize?client_id=${cid}&redirect_uri=${cb}&response_type=code&scope=identify`);
+});
+
+app.get("/api/auth/discord/callback", async (req, res) => {
+  const { code } = req.query;
+  if (!code) return res.redirect("/api/demo?oauth_error=no_code");
+  try {
+    const body = new URLSearchParams({ client_id: process.env.DISCORD_CLIENT_ID, client_secret: process.env.DISCORD_CLIENT_SECRET, grant_type: "authorization_code", code, redirect_uri: BASE_URL() + "/api/auth/discord/callback" });
+    const tr = await fetch("https://discord.com/api/oauth2/token", { method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body });
+    const td = await tr.json();
+    if (!td.access_token) throw new Error("no_token");
+    const ur = await fetch("https://discord.com/api/users/@me", { headers: { Authorization: `Bearer ${td.access_token}` } });
+    const ud = await ur.json();
+    const sid = mkSession({ user: ud.username || "discord_user", provider: "discord", avatar: ud.avatar ? `https://cdn.discordapp.com/avatars/${ud.id}/${ud.avatar}.png` : null });
+    res.redirect(`/api/demo?oauth_session=${sid}&provider=discord`);
+  } catch { res.redirect("/api/demo?oauth_error=discord_failed"); }
+});
+
+/* ── Google OAuth ─────────────────────────────────── */
+app.get("/api/auth/google", (req, res) => {
+  const cid = process.env.GOOGLE_CLIENT_ID;
+  if (!cid) return res.redirect("/api/demo?oauth_error=not_configured");
+  const cb = encodeURIComponent(BASE_URL() + "/api/auth/google/callback");
+  res.redirect(`https://accounts.google.com/o/oauth2/v2/auth?client_id=${cid}&redirect_uri=${cb}&response_type=code&scope=openid%20email%20profile&access_type=offline`);
+});
+
+app.get("/api/auth/google/callback", async (req, res) => {
+  const { code } = req.query;
+  if (!code) return res.redirect("/api/demo?oauth_error=no_code");
+  try {
+    const body = new URLSearchParams({ code, client_id: process.env.GOOGLE_CLIENT_ID, client_secret: process.env.GOOGLE_CLIENT_SECRET, redirect_uri: BASE_URL() + "/api/auth/google/callback", grant_type: "authorization_code" });
+    const tr = await fetch("https://oauth2.googleapis.com/token", { method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body });
+    const td = await tr.json();
+    if (!td.access_token) throw new Error("no_token");
+    const ur = await fetch("https://www.googleapis.com/oauth2/v2/userinfo", { headers: { Authorization: `Bearer ${td.access_token}` } });
+    const ud = await ur.json();
+    const sid = mkSession({ user: ud.name || ud.email || "google_user", provider: "google", avatar: ud.picture });
+    res.redirect(`/api/demo?oauth_session=${sid}&provider=google`);
+  } catch { res.redirect("/api/demo?oauth_error=google_failed"); }
+});
+
+/* ── OAuth Session Retrieval ──────────────────────── */
+app.get("/api/auth/session/:id", (req, res) => {
+  const s = oauthSessions.get(req.params.id);
+  if (!s) return res.status(404).json({ error: "session_not_found" });
+  oauthSessions.delete(req.params.id);
+  res.json(s);
+});
+
 /* ── 9. Rate Limiting ─────────────────────────────────── */
 app.use("/api", globalLimiter);
 app.use("/api/like-spam", strictLimiter);
