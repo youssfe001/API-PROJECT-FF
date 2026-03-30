@@ -1483,6 +1483,22 @@
   let playerCurrentView = 'cards';
 
   /* ═══════════════════════════════════════════════════
+     LOGOUT
+  ═══════════════════════════════════════════════════ */
+  function doLogout() {
+    localStorage.removeItem('ff-logged-in');
+    const ls = document.getElementById('login-screen');
+    if (ls) { ls.style.display = ''; ls.style.opacity = '1'; ls.style.pointerEvents = ''; }
+    document.body.classList.remove('app-ready');
+    const card = document.getElementById('login-card');
+    if (card) { card.style.transform = ''; card.style.opacity = ''; }
+    const btn = document.getElementById('login-btn');
+    if (btn) { btn.disabled = false; btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg> Enter Dashboard'; }
+    const err = document.getElementById('login-error');
+    if (err) err.classList.add('hidden');
+  }
+
+  /* ═══════════════════════════════════════════════════
      GENERIC API CALL
   ═══════════════════════════════════════════════════ */
   async function apiCall(url, containerId, renderFn, options = {}) {
@@ -1491,11 +1507,14 @@
     container.innerHTML = `<div class="result-loading"><div class="spinner"></div> Fetching...</div>`;
 
     try {
+      const apiKey = localStorage.getItem('ff-api-key');
+      const headers = {};
+      if (apiKey) headers['x-api-key'] = apiKey;
       const fetchOpts = options.method === 'POST' ? {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...headers },
         body: JSON.stringify(options.body),
-      } : {};
+      } : (apiKey ? { headers } : {});
       const res = await fetch(url, fetchOpts);
       const text = await res.text();
       let data;
