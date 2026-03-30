@@ -78,6 +78,7 @@ router.get("/uid-generator", (req, res, next) => {
       });
     }
 
+    res.set("Cache-Control", "no-store");
     res.json({
       mode,
       count,
