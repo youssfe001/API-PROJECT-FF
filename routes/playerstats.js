@@ -113,6 +113,7 @@ router.get("/v1/playerstats", async (req, res, next) => {
 
     const decoded = decodeStats(responseBuffer);
 
+    res.set("Cache-Control", "public, s-maxage=30, max-age=30");
     res.json({
       endpoint: "/GetPlayerStats",
       region,
