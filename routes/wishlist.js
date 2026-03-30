@@ -3,7 +3,7 @@ const router = express.Router();
 
 const { ffRequest, ffRequestEncrypted } = require("../lib/request");
 const { encodeProto } = require("../lib/proto");
-const { requireRegion, requireParam, requireUid } = require("../lib/validate");
+const { requireRegion, requireParam, requireUid, ApiError } = require("../lib/validate");
 const { decodeVarint } = require("../lib/protobuf/varint");
 const { lookupItem } = require("../lib/items");
 
