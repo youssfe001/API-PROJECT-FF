@@ -108,11 +108,11 @@ pre { overflow-x: auto; }
 }
 .bg-slide.active { opacity: 1; }
 
-/* Glass effect for UI elements when slideshow is active */
---bg-body: transparent;
-#sidebar { background: rgba(255,255,255,0.82) !important; backdrop-filter: blur(24px) saturate(1.4); }
-.card { background: rgba(255,255,255,0.80) !important; backdrop-filter: blur(18px); }
-#topbar { background: rgba(255,255,255,0.78) !important; backdrop-filter: blur(20px) saturate(1.4); }
+/* Glass effect for UI elements (always on because slideshow is always running) */
+body #sidebar { background: rgba(255,255,255,0.82); backdrop-filter: blur(24px) saturate(1.4); }
+body .card { background: rgba(255,255,255,0.80); backdrop-filter: blur(18px); }
+body #topbar { background: rgba(255,255,255,0.78); backdrop-filter: blur(20px) saturate(1.4); }
+body { --bg-body: transparent; }
 
 [data-theme="dark"] #sidebar { background: rgba(14,15,18,0.88) !important; }
 [data-theme="dark"] .card { background: rgba(20,21,26,0.82) !important; }
