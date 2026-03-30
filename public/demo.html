@@ -1844,7 +1844,12 @@
   }
 
   /* ── Toggle login music ── */
-  let loginMusicOpen = false;
+  let loginMusicOpen = true;
+  // Auto-show player and mark button as playing on load
+  (function() {
+    const btn = document.getElementById('lc-music-toggle');
+    if (btn) btn.classList.add('playing');
+  })();
   function toggleLoginMusic() {
     loginMusicOpen = !loginMusicOpen;
     const wrap = document.getElementById('lc-spotify-wrap');
