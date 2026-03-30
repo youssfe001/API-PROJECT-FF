@@ -1737,7 +1737,7 @@
   function initHomePage() {
     if (homeInitDone) return;
     homeInitDone = true;
-    fetch('/api/items/search?q=&limit=20')
+    fetch('/api/items/random?count=20')
       .then(r => r.json())
       .then(data => {
         const items = data.items || [];
@@ -1749,11 +1749,12 @@
         carousel.innerHTML = items.map(it => {
           const name = it.name || it.itemName || 'Item';
           const type = (it.type || it.itemType || '').replace(/_/g, ' ');
+          const col = rareColor(it.rare || it.itemRare || 'NONE');
           return `
-          <div class="carousel-item" onclick="navigate('#items');document.getElementById('item-id').value='${esc(it.id||it.itemId||'')}';setTimeout(runItemLookup,100)">
+          <div class="carousel-item" style="border-color:${col}33" onclick="navigate('#items');document.getElementById('item-id').value='${esc(it.id||it.itemId||'')}';setTimeout(runItemLookup,100)">
             <img src="${itemImg(it, 80, 2)}" alt="${esc(name)}" loading="lazy" onerror="this.style.display='none'" />
             <div class="carousel-item-name" title="${esc(name)}">${esc(name)}</div>
-            <div class="carousel-item-type">${esc(type)}</div>
+            <div class="carousel-item-type" style="color:${col}">${esc(type)}</div>
           </div>`;
         }).join('');
       })
