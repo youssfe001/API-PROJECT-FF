@@ -115,6 +115,7 @@ router.get("/v1/playertcstats", async (req, res, next) => {
 
     const decoded = decodeTcStats(responseBuffer);
 
+    res.set("Cache-Control", "public, s-maxage=30, max-age=30");
     res.json({
       endpoint: "/GetPlayerTCStats",
       region,
