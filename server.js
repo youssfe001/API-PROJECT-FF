@@ -206,18 +206,19 @@ function verifyResetToken(token) {
   return username;
 }
 
-app.post("/api/auth/forgot-password", (req, res) => {
+app.post("/api/auth/forgot-password", async (req, res) => {
   const { username, email } = req.body || {};
   if (!username || !email)
     return res.status(400).json({ error: "username and email are required" });
-  const acct = memAccounts[username.toLowerCase()];
+  const accounts = await getAccounts();
+  const acct = accounts[username.toLowerCase()];
   if (!acct || acct.email.toLowerCase() !== email.toLowerCase())
     return res.status(404).json({ error: "no_match" });
   const token = makeResetToken(username);
   res.json({ ok: true, token });
 });
 
-app.post("/api/auth/reset-password", (req, res) => {
+app.post("/api/auth/reset-password", async (req, res) => {
   const { token, password } = req.body || {};
   if (!token || !password)
     return res.status(400).json({ error: "token and password are required" });
@@ -226,9 +227,10 @@ app.post("/api/auth/reset-password", (req, res) => {
   const username = verifyResetToken(token);
   if (!username)
     return res.status(400).json({ error: "invalid_or_expired_token" });
-  if (!memAccounts[username])
+  const accounts = await getAccounts();
+  if (!accounts[username])
     return res.status(404).json({ error: "account_not_found" });
-  memAccounts[username].passHash = hashPass(password);
+  accounts[username].passHash = hashPass(password);
   saveAccounts();
   res.json({ ok: true });
 });
