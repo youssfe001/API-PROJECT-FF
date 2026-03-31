@@ -146,8 +146,29 @@ app.post("/api/auth/login", (req, res) => {
   res.json({ ok: true, username: acct.username, email: acct.email, provider: "local" });
 });
 
-/* ── Forgot / Reset Password ──────────────────────── */
-const resetTokens = new Map(); // token → { key, expires }
+/* ── Forgot / Reset Password (stateless signed token) ── */
+const RESET_SECRET = () => process.env.LOGIN_SECRET || "ff-api-salt";
+
+function makeResetToken(username) {
+  const expires = Date.now() + 15 * 60 * 1000; // 15 min
+  const payload = Buffer.from(username.toLowerCase() + ":" + expires).toString("base64url");
+  const sig = crypto.createHmac("sha256", RESET_SECRET()).update(payload).digest("hex").slice(0, 12);
+  return payload + "." + sig;
+}
+
+function verifyResetToken(token) {
+  const parts = (token || "").split(".");
+  if (parts.length !== 2) return null;
+  const [payload, sig] = parts;
+  const expected = crypto.createHmac("sha256", RESET_SECRET()).update(payload).digest("hex").slice(0, 12);
+  if (sig !== expected) return null;
+  const decoded = Buffer.from(payload, "base64url").toString("utf8");
+  const colonIdx = decoded.lastIndexOf(":");
+  const username = decoded.slice(0, colonIdx);
+  const expires = parseInt(decoded.slice(colonIdx + 1), 10);
+  if (Date.now() > expires) return null;
+  return username;
+}
 
 app.post("/api/auth/forgot-password", (req, res) => {
   const { username, email } = req.body || {};
@@ -156,11 +177,8 @@ app.post("/api/auth/forgot-password", (req, res) => {
   const acct = memAccounts[username.toLowerCase()];
   if (!acct || acct.email.toLowerCase() !== email.toLowerCase())
     return res.status(404).json({ error: "no_match" });
-  // Generate 8-char reset token
-  const token = crypto.randomBytes(4).toString("hex").toUpperCase();
-  resetTokens.set(token, { key: username.toLowerCase(), expires: Date.now() + 15 * 60 * 1000 });
-  setTimeout(() => resetTokens.delete(token), 15 * 60 * 1000);
-  res.json({ ok: true, token }); // returned directly — no email service needed
+  const token = makeResetToken(username);
+  res.json({ ok: true, token });
 });
 
 app.post("/api/auth/reset-password", (req, res) => {
@@ -169,12 +187,13 @@ app.post("/api/auth/reset-password", (req, res) => {
     return res.status(400).json({ error: "token and password are required" });
   if (password.length < 6)
     return res.status(400).json({ error: "password must be at least 6 characters" });
-  const entry = resetTokens.get(token.toUpperCase());
-  if (!entry || Date.now() > entry.expires)
+  const username = verifyResetToken(token);
+  if (!username)
     return res.status(400).json({ error: "invalid_or_expired_token" });
-  memAccounts[entry.key].passHash = hashPass(password);
+  if (!memAccounts[username])
+    return res.status(404).json({ error: "account_not_found" });
+  memAccounts[username].passHash = hashPass(password);
   saveAccounts();
-  resetTokens.delete(token.toUpperCase());
   res.json({ ok: true });
 });
 
