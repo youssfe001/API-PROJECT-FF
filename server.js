@@ -119,7 +119,7 @@ function saveAccounts() {
 }
 
 function hashPass(pass) {
-  return crypto.createHash("sha256").update(pass + "ff-api-salt").digest("hex");
+  return crypto.createHash("sha256").update(pass + (process.env.LOGIN_SECRET || "ff-api-salt")).digest("hex");
 }
 
 app.post("/api/auth/register", (req, res) => {
