@@ -146,6 +146,38 @@ app.post("/api/auth/login", (req, res) => {
   res.json({ ok: true, username: acct.username, email: acct.email, provider: "local" });
 });
 
+/* ── Forgot / Reset Password ──────────────────────── */
+const resetTokens = new Map(); // token → { key, expires }
+
+app.post("/api/auth/forgot-password", (req, res) => {
+  const { username, email } = req.body || {};
+  if (!username || !email)
+    return res.status(400).json({ error: "username and email are required" });
+  const acct = memAccounts[username.toLowerCase()];
+  if (!acct || acct.email.toLowerCase() !== email.toLowerCase())
+    return res.status(404).json({ error: "no_match" });
+  // Generate 8-char reset token
+  const token = crypto.randomBytes(4).toString("hex").toUpperCase();
+  resetTokens.set(token, { key: username.toLowerCase(), expires: Date.now() + 15 * 60 * 1000 });
+  setTimeout(() => resetTokens.delete(token), 15 * 60 * 1000);
+  res.json({ ok: true, token }); // returned directly — no email service needed
+});
+
+app.post("/api/auth/reset-password", (req, res) => {
+  const { token, password } = req.body || {};
+  if (!token || !password)
+    return res.status(400).json({ error: "token and password are required" });
+  if (password.length < 6)
+    return res.status(400).json({ error: "password must be at least 6 characters" });
+  const entry = resetTokens.get(token.toUpperCase());
+  if (!entry || Date.now() > entry.expires)
+    return res.status(400).json({ error: "invalid_or_expired_token" });
+  memAccounts[entry.key].passHash = hashPass(password);
+  saveAccounts();
+  resetTokens.delete(token.toUpperCase());
+  res.json({ ok: true });
+});
+
 /* ── OAuth Sessions (in-memory, short-lived) ─────── */
 const oauthSessions = new Map();
 function mkSession(data) {
