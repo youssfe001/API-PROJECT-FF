@@ -156,25 +156,27 @@ function hashPass(pass) {
   return crypto.createHash("sha256").update(pass + (process.env.LOGIN_SECRET || "ff-api-salt")).digest("hex");
 }
 
-app.post("/api/auth/register", (req, res) => {
+app.post("/api/auth/register", async (req, res) => {
   const { username, email, password } = req.body || {};
   if (!username || !email || !password)
     return res.status(400).json({ error: "username, email and password are required" });
   if (password.length < 6)
     return res.status(400).json({ error: "password must be at least 6 characters" });
+  const accounts = await getAccounts();
   const key = username.toLowerCase();
-  if (memAccounts[key])
+  if (accounts[key])
     return res.status(409).json({ error: "username_taken" });
-  memAccounts[key] = { username, email, passHash: hashPass(password), createdAt: new Date().toISOString(), provider: "local" };
+  accounts[key] = { username, email, passHash: hashPass(password), createdAt: new Date().toISOString(), provider: "local" };
   saveAccounts();
   res.json({ ok: true, username, provider: "local" });
 });
 
-app.post("/api/auth/login", (req, res) => {
+app.post("/api/auth/login", async (req, res) => {
   const { username, password } = req.body || {};
   if (!username || !password)
     return res.status(400).json({ error: "username and password are required" });
-  const acct = memAccounts[username.toLowerCase()];
+  const accounts = await getAccounts();
+  const acct = accounts[username.toLowerCase()];
   if (!acct || acct.passHash !== hashPass(password))
     return res.status(401).json({ error: "invalid_credentials" });
   res.json({ ok: true, username: acct.username, email: acct.email, provider: "local" });
