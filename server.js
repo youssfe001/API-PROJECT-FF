@@ -319,10 +319,19 @@ app.get("/api/auth/google/callback", async (req, res) => {
 
 /* ── OAuth Session Retrieval ──────────────────────── */
 app.get("/api/auth/session/:id", (req, res) => {
-  const s = oauthSessions.get(req.params.id);
-  if (!s) return res.status(404).json({ error: "session_not_found" });
-  oauthSessions.delete(req.params.id);
-  res.json(s);
+  const parts = (req.params.id || "").split(".");
+  if (parts.length !== 2) return res.status(404).json({ error: "session_not_found" });
+  const [payload, sig] = parts;
+  const expected = crypto.createHmac("sha256", SESSION_SECRET()).update(payload).digest("hex").slice(0, 16);
+  if (sig !== expected) return res.status(404).json({ error: "session_not_found" });
+  try {
+    const data = JSON.parse(Buffer.from(payload, "base64url").toString("utf8"));
+    if (Date.now() > data.exp) return res.status(404).json({ error: "session_expired" });
+    const { exp: _, ...sessionData } = data;
+    res.json(sessionData);
+  } catch {
+    res.status(404).json({ error: "session_not_found" });
+  }
 });
 
 /* ── 9. Rate Limiting ─────────────────────────────────── */
