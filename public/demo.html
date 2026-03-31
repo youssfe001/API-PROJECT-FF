@@ -1852,14 +1852,20 @@
      LOGIN — helpers
   ═══════════════════════════════════════════════════ */
   function switchPanel(to) {
-    const signin = document.getElementById('lc-signin');
-    const register = document.getElementById('lc-register');
-    const tabSignin = document.getElementById('tab-signin');
-    const tabRegister = document.getElementById('tab-register');
-    signin.classList.toggle('hidden', to !== 'signin');
-    register.classList.toggle('hidden', to !== 'register');
-    tabSignin.classList.toggle('active', to === 'signin');
-    tabRegister.classList.toggle('active', to === 'register');
+    const panels = ['signin','register','forgot'];
+    panels.forEach(p => {
+      const el = document.getElementById('lc-' + p);
+      if (el) el.classList.toggle('hidden', to !== p);
+    });
+    document.getElementById('tab-signin')?.classList.toggle('active', to === 'signin');
+    document.getElementById('tab-register')?.classList.toggle('active', to === 'register');
+    // reset forgot steps when opening
+    if (to === 'forgot') {
+      document.getElementById('fp-step1')?.classList.remove('hidden');
+      document.getElementById('fp-step2')?.classList.add('hidden');
+      document.getElementById('fp-error1')?.classList.add('hidden');
+      ['fp-user','fp-email','fp-token','fp-newpass'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
+    }
   }
 
   function togglePass(inputId, btn) {
