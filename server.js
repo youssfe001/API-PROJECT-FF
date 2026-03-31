@@ -234,14 +234,15 @@ app.post("/api/auth/reset-password", async (req, res) => {
   res.json({ ok: true });
 });
 
-/* ── OAuth Sessions (in-memory, short-lived) ─────── */
-const oauthSessions = new Map();
+/* ── OAuth Sessions (stateless signed token — works across all Vercel instances) ── */
+const SESSION_SECRET = () => process.env.LOGIN_SECRET || "ff-api-salt";
+
 function mkSession(data) {
-  const id = Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2) + Date.now().toString(36);
-  oauthSessions.set(id, data);
-  setTimeout(() => oauthSessions.delete(id), 5 * 60 * 1000); // 5 min TTL
-  return id;
+  const payload = Buffer.from(JSON.stringify({ ...data, exp: Date.now() + 5 * 60 * 1000 })).toString("base64url");
+  const sig = crypto.createHmac("sha256", SESSION_SECRET()).update(payload).digest("hex").slice(0, 16);
+  return payload + "." + sig;
 }
+
 const BASE_URL = () => process.env.BASE_URL || `http://localhost:${process.env.PORT || 3000}`;
 
 /* ── GitHub OAuth ─────────────────────────────────── */
