@@ -2089,9 +2089,8 @@
       // Show token to user
       const box = document.getElementById('fp-token-box');
       box.innerHTML = `<div style="text-align:center">
-        <div style="font-size:11px;color:var(--muted);margin-bottom:6px">Your reset token (valid 15 min):</div>
-        <div style="font-size:22px;font-weight:700;letter-spacing:4px;color:var(--accent);font-family:'JetBrains Mono',monospace">${data.token}</div>
-        <div style="font-size:10px;color:var(--muted);margin-top:4px">Copy and paste it below</div>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:8px">✅ Identity verified — token auto-filled below</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:4px;opacity:0.6">Valid for 15 minutes</div>
       </div>`;
       document.getElementById('fp-token').value = data.token;
       document.getElementById('fp-step1').classList.add('hidden');
