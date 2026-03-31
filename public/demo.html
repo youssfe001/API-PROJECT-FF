@@ -2129,8 +2129,10 @@
 
   /* ── OAuth (real server-side flow) ── */
   function oauthLogin(provider) {
-    showToast('Redirecting to ' + provider.charAt(0).toUpperCase()+provider.slice(1) + '…', null);
-    setTimeout(()=>{ window.location.href = '/api/auth/' + provider; }, 600);
+    document.querySelectorAll('.lc-social-btn').forEach(b => { b.disabled = true; b.style.opacity = '0.6'; });
+    const label = provider.charAt(0).toUpperCase() + provider.slice(1);
+    showToast('Redirecting to ' + label + '…', '#6366f1');
+    setTimeout(() => { window.location.href = '/api/auth/' + provider; }, 500);
   }
 
   /* ── Handle OAuth callback redirect ── */
