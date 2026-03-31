@@ -2119,8 +2119,8 @@
       btn.disabled=false; btn.textContent='Reset Password';
       if (data.error === 'invalid_or_expired_token') { err.textContent='Token is invalid or expired. Try again.'; err.classList.remove('hidden'); return; }
       if (data.error) { err.textContent=data.error; err.classList.remove('hidden'); return; }
-      showToast('✅ Password reset! Please sign in.', '#4ade80');
-      setTimeout(()=>switchPanel('signin'), 800);
+      showToast('✅ Password reset! Redirecting to sign in…', '#4ade80');
+      setTimeout(()=>switchPanel('signin'), 2500);
     })
     .catch(()=>{ btn.disabled=false; btn.textContent='Reset Password'; err.textContent='Server error. Try again.'; err.classList.remove('hidden'); });
   }
