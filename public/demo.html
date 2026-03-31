@@ -2136,29 +2136,47 @@
     const params = new URLSearchParams(window.location.search);
     const session = params.get('oauth_session');
     const oauthErr = params.get('oauth_error');
+
+    // Always clean URL first
+    if (session || oauthErr) history.replaceState(null, '', window.location.pathname);
+
     if (oauthErr) {
+      // Make sure login screen is visible for the error toast
+      const ls = document.getElementById('login-screen');
+      if (ls) { ls.style.display = ''; ls.style.opacity = '1'; }
+      document.body.classList.remove('app-ready');
       const msgs = {
-        not_configured: 'OAuth not configured. Add client credentials to .env',
-        no_code: 'OAuth cancelled or failed.',
-        exchange_failed: 'OAuth token exchange failed. Check credentials.',
-        github_failed: 'GitHub OAuth failed.',
-        discord_failed: 'Discord OAuth failed.',
-        google_failed:  'Google OAuth failed.',
+        not_configured:  'OAuth not configured on the server.',
+        no_code:         'Login cancelled or failed — please try again.',
+        exchange_failed: 'OAuth token exchange failed.',
+        github_failed:   'GitHub login failed — check app settings.',
+        discord_failed:  'Discord login failed — check app settings.',
+        google_failed:   'Google login failed — check app settings.',
       };
-      showToast('⚠️ ' + (msgs[oauthErr] || oauthErr), '#f87171');
-      history.replaceState(null,'',window.location.pathname);
+      setTimeout(() => showToast('⚠️ ' + (msgs[oauthErr] || oauthErr), '#f87171'), 300);
+      return;
     }
+
     if (session) {
-      fetch('/api/auth/session/' + session).then(r=>r.json()).then(data=>{
-        if (data.user) {
-          localStorage.setItem('ff-user', data.user);
-          localStorage.setItem('ff-logged-in','1');
-          localStorage.setItem('ff-provider', data.provider||'');
-          history.replaceState(null,'',window.location.pathname);
-          showToast('✅ Signed in as ' + data.user, '#4ade80');
-          setTimeout(()=>enterDashboard(data.user), 600);
-        }
-      }).catch(()=>{ showToast('Session expired. Please try again.','#f87171'); history.replaceState(null,'',window.location.pathname); });
+      fetch('/api/auth/session/' + session)
+        .then(r => r.json())
+        .then(data => {
+          if (data.error) {
+            showToast('⚠️ ' + (data.error === 'session_expired' ? 'Session expired — please sign in again.' : 'OAuth sign-in failed.'), '#f87171');
+            return;
+          }
+          if (data.user) {
+            localStorage.setItem('ff-user', data.user);
+            localStorage.setItem('ff-logged-in', '1');
+            localStorage.setItem('ff-provider', data.provider || '');
+            if (data.avatar) localStorage.setItem('ff-avatar', data.avatar);
+            showToast('✅ Signed in as ' + data.user, '#4ade80');
+            setTimeout(() => enterDashboard(data.user), 600);
+          }
+        })
+        .catch(() => {
+          showToast('⚠️ Could not complete sign-in. Please try again.', '#f87171');
+        });
     }
   })();
 
