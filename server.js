@@ -27,7 +27,7 @@ async function ecRead() {
 }
 
 async function ecWrite(accounts) {
-  const apiToken = process.env.VERCEL_API_TOKEN;
+  const apiToken = process.env.VER_TOKEN;
   if (!apiToken) return;
   try {
     await fetch(EC_URL, {
