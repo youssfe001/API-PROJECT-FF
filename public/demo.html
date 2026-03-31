@@ -2067,6 +2067,65 @@
     .catch(()=>{ btn.disabled=false; btn.textContent='Create Account'; err.textContent='Server error. Try again.'; err.classList.remove('hidden'); });
   }
 
+  /* ── Forgot Password Step 1: get token ── */
+  function doForgotStep1() {
+    const user  = (document.getElementById('fp-user')?.value||'').trim();
+    const email = (document.getElementById('fp-email')?.value||'').trim();
+    const btn   = document.getElementById('fp-btn1');
+    const err   = document.getElementById('fp-error1');
+    err.classList.add('hidden');
+    if (!user)  { err.textContent='Username is required.'; err.classList.remove('hidden'); return; }
+    if (!email) { err.textContent='Email is required.';    err.classList.remove('hidden'); return; }
+    btn.disabled=true; btn.textContent='Checking…';
+    fetch('/api/auth/forgot-password', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ username: user, email })
+    })
+    .then(r=>r.json())
+    .then(data => {
+      btn.disabled=false; btn.textContent='Get Reset Token';
+      if (data.error === 'no_match') { err.textContent='Username / email combination not found.'; err.classList.remove('hidden'); return; }
+      if (data.error) { err.textContent=data.error; err.classList.remove('hidden'); return; }
+      // Show token to user
+      const box = document.getElementById('fp-token-box');
+      box.innerHTML = `<div style="text-align:center">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px">Your reset token (valid 15 min):</div>
+        <div style="font-size:22px;font-weight:700;letter-spacing:4px;color:var(--accent);font-family:'JetBrains Mono',monospace">${data.token}</div>
+        <div style="font-size:10px;color:var(--muted);margin-top:4px">Copy and paste it below</div>
+      </div>`;
+      document.getElementById('fp-token').value = data.token;
+      document.getElementById('fp-step1').classList.add('hidden');
+      document.getElementById('fp-step2').classList.remove('hidden');
+    })
+    .catch(()=>{ btn.disabled=false; btn.textContent='Get Reset Token'; err.textContent='Server error. Try again.'; err.classList.remove('hidden'); });
+  }
+
+  /* ── Forgot Password Step 2: reset ── */
+  function doForgotStep2() {
+    const token = (document.getElementById('fp-token')?.value||'').trim().toUpperCase();
+    const pass  = (document.getElementById('fp-newpass')?.value||'');
+    const btn   = document.getElementById('fp-btn2');
+    const err   = document.getElementById('fp-error2');
+    err.classList.add('hidden');
+    if (!token) { err.textContent='Please enter the reset token.'; err.classList.remove('hidden'); return; }
+    if (!pass)  { err.textContent='Please enter a new password.';  err.classList.remove('hidden'); return; }
+    if (pass.length < 6) { err.textContent='Password must be at least 6 characters.'; err.classList.remove('hidden'); return; }
+    btn.disabled=true; btn.textContent='Resetting…';
+    fetch('/api/auth/reset-password', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ token, password: pass })
+    })
+    .then(r=>r.json())
+    .then(data => {
+      btn.disabled=false; btn.textContent='Reset Password';
+      if (data.error === 'invalid_or_expired_token') { err.textContent='Token is invalid or expired. Try again.'; err.classList.remove('hidden'); return; }
+      if (data.error) { err.textContent=data.error; err.classList.remove('hidden'); return; }
+      showToast('✅ Password reset! Please sign in.', '#4ade80');
+      setTimeout(()=>switchPanel('signin'), 800);
+    })
+    .catch(()=>{ btn.disabled=false; btn.textContent='Reset Password'; err.textContent='Server error. Try again.'; err.classList.remove('hidden'); });
+  }
+
   /* ── OAuth (real server-side flow) ── */
   function oauthLogin(provider) {
     showToast('Redirecting to ' + provider.charAt(0).toUpperCase()+provider.slice(1) + '…', null);
