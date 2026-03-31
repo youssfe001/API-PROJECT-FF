@@ -274,7 +274,7 @@ app.use("/api/like-spam", strictLimiter);
 
 /* ── 10. API Key Authentication ───────────────────────── */
 app.use("/api", (req, res, next) => {
-  const exempt = ["/health", "/demo", "/auth/register", "/auth/login", "/auth/github", "/auth/github/callback", "/auth/discord", "/auth/discord/callback", "/auth/google", "/auth/google/callback"];
+  const exempt = ["/health", "/demo", "/auth/register", "/auth/login", "/auth/forgot-password", "/auth/reset-password", "/auth/github", "/auth/github/callback", "/auth/discord", "/auth/discord/callback", "/auth/google", "/auth/google/callback"];
   if (exempt.some(e => req.path === e || req.path.startsWith("/auth/session/"))) return next();
   apiKeyAuth(req, res, next);
 });
