@@ -143,6 +143,57 @@
         <div id="reg-error" class="lc-error hidden"></div>
       </div>
 
+      <!-- ── FORGOT PASSWORD PANEL ── -->
+      <div class="lc-panel hidden" id="lc-forgot">
+        <p class="lc-panel-desc">Reset your password in two steps</p>
+
+        <!-- Step 1: get token -->
+        <div id="fp-step1">
+          <div class="lc-field">
+            <label class="lc-label">Username</label>
+            <div class="lc-input-wrap">
+              <svg class="lc-input-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              <input id="fp-user" type="text" class="lc-input" placeholder="Your username" autocomplete="username"/>
+            </div>
+          </div>
+          <div class="lc-field">
+            <label class="lc-label">Email</label>
+            <div class="lc-input-wrap">
+              <svg class="lc-input-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+              <input id="fp-email" type="email" class="lc-input" placeholder="you@example.com" autocomplete="email"/>
+            </div>
+          </div>
+          <button class="lc-btn" id="fp-btn1" onclick="doForgotStep1()">Get Reset Token</button>
+          <div id="fp-error1" class="lc-error hidden"></div>
+        </div>
+
+        <!-- Step 2: use token -->
+        <div id="fp-step2" class="hidden">
+          <div class="lc-info-box" id="fp-token-box"></div>
+          <div class="lc-field">
+            <label class="lc-label">Reset Token</label>
+            <div class="lc-input-wrap">
+              <svg class="lc-input-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+              <input id="fp-token" type="text" class="lc-input" placeholder="Enter 8-char token" autocomplete="off" style="text-transform:uppercase;letter-spacing:2px"/>
+            </div>
+          </div>
+          <div class="lc-field">
+            <label class="lc-label">New Password</label>
+            <div class="lc-input-wrap">
+              <svg class="lc-input-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+              <input id="fp-newpass" type="password" class="lc-input" placeholder="Min 6 characters" autocomplete="new-password"/>
+              <button class="lc-eye" onclick="togglePass('fp-newpass',this)" tabindex="-1"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+            </div>
+          </div>
+          <button class="lc-btn" id="fp-btn2" onclick="doForgotStep2()">Reset Password</button>
+          <div id="fp-error2" class="lc-error hidden"></div>
+        </div>
+
+        <div style="text-align:center;margin-top:12px">
+          <span class="lc-link" style="font-size:12px" onclick="switchPanel('signin')">← Back to Sign In</span>
+        </div>
+      </div>
+
       <!-- Bottom bar: status + music -->
       <div class="lc-bottom">
         <div class="lc-status">
