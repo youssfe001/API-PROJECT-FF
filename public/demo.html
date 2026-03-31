@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en"><!-- FF API Pro -->
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -1939,7 +1939,7 @@
     if (el) el.textContent = 'API ' + (d.status||'online') + ' · ' + (d.now ? new Date(d.now).toLocaleTimeString():'');
   }).catch(()=>{ const el=document.getElementById('login-api-status'); if(el){el.textContent='API offline';el.style.color='var(--err)';} });
 
-  /* ── Sign In ── */
+  /* ── Sign In (real server check) ── */
   function doLogin() {
     const user = (document.getElementById('login-user')?.value||'').trim();
     const pass = (document.getElementById('login-key')?.value||'').trim();
@@ -1948,15 +1948,30 @@
     err.classList.add('hidden');
     if (!user) { err.textContent='Please enter your username.'; err.classList.remove('hidden'); document.getElementById('login-user').focus(); return; }
     btn.disabled=true; btn.textContent='Signing in…';
-    fetch('/api/health').then(r=>{ if(!r.ok) throw new Error(); return r.json(); }).then(()=>{
-      localStorage.setItem('ff-user', user);
-      localStorage.setItem('ff-logged-in','1');
-      if (pass) localStorage.setItem('ff-api-key', pass); else localStorage.removeItem('ff-api-key');
-      enterDashboard(user);
-    }).catch(()=>{ btn.disabled=false; btn.textContent='Sign In'; err.textContent='Could not reach the server.'; err.classList.remove('hidden'); });
+
+    // Try real account first, fall through to guest access if no password
+    const tryLogin = pass
+      ? fetch('/api/auth/login', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ username: user, password: pass }) })
+      : fetch('/api/health').then(r => ({ ok: r.ok, json: () => ({ username: user, provider: 'guest' }) }));
+
+    tryLogin
+      .then(r => r.json ? r.json() : r)
+      .then(data => {
+        if (data.error === 'invalid_credentials') {
+          btn.disabled=false; btn.textContent='Sign In';
+          err.textContent='Incorrect username or password.'; err.classList.remove('hidden'); return;
+        }
+        const name = data.username || user;
+        localStorage.setItem('ff-user', name);
+        localStorage.setItem('ff-logged-in','1');
+        localStorage.setItem('ff-provider', data.provider||'local');
+        if (pass) localStorage.setItem('ff-api-key', pass); else localStorage.removeItem('ff-api-key');
+        enterDashboard(name);
+      })
+      .catch(()=>{ btn.disabled=false; btn.textContent='Sign In'; err.textContent='Could not reach the server.'; err.classList.remove('hidden'); });
   }
 
-  /* ── Create Account ── */
+  /* ── Create Account (real server) ── */
   function doRegister() {
     const user    = (document.getElementById('reg-user')?.value||'').trim();
     const email   = (document.getElementById('reg-email')?.value||'').trim();
@@ -1965,20 +1980,34 @@
     const btn     = document.getElementById('reg-btn');
     const err     = document.getElementById('reg-error');
     err.classList.add('hidden');
-    if (!user)              { err.textContent='Username is required.'; err.classList.remove('hidden'); return; }
-    if (!email)             { err.textContent='Email is required.'; err.classList.remove('hidden'); return; }
-    if (!pass)              { err.textContent='Password is required.'; err.classList.remove('hidden'); return; }
-    if (pass.length < 6)    { err.textContent='Password must be at least 6 characters.'; err.classList.remove('hidden'); return; }
-    if (pass !== confirm)   { err.textContent='Passwords do not match.'; err.classList.remove('hidden'); return; }
+    if (!user)           { err.textContent='Username is required.'; err.classList.remove('hidden'); return; }
+    if (!email)          { err.textContent='Email is required.'; err.classList.remove('hidden'); return; }
+    if (!pass)           { err.textContent='Password is required.'; err.classList.remove('hidden'); return; }
+    if (pass.length < 6) { err.textContent='Password must be at least 6 characters.'; err.classList.remove('hidden'); return; }
+    if (pass !== confirm) { err.textContent='Passwords do not match.'; err.classList.remove('hidden'); return; }
     btn.disabled=true; btn.textContent='Creating account…';
-    const accounts = JSON.parse(localStorage.getItem('ff-accounts')||'{}');
-    if (accounts[user]) { err.textContent='Username already taken.'; err.classList.remove('hidden'); btn.disabled=false; btn.textContent='Create Account'; return; }
-    accounts[user] = { email, passHash: btoa(pass) };
-    localStorage.setItem('ff-accounts', JSON.stringify(accounts));
-    localStorage.setItem('ff-user', user);
-    localStorage.setItem('ff-logged-in','1');
-    showToast('🎮 Account created! Welcome, ' + user, '#4ade80');
-    setTimeout(()=>enterDashboard(user), 900);
+
+    fetch('/api/auth/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username: user, email, password: pass })
+    })
+    .then(r => r.json())
+    .then(data => {
+      if (data.error === 'username_taken') {
+        err.textContent='Username already taken. Choose another.';
+        err.classList.remove('hidden'); btn.disabled=false; btn.textContent='Create Account'; return;
+      }
+      if (data.error) {
+        err.textContent=data.error; err.classList.remove('hidden'); btn.disabled=false; btn.textContent='Create Account'; return;
+      }
+      localStorage.setItem('ff-user', data.username || user);
+      localStorage.setItem('ff-logged-in','1');
+      localStorage.setItem('ff-provider','local');
+      showToast('🎮 Account created! Welcome, ' + (data.username||user), '#4ade80');
+      setTimeout(()=>enterDashboard(data.username||user), 900);
+    })
+    .catch(()=>{ btn.disabled=false; btn.textContent='Create Account'; err.textContent='Server error. Try again.'; err.classList.remove('hidden'); });
   }
 
   /* ── OAuth (real server-side flow) ── */

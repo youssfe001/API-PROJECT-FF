@@ -1,5 +1,8 @@
+require("dotenv").config();
 const express = require("express");
 const path = require("path");
+const crypto = require("crypto");
+const fs = require("fs");
 const compression = require("compression");
 const helmet = require("helmet");
 const cors = require("cors");
@@ -95,6 +98,52 @@ app.get("/", (req, res) => {
 /* ── 8. Dashboard ─────────────────────────────────────── */
 app.get("/api/demo", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "demo.html"));
+});
+
+/* ── User Accounts (in-memory + file fallback for local dev) ── */
+// Vercel is serverless — no persistent filesystem. Accounts live in memory
+// per-instance + backed by local file when running locally.
+const ACCOUNTS_FILE = path.join(__dirname, "config", "users.json");
+const memAccounts = {};
+
+// Load from file on startup (works locally, no-op on Vercel)
+(function loadFromFile() {
+  try {
+    const data = JSON.parse(fs.readFileSync(ACCOUNTS_FILE, "utf8"));
+    Object.assign(memAccounts, data);
+  } catch { /* file not found — fresh start */ }
+})();
+
+function saveAccounts() {
+  try { fs.writeFileSync(ACCOUNTS_FILE, JSON.stringify(memAccounts, null, 2)); } catch { /* serverless — skip */ }
+}
+
+function hashPass(pass) {
+  return crypto.createHash("sha256").update(pass + "ff-api-salt").digest("hex");
+}
+
+app.post("/api/auth/register", (req, res) => {
+  const { username, email, password } = req.body || {};
+  if (!username || !email || !password)
+    return res.status(400).json({ error: "username, email and password are required" });
+  if (password.length < 6)
+    return res.status(400).json({ error: "password must be at least 6 characters" });
+  const key = username.toLowerCase();
+  if (memAccounts[key])
+    return res.status(409).json({ error: "username_taken" });
+  memAccounts[key] = { username, email, passHash: hashPass(password), createdAt: new Date().toISOString(), provider: "local" };
+  saveAccounts();
+  res.json({ ok: true, username, provider: "local" });
+});
+
+app.post("/api/auth/login", (req, res) => {
+  const { username, password } = req.body || {};
+  if (!username || !password)
+    return res.status(400).json({ error: "username and password are required" });
+  const acct = memAccounts[username.toLowerCase()];
+  if (!acct || acct.passHash !== hashPass(password))
+    return res.status(401).json({ error: "invalid_credentials" });
+  res.json({ ok: true, username: acct.username, email: acct.email, provider: "local" });
 });
 
 /* ── OAuth Sessions (in-memory, short-lived) ─────── */
@@ -193,8 +242,8 @@ app.use("/api/like-spam", strictLimiter);
 
 /* ── 10. API Key Authentication ───────────────────────── */
 app.use("/api", (req, res, next) => {
-  const exempt = ["/health", "/demo"];
-  if (exempt.includes(req.path)) return next();
+  const exempt = ["/health", "/demo", "/auth/register", "/auth/login", "/auth/github", "/auth/github/callback", "/auth/discord", "/auth/discord/callback", "/auth/google", "/auth/google/callback"];
+  if (exempt.some(e => req.path === e || req.path.startsWith("/auth/session/"))) return next();
   apiKeyAuth(req, res, next);
 });
 
