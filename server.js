@@ -127,13 +127,11 @@ app.get("/api/demo", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "demo.html"));
 });
 
-/* ── User Accounts (in-memory + file fallback for local dev) ── */
-// Vercel is serverless — no persistent filesystem. Accounts live in memory
-// per-instance + backed by local file when running locally.
+/* ── User Accounts (Edge Config persistent + local file fallback) ── */
 const ACCOUNTS_FILE = path.join(__dirname, "config", "users.json");
 const memAccounts = {};
 
-// Load from file on startup (works locally, no-op on Vercel)
+// Load from local file (local dev) on startup
 (function loadFromFile() {
   try {
     const data = JSON.parse(fs.readFileSync(ACCOUNTS_FILE, "utf8"));
@@ -141,8 +139,17 @@ const memAccounts = {};
   } catch { /* file not found — fresh start */ }
 })();
 
+async function getAccounts() {
+  const cloud = await ecRead();
+  if (cloud) Object.assign(memAccounts, cloud);
+  return memAccounts;
+}
+
 function saveAccounts() {
+  // Local file (dev)
   try { fs.writeFileSync(ACCOUNTS_FILE, JSON.stringify(memAccounts, null, 2)); } catch { /* serverless — skip */ }
+  // Edge Config (production)
+  ecWrite(memAccounts).catch(() => {});
 }
 
 function hashPass(pass) {
