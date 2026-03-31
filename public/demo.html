@@ -2186,7 +2186,13 @@
 
   /* ── Auto-login if returning ── */
   (function(){
-    if (localStorage.getItem('ff-logged-in')) { document.getElementById('login-screen').style.display='none'; document.body.classList.add('app-ready'); }
+    const params = new URLSearchParams(window.location.search);
+    // Don't auto-login if handling an OAuth callback — let handleOAuthCallback do it
+    if (params.get('oauth_session') || params.get('oauth_error')) return;
+    if (localStorage.getItem('ff-logged-in')) {
+      document.getElementById('login-screen').style.display='none';
+      document.body.classList.add('app-ready');
+    }
     const u=localStorage.getItem('ff-user'); if(u){ const el=document.getElementById('login-user'); if(el) el.value=u; }
   })();
 
