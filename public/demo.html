@@ -1881,7 +1881,9 @@
     t.textContent = msg;
     t.style.borderColor = color ? color + '55' : '';
     t.style.color = color || '';
+    t.style.display = 'block';
     t.classList.remove('hidden');
+    void t.offsetWidth; // force reflow so transition triggers
     t.classList.add('show');
     clearTimeout(t._timer);
     t._timer = setTimeout(() => { t.classList.remove('show'); setTimeout(() => t.classList.add('hidden'), 300); }, 3200);
