@@ -310,6 +310,12 @@ body { --bg-body: transparent; }
   border-radius:7px;color:#f87171;font-size:12.5px;text-align:center;
 }
 
+.lc-info-box {
+  padding:14px 16px;margin-bottom:14px;
+  background:rgba(79,70,229,0.08);border:1px solid rgba(99,102,241,0.25);
+  border-radius:10px;text-align:center;
+}
+
 /* Bottom strip */
 .lc-bottom {
   display:flex;align-items:center;justify-content:space-between;
