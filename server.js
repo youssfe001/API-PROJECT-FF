@@ -11,6 +11,33 @@ const { errorHandler } = require("./lib/validate");
 const { globalLimiter, strictLimiter } = require("./lib/rateLimit");
 const { apiKeyAuth } = require("./lib/apiKeyAuth");
 
+/* ── Edge Config (persistent accounts on Vercel) ──── */
+let edgeConfig = null;
+try {
+  const { createClient } = require("@vercel/edge-config");
+  if (process.env.EDGE_CONFIG) edgeConfig = createClient(process.env.EDGE_CONFIG);
+} catch { /* package not available */ }
+
+const EC_ID  = "ecfg_sx8ykqtbtcvpudaltpb7zhx1yb25";
+const EC_URL = `https://api.vercel.com/v1/edge-config/${EC_ID}/items?teamId=team_n22ryUqHkCD1WVRYCevBfIWD`;
+
+async function ecRead() {
+  if (!edgeConfig) return null;
+  try { return (await edgeConfig.get("accounts")) || {}; } catch { return null; }
+}
+
+async function ecWrite(accounts) {
+  const apiToken = process.env.VERCEL_API_TOKEN;
+  if (!apiToken) return;
+  try {
+    await fetch(EC_URL, {
+      method: "PATCH",
+      headers: { Authorization: `Bearer ${apiToken}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ items: [{ operation: "upsert", key: "accounts", value: accounts }] }),
+    });
+  } catch { /* ignore write errors */ }
+}
+
 const app = express();
 
 /* ── 1. Compression ───────────────────────────────────── */
