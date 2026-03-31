@@ -145,11 +145,11 @@ async function getAccounts() {
   return memAccounts;
 }
 
-function saveAccounts() {
+async function saveAccounts() {
   // Local file (dev)
   try { fs.writeFileSync(ACCOUNTS_FILE, JSON.stringify(memAccounts, null, 2)); } catch { /* serverless — skip */ }
-  // Edge Config (production)
-  ecWrite(memAccounts).catch(() => {});
+  // Edge Config (production) — await so the data is persisted before response
+  await ecWrite(memAccounts);
 }
 
 function hashPass(pass) {
