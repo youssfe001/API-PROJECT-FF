@@ -2190,14 +2190,11 @@
 
   /* ── Auto-login if returning ── */
   (function(){
-    const params = new URLSearchParams(window.location.search);
-    // Don't auto-login if handling an OAuth callback — let handleOAuthCallback do it
-    if (params.get('oauth_session') || params.get('oauth_error')) return;
-    if (localStorage.getItem('ff-logged-in')) {
-      document.getElementById('login-screen').style.display='none';
-      document.body.classList.add('app-ready');
-    }
-    const u=localStorage.getItem('ff-user'); if(u){ const el=document.getElementById('login-user'); if(el) el.value=u; }
+    // Login page disabled temporarily — go straight to dashboard
+    const ls = document.getElementById('login-screen');
+    if (ls) ls.style.display = 'none';
+    document.body.classList.add('app-ready');
+    if (!localStorage.getItem('ff-user')) localStorage.setItem('ff-user', 'Guest');
   })();
 
   /* ── Floating item icons on login bg ── */
